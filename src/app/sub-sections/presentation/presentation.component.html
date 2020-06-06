@@ -1,0 +1,15 @@
+<div id = "about-container" class ='grid-container'>
+    <div class ='grid-item' id = 'grid-item-1'>
+        <img src="../../assets/programmer.png" title="Icon made by Surang from Flaticon.com, Creative Commons by 3.0">
+    </div>
+    <div class ='grid-item' id = 'grid-item-2'>
+        <article>
+          <h2  class="text-light">{{aboutMeTitle}}</h2>
+          <p *ngFor="let item of aboutMe" class="text-light">
+              {{item}}
+          </p>
+        </article>
+    </div>
+</div>
+  
+  

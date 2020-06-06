@@ -1,0 +1,29 @@
+.card-container{
+    position: absolute;
+    top:0px;
+    bottom:0px;
+    right:0px;
+    left:0px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    .card{
+        background: transparent;
+        img{
+            width: 30%;
+            height: 30%;
+            margin: 0 auto;
+        }
+        div{
+            h5{
+                text-align: center;
+            }
+            .card-text{
+                text-align: center;
+            }
+        }
+    }
+
+}

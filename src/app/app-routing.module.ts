@@ -1,11 +1,26 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
-
-const routes: Routes = [];
+import {PresentationComponent} from './sub-sections/presentation/presentation.component';
+import {ContactComponent} from './sub-sections/contact/contact.component';
+import { BrowserModule } from '@angular/platform-browser';
+// import {} from './sub-sections/contact/contact.component';
+import { from } from 'rxjs';
+const routes: Routes = [{
+  path: '',
+  component: PresentationComponent
+},
+{
+  path: '#',
+  component: PresentationComponent
+},
+{
+  path: 'contact',
+  component: ContactComponent
+}
+];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes), BrowserModule],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

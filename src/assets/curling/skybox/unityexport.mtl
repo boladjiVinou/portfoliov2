@@ -1,0 +1,28 @@
+newmtl LowPoly - TreeTrunk
+Kd 0.4191176 0.2952102 0.2496215
+illum 2
+
+newmtl LowPoly - FirTree
+Kd 0.2235294 0.5607843 0.2078432
+illum 2
+
+newmtl LowPoly - Rock
+Kd 0.7450981 0.854902 0.8941177
+illum 2
+
+newmtl LowPoly - Grass
+Kd 0.6350949 0.6470588 0.07612456
+illum 2
+
+newmtl LowPoly - Wood
+Kd 0.8161765 0.4767926 0.2160467
+illum 2
+
+newmtl LowPoly - Terrain
+Kd 0.5441177 0.5441177 0.5441177
+illum 2
+
+newmtl LowPoly - FirTreeVariation
+Kd 0.02762759 0.5367647 0.2628841
+illum 2
+
