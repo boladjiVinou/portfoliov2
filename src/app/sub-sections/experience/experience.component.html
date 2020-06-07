@@ -1,0 +1,18 @@
+<div class ='grid-container'>
+    <div class ='grid-item' id = 'grid-item-1'>
+        <img src="../../assets/manWorking.png" title="Icon made by Freepik from Flaticon.com, Creative Commons by 3.0">
+    </div>
+    <div class ='grid-item' id = 'grid-item-2'>
+        <ul *ngFor="let item of experiences">
+          <div id = 'experience-title'>
+            <p class="text-light" id= 'title'>{{item.title}}</p>
+            <p  class="text-light" id ='place'>{{item.place}}</p>
+          </div>
+            <ul>
+                <li *ngFor="let task of item.tasks"  class="text-light">
+                    {{task}}
+                </li>
+            </ul>
+        </ul>
+    </div>
+</div>

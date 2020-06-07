@@ -8,8 +8,8 @@ import {LanguageService} from '../../services/languageService';
 })
 export class ContactComponent implements OnInit {
 
-  private myProfil = 'Mon profil';
-  private phone = 'Numéro de téléphone';
+  public myProfil = 'Mon profil';
+  public phone = 'Numéro de téléphone';
   constructor(private languageService: LanguageService, private zone: NgZone) { }
 
   ngOnInit() {

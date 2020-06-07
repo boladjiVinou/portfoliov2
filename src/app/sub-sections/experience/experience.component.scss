@@ -1,0 +1,82 @@
+html {
+    overflow:   scroll;
+  }
+  ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* make scrollbar transparent */
+}
+.grid-container {
+    position: absolute;
+    top:0px;
+    bottom:0px;
+    right:0px;
+    left:0px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    ::-webkit-scrollbar { 
+        display: none;  /* Chrome Safari */
+    }
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none;  /* IE 10+ */
+      overflow-y:scroll;
+      overflow-x:hidden;
+    #grid-item-1 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+        img {
+            width: 35%;
+            background-color: whitesmoke;
+            max-width: 75%;
+            max-height: 75%;
+        }
+    }
+    #grid-item-2 {
+        /*
+        
+         width: 50%;
+        margin-left: 10px;
+        display: flex;
+        overflow: auto;
+        
+        */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: auto;
+        ul {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+            #experience-title {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                #title {
+                    font-weight: bold; 
+                    text-decoration: underline;
+                    font-size: 15px;
+                }
+                #place {
+                    margin-left: 10px;
+                    font-weight: bold; 
+                    font-size: 15px;
+                }
+            }
+            ul {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                li {
+                    max-width: 100%;
+                    font-size: 15px;
+                }
+            }
+        }
+    }
+}

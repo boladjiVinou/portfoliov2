@@ -21,12 +21,12 @@ export class AppComponent implements OnInit {
     // this.router.navigateByUrl('about');
   }
   englishButtonChange(event: any) {
-    if (event.value) {
+    if (event !== undefined) {
       this.languageService.setEnglishLangageState(true);
     }
   }
   frenchButtonChange(event: any) {
-    if (event.value) {
+    if (event !== undefined) {
       this.languageService.setEnglishLangageState(false);
     }
   }
