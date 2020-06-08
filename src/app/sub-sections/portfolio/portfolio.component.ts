@@ -13,7 +13,7 @@ interface KeyValuePair {
 export class PortfolioComponent implements OnInit, AfterViewInit {
 
   public projects: KeyValuePair[] = [];
-  private projectsOver: boolean[] =  [false, false, false];
+  public projectShaker: boolean[] =  [false, false, false];
   private projectsUrl = ['portfolio/firstProject', 'portfolio/sudoku', 'portfolio/curling'];
   public projectsImgs: KeyValuePair[] = [];
   constructor(private principalService: LanguageService, private zone: NgZone, private router: Router) { }
@@ -31,20 +31,21 @@ export class PortfolioComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    /*
-
-    setTimeout(() => {
-        this.openDialog();
-    }, 100);
-
-    */
+    setInterval(() => {
+        this.shakeAProject();
+    }, 8000);
   }
   getImageSrc(index: number): string{
     return this.projectsImgs[index].value;
   }
-  updateProjectOver(index: number) {
-    this.projectsOver = [false, false, false];
-    this.projectsOver[index] = true;
+  shakeAProject(){
+      if (this.projectShaker.length > 0){
+        const idx = Math.floor(Math.random() * (this.projectShaker.length - 1));
+        this.projectShaker[idx] = true;
+        setTimeout(() => {
+            this.projectShaker[idx] = false;
+        }, 4000);
+    }
   }
 
   translateProjects(isEnglish: boolean) {
