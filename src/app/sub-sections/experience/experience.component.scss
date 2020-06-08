@@ -64,6 +64,7 @@ html {
                 }
                 #place {
                     margin-left: 10px;
+                    margin-right: 10px;;
                     font-weight: bold; 
                     font-size: 15px;
                 }
@@ -72,6 +73,7 @@ html {
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
+                margin-right: 10px;
                 li {
                     max-width: 100%;
                     font-size: 15px;

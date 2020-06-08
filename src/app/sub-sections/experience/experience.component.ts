@@ -38,6 +38,8 @@ export class ExperienceComponent implements OnInit, OnDestroy {
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Full time internship in software development (May 2017 - August 2017)', place: 'Hydro-Quebec TransEnergie', tasks: ['Development with the C# of an application making it possible to direct the technician in the process of maintenance of a smart relay.', 'Unit test design.'] });
     } else {
+        // tslint:disable-next-line:max-line-length
+      this.experiences.push({ title: 'Developpeur ETL Junior (Juillet 2019 - Aujourdhui)', place: 'MEDFAR Solutions Cliniques', tasks: [`Developpement avec les languages C# et SQL de scripts pour l' integration de donnnees medicales`, `Amelioration des logiciels custom de transferts de donnees`]});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Stage à temps partiel en développement logiciel (Janvier 2019 - Avril 2019)', place: 'Hydro-Quebec TransEnergie', tasks: ['Développement avec le langage VB.Net de formulaires utilisés par les techniciens pour leurs calculs dans le cadre des procédures de tests d’un relais intelligent.', 'Correction de bugs dans des formulaires existants.'] });
       // tslint:disable-next-line:max-line-length

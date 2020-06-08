@@ -1,0 +1,8 @@
+<div id = "projects-container" class ='grid-container'>
+    <div class="card" (click) = "navigateToSelectedProject(i)" *ngFor="let item of projects, let i = index">
+        <img class="card-img-top" [src]="getImageSrc(i)">
+        <div class="card-body">
+            <h5 class="card-title text-light">{{item.value}}</h5>
+        </div>
+    </div>
+  </div>
