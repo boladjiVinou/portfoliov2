@@ -1,0 +1,22 @@
+<div *ngIf="choiceMade === true" id ='sudoku-container'>
+  <div id= "chrono-container">
+      <p>{{timeText}}</p>
+      <p id ="time">{{nbSeconds}}</p>
+      <p>{{secondsText}}</p>
+  </div>
+  <progress *ngIf="gridLoaded === false" id ="progress-bar"></progress>
+  <div id ='grid-container' *ngIf="gridLoaded === true">
+    <div *ngFor="let  row of sudokuGrid , let i = index" id = 'grid-row'>
+        <div *ngFor="let item of row , let j = index" id = 'grid-item'>
+          <p *ngIf="item.isInput === false">{{item.value}}</p>
+          <input #tmp type="text" maxlength="1" *ngIf="item.isInput === true" (keyup)="insertInGrid($event, i,j)"  [ngClass]="{'wrong-input':  item.isWrong}">
+        </div>
+    </div>
+  </div>
+  <button (click) = "verifyGrid()">{{submitBoutonText}}</button>
+</div>
+<div id='choice-container' *ngIf="choiceMade === false" >
+    <button  (click)="makeChoice(18)">{{easyBoutonText}}</button>
+    <button  (click)="makeChoice(36)">{{mediumBoutonText}}</button>
+    <button  (click)="makeChoice(72)">{{hardBoutonText}}</button>
+</div>

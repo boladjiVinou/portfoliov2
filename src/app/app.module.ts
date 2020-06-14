@@ -9,6 +9,7 @@ import {ContactComponent} from './sub-sections/contact/contact.component';
 import {ExperienceComponent} from './sub-sections/experience/experience.component';
 import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
 import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
+import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component';
 
 import {LanguageService} from './services/languageService';
 import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
@@ -20,7 +21,8 @@ import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/proj
     ContactComponent,
     ExperienceComponent,
     PortfolioComponent,
-    ProjectOneComponent
+    ProjectOneComponent,
+    SudokuComponent
   ],
   imports: [
     BrowserModule,

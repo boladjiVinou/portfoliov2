@@ -37,8 +37,12 @@ html {
         #render-container {
             height: 90%;
             width: 100%;
-            #progress-bar {
-                margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            progress {
+                width: 60%;
             }
         }
         #simulation-button {

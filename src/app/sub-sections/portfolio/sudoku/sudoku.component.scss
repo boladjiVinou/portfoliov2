@@ -1,0 +1,68 @@
+#sudoku-container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    #chrono-container {
+        display: flex;
+        flex-direction: row;
+        p{
+            font-size: 20px;
+        }
+        #time{
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+    }
+    progress{
+        width: 35%;
+    }
+    #grid-container {
+        border-left: 2px solid rgb(165,42,42);
+        border-top: 2px solid rgb(165,42,42);
+        width: 40%;
+        #grid-row {
+            display: flex;
+            flex-direction: row;
+            height: 11.11%;
+            #grid-item {
+                width: 11.11%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 2px solid rgb(165,42,42);
+                border-right: 2px solid rgb(165,42,42);
+                color: black;
+                
+            }
+            input {
+                width: 94%;
+                height: 87%;
+                padding: 0;
+            }
+            .wrong-input {
+                background-color: #EF5350;
+            }
+        }
+    }
+}
+#choice-container {
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    right: 30%;
+    bottom: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #37474F;
+    button {
+        margin-bottom: 20px;
+    }
+}
