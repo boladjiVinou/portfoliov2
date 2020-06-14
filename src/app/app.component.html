@@ -32,7 +32,7 @@
 <main>
   <article>
       <div class = "background-container">
-        <video preload autoplay muted loop class="frontground-video">
+        <video preload autoplay [muted]="true" loop class="frontground-video" oncanplay="this.play()" onloadedmetadata="this.muted = true">
           <source src="../assets/160708_CircuitBoards_098_1080p22.mp4" type="video/mp4">
           <source src="../assets/160708_CircuitBoards_098_1080pogg.ogg" type="video/ogg">
           <source src="../assets/160708_CircuitBoards_098_1080pwbm.webm" type="video/webm">

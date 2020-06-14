@@ -1,0 +1,21 @@
+<div id = "about-container" class ='grid-container'>
+    <div class ='grid-item' id = 'grid-item-1'>
+        <article>
+            <h2 class = "text-light">{{projectTitle}}</h2>
+    
+            <p  class = "text-light" *ngFor="let item of projectDescription">
+                {{item}}
+            </p>
+          </article>
+    </div>
+    <div class ='grid-item' id = 'grid-item-2'>
+      <div id = 'render-container'>
+        <div class="progress md-progress primary-color-dark" id ="progress-bar">
+          <div class="indeterminate"  ></div>
+        </div>
+      </div>
+      <button  class = "text-light" id ='simulation-button' (click) = 'resetRender()'>
+        {{boutonText}}
+      </button>
+    </div>
+  </div>

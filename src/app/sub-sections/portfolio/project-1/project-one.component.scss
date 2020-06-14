@@ -1,0 +1,46 @@
+.children-container{
+    opacity: 1;
+}
+.grid-container {
+    position: absolute;
+    top:0px;
+    bottom:0px;
+    right:16px;
+    left:16px;
+    display: flex;
+    flex-direction: column;
+    #grid-item-1 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        img {
+            max-width: 75%;
+            max-height: 75%;
+        }
+    }
+    #grid-item-2 {
+        width:80%;
+        height:70%;
+        margin: 0 10%;
+        overflow: auto;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        #render-container {
+            height: 90%;
+            width: 100%;
+            #progress-bar {
+                margin: 0 auto;
+            }
+        }
+        #simulation-button {
+            margin-top: 20px;
+            background-color: rgb(39, 79, 83);
+            border-radius: 6px;
+        }
+    }
+}

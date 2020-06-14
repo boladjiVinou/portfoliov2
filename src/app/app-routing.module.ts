@@ -4,6 +4,7 @@ import {PresentationComponent} from './sub-sections/presentation/presentation.co
 import {ContactComponent} from './sub-sections/contact/contact.component';
 import {ExperienceComponent} from './sub-sections/experience/experience.component';
 import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
+import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
 
 import { BrowserModule } from '@angular/platform-browser';
 // import {} from './sub-sections/contact/contact.component';
@@ -30,6 +31,15 @@ const routes: Routes = [{
 {
   path: 'portfolio',
   component: PortfolioComponent
+},
+{
+  path: 'portfolio/Projet 1',
+  component: ProjectOneComponent
+}
+,
+{
+  path: 'portfolio/Project 1',
+  component: ProjectOneComponent
 }
 ];
 

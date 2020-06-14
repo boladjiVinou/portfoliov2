@@ -8,9 +8,10 @@ import {PresentationComponent} from './sub-sections/presentation/presentation.co
 import {ContactComponent} from './sub-sections/contact/contact.component';
 import {ExperienceComponent} from './sub-sections/experience/experience.component';
 import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
-
+import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
 
 import {LanguageService} from './services/languageService';
+import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
 
 @NgModule({
   declarations: [
@@ -18,13 +19,14 @@ import {LanguageService} from './services/languageService';
     PresentationComponent,
     ContactComponent,
     ExperienceComponent,
-    PortfolioComponent
+    PortfolioComponent,
+    ProjectOneComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [LanguageService],
+  providers: [LanguageService, ProjectOneRendererService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, AfterViewInit } from '@angular/core';
+import { Component, OnInit, NgZone, AfterViewInit, OnDestroy } from '@angular/core';
 import {LanguageService} from '../../services/languageService';
 import { Router } from '@angular/router';
 interface KeyValuePair {
@@ -10,8 +10,8 @@ interface KeyValuePair {
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.scss']
 })
-export class PortfolioComponent implements OnInit, AfterViewInit {
-
+export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
+  private shakingSystem: any;
   public projects: KeyValuePair[] = [];
   public projectShaker: boolean[] =  [false, false, false];
   private projectsUrl = ['portfolio/firstProject', 'portfolio/sudoku', 'portfolio/curling'];
@@ -29,11 +29,13 @@ export class PortfolioComponent implements OnInit, AfterViewInit {
       this.zone.run(() => this.translateProjects(isEnglish));
     });
   }
-
+  ngOnDestroy(){
+      clearInterval(this.shakingSystem);
+  }
   ngAfterViewInit() {
-    setInterval(() => {
+    this.shakingSystem  = setInterval(() => {
         this.shakeAProject();
-    }, 8000);
+    }, 7000);
   }
   getImageSrc(index: number): string{
     return this.projectsImgs[index].value;
@@ -44,7 +46,7 @@ export class PortfolioComponent implements OnInit, AfterViewInit {
         this.projectShaker[idx] = true;
         setTimeout(() => {
             this.projectShaker[idx] = false;
-        }, 4000);
+        }, 3500);
     }
   }
 

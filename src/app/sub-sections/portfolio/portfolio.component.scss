@@ -39,16 +39,16 @@ html {
       -ms-overflow-style: none;  /* IE 10+ */
       overflow-y:scroll;
       overflow-x:hidden;
-
-    
     .card{
-        background: transparent;
-        width: 185px;
-        height: 185px;
+      background: transparent;
+      width: auto;
+      height: auto;
+      margin:20px;
+    }
+    .card a{
         display:flex;
         flex-direction: column;
         justify-content: center;
-        margin:10px;
         img{
             width: 100px;
             height: 100px;
