@@ -37,6 +37,7 @@ private boutonText = 'Recommencer la simulation';
  * Cette methode cree la scene, la skybox, initialise certains attributs
  */
 public  init(): Promise<void> {
+    console.log('init renderer');
     return new Promise<void>((resolve) => {
         this.scene = new THREE.Scene();
         this.renderer = new THREE.WebGLRenderer({antialias: true});
@@ -92,26 +93,27 @@ public setController() {
 
 private loadWalls(): Promise<void> {
   return new Promise<void>((resolve) => {
-    this.loader1.load('../../assets/walls/wall1.obj', (wall1: Object3D) => {
+    this.loader1.load('../../assets/walls/newWall/newWall/wall1.obj', (wall1: Object3D) => {
       wall1.traverse((child: THREE.Mesh) => {
         child.material = new THREE.MeshLambertMaterial({color: new THREE.Color(0x78909C/*D84315*/)});
       });
-      wall1.scale.set(200, 100, 200);
-      wall1.rotateY(Math.PI / 2);
       wall1.rotateX(-Math.PI / 2);
-      wall1.position.setY(-15);
-      wall1.position.setX(10);
+      wall1.position.setY(30);
+      wall1.scale.set(1, 2, 1);
+      wall1.position.setX(-10);
+      wall1.position.setZ(68);
       this.scene.add(wall1);
       this.tableWall1 = wall1;
-      this.loader1.load('../../assets/walls/wall2.obj', (wall2: Object3D) => {
+      this.loader1.load('../../assets/walls/newWall/newWall2/Wall2.obj', (wall2: Object3D) => {
         wall2.traverse((child: THREE.Mesh) => {
           child.material = new THREE.MeshLambertMaterial({color: new THREE.Color(0x78909C/*D84315*/)});
         });
-        wall2.scale.set(150, 100, 200);
-        wall2.rotateY(Math.PI / 2);
         wall2.rotateX(-Math.PI / 2);
-        wall2.position.setY(-5);
-        wall2.position.setX(-15.5);
+        wall2.rotateZ(Math.PI);
+        wall2.position.setY(30);
+        wall2.scale.set(1, 2, 1);
+        wall2.position.setX(-13);
+        wall2.position.setZ(-58);
         this.scene.add(wall2);
         this.tableWall2 = wall2;
         resolve();

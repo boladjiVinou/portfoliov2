@@ -46,9 +46,10 @@ export class ProjectOneComponent implements OnInit, OnDestroy,AfterViewInit {
   ngAfterViewInit(){
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.opacity = '1';
-    console.log(childrenContainer);
   }
   ngOnDestroy() {
+    const childrenContainer = document.querySelector('.children-container') as HTMLElement;
+    childrenContainer.style.opacity = '0.8';
     this.langageSubscription.unsubscribe();
     window.removeEventListener('resize', this.rendererResizer.bind(this));
   }

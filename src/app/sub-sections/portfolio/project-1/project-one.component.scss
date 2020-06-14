@@ -1,6 +1,10 @@
-.children-container{
-    opacity: 1;
-}
+html {
+    overflow:   scroll;
+  }
+  ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* make scrollbar transparent */
+  }
 .grid-container {
     position: absolute;
     top:0px;
@@ -38,7 +42,7 @@
             }
         }
         #simulation-button {
-            margin-top: 20px;
+            margin: 20px;
             background-color: rgb(39, 79, 83);
             border-radius: 6px;
         }

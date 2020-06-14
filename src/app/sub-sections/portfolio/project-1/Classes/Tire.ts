@@ -11,7 +11,7 @@ export class Tire {
             this.matLoader.setPath('../../../assets/TIRES/');
             this.matLoader.load('../../../assets/TIRES/modelObj.mtl', (tireMaterial: {preload: () => void; }) => {
                 tireMaterial.preload();
-                this.loader1.setMaterials(tireMaterial);
+                this.loader1.setMaterials(tireMaterial as MTLLoader.MaterialCreator);
                 this.loader1.load('../../../assets/TIRES/modelObj.obj', (tire: Object3D) => {
                     tire.scale.set(0.04, 0.04, 0.05);
                     this.tire = tire;

@@ -28,7 +28,7 @@ export class Bot {
             this.matLoader.setPath('../../../assets/arduino+uno11/');
             this.matLoader.load('arduino.mtl', (materials: { preload: () => void; }) => {
                 materials.preload();
-                this.loader1.setMaterials(materials);
+                this.loader1.setMaterials(materials  as MTLLoader.MaterialCreator);
                 this.loader1.load('../../../assets/arduino+uno11/arduino.obj', (card: Object3D) => {
                     this.tire1 = new Tire();
                     this.tire1.init().then((value: THREE.Object3D) => {
@@ -50,7 +50,7 @@ export class Bot {
                         return;
                     });
 
-            }, null , (error: Error) => {
+            }, null , (error: ErrorEvent) => {
                 console.log(error);
             });
         });
