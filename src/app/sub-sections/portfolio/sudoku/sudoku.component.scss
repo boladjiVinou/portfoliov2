@@ -25,7 +25,7 @@
     #grid-container {
         border-left: 2px solid rgb(165,42,42);
         border-top: 2px solid rgb(165,42,42);
-        width: 40%;
+        width: 50%;
         #grid-row {
             display: flex;
             flex-direction: row;
@@ -38,7 +38,9 @@
                 border-bottom: 2px solid rgb(165,42,42);
                 border-right: 2px solid rgb(165,42,42);
                 color: black;
-                
+                p{
+                    font-weight: bold;
+                }
             }
             input {
                 width: 94%;

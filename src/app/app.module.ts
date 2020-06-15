@@ -13,6 +13,7 @@ import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component'
 
 import {LanguageService} from './services/languageService';
 import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
+import {SudokuService} from './sub-sections/portfolio/sudoku/sudoke.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,7 @@ import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/proj
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [LanguageService, ProjectOneRendererService],
+  providers: [LanguageService, ProjectOneRendererService, SudokuService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

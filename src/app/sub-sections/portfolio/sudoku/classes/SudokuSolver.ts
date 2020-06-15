@@ -1,4 +1,4 @@
-const Logic = require('logic-solver');
+import * as Logic from 'logic-solver';
 import * as _ from 'underscore';
 export class SudokuSolver {
     private solver = new Logic.Solver();

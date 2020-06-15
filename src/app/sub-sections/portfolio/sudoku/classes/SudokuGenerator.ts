@@ -1,4 +1,4 @@
-const Logic = require('logic-solver'); // https://github.com/meteor/logic-solver
+import * as Logic from 'logic-solver'; // https://github.com/meteor/logic-solver
 import * as _ from 'underscore';
 import { SudokuSolver } from './SudokuSolver';
 export interface GridPair {
@@ -16,6 +16,7 @@ export class SudokuGenerator {
         this.binarizedPreviousGrids = [];
         this.previousData = [];
     }
+
     public generateAGrid(nbOfVoid: number = 18): Promise<GridPair> {
         return new Promise<GridPair>((resolve: (Function)) => {
             this.generateSudokuLogically(nbOfVoid).then((grid) => {
@@ -49,17 +50,12 @@ export class SudokuGenerator {
                 }
             });
         });
-        let nbOfSolution = 0;
         let result: any[] = [];
-        try {
-            const solution = sudokuSolver.getSolver().solve();
-            result = _.map(sudokuSolver.getLocations(), (loc) => solution.evaluate(loc));
-            if (result.length > 0) {
-                ++nbOfSolution;
-            }
-        } catch (error) {
+        const solution = sudokuSolver.getSolver().solve();
+        if (solution === null){
             return false;
         }
+        result = _.map(sudokuSolver.getLocations(), (loc) => solution.evaluate(loc));
         const binarizedPreviousResult = result.map((value) => {
             if (value > 0) {
                 return Logic.constantBits(value);
@@ -77,18 +73,8 @@ export class SudokuGenerator {
             });
         });
         sudokuSolver.getSolver().require(Logic.or(logicalXORArray));
-        // an exception should be raised here if there is no 2nd solution
-        try {
-            const solution2 = sudokuSolver.getSolver().solve();
-            let result2 = [];
-            result2 = _.map(sudokuSolver.getLocations(), (loc) => solution2.evaluate(loc));
-            if (result2.length > 0) {
-                ++nbOfSolution;
-            }
-        }catch (error) {
-            return true;
-        }
-        return (nbOfSolution === 1);
+        return (sudokuSolver.getSolver().solve() === null);
+        // si c est non nul c est qu il y a une 2e solution et ce n est pas ce qu on veut
     }
 
     private insertVoidInSudokuGrid(grid: number[], nbOfVoid: number): number[] {
@@ -102,17 +88,15 @@ export class SudokuGenerator {
         let i = 0;
         while (counter > 0 && i < 81) {
             if (newGrid[indexes[i]] !== -1){
-                if (Math.random() >= 0.5){
-                    const oldValue = newGrid[indexes[i]];
-                    newGrid[indexes[i]] = -1;
-                    if (!this.checkIfThereIsOnlyOneSolution(newGrid)) {
+                const oldValue = newGrid[indexes[i]];
+                newGrid[indexes[i]] = -1;
+                if (!this.checkIfThereIsOnlyOneSolution(newGrid)) {
                         newGrid[indexes[i]] = oldValue;
                     }else {
                         --counter;
                     }
-                }
             }
-            i++;
+            ++i;
         }
         return newGrid;
     }

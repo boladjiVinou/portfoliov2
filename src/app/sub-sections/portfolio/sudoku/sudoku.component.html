@@ -1,8 +1,7 @@
 <div *ngIf="choiceMade === true" id ='sudoku-container'>
   <div id= "chrono-container">
       <p>{{timeText}}</p>
-      <p id ="time">{{nbSeconds}}</p>
-      <p>{{secondsText}}</p>
+      <p id ="time">{{convertTime(nbSeconds)}}</p>
   </div>
   <progress *ngIf="gridLoaded === false" id ="progress-bar"></progress>
   <div id ='grid-container' *ngIf="gridLoaded === true">
@@ -14,6 +13,9 @@
     </div>
   </div>
   <button (click) = "verifyGrid()">{{submitBoutonText}}</button>
+</div>
+<div class="alert alert-danger" role="alert" *ngIf = "displayWarning === true">
+  {{warningMsg}}
 </div>
 <div id='choice-container' *ngIf="choiceMade === false" >
     <button  (click)="makeChoice(18)">{{easyBoutonText}}</button>
