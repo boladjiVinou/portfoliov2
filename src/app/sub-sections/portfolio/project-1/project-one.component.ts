@@ -62,12 +62,12 @@ export class ProjectOneComponent implements OnInit, OnDestroy,AfterViewInit {
       this.projectTitle = 'Project I';
       this.boutonText = 'Restart the simulation';
       // tslint:disable-next-line:max-line-length
-      this.projectDescription.push(`In this first year's project, I had to design a robot equipped with an AT-Mega 32 microcontroller to analyze the walls of a mine, to make a graphical rendering of the curves of each wall, then calculate the percentage of area occupied from the distances read during the run. (It is assumed that there is no void behind the walls.). The simulation below illustrates this project.`);
+      this.projectDescription.push(`My fistr project at school was to design a bot equipped with an AT-Mega 32 microcontroller. It was supposed to analyze the walls of a mine, to make a graphical rendering of the curves of each wall, and then compute the percentage of area occupied from the distances read during the run. (we supposed that there is no void behind the walls.). The simulation below illustrates the bot run during this project.`);
     } else {
       this.projectTitle = 'Projet I';
       this.boutonText = 'Recommencer la simulation';
       // tslint:disable-next-line:max-line-length
-      this.projectDescription.push(`Dans le cadre de ce projet en 1ere année, je devais concevoir en équipe un robot doté d’un microcontrôleur AT-Méga 32 permettant d’analyser les parois d’une mine, d’effectuer un rendu graphique des courbes de chaque paroi, puis de calculer le pourcentage de surface occupée à partir des distances lues pendant le parcours. (On suppose qu’il n’y a pas de vide derrière les parois.). La simulation ci-dessous illustre ce projet.`);
+      this.projectDescription.push(`Dans le cadre de ce projet en 1ere année, je devais concevoir en équipe un robot doté d’un microcontrôleur AT-Méga 32 permettant d’analyser les parois d’une mine, d’effectuer un rendu graphique des courbes de chaque paroi, puis de calculer le pourcentage de surface occupée à partir des distances lues pendant le parcours. (On supposait qu’il n’y a pas de vide derrière les parois.). La simulation 3D ci-dessous illustre le parcours du robot lors de ce projet.`);
     }
   }
 }

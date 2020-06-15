@@ -50,6 +50,7 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
     this.langageSubscription.unsubscribe();
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.backgroundColor = 'black';
+    childrenContainer.style.opacity = '0.8';
   }
   loadANewGrid(difficulty: number) {
     this.gridLoaded = false;
@@ -129,7 +130,7 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mediumBoutonText = 'Medium';
       this.easyBoutonText = 'Easy';
       this.successMsg = 'Congratulations, the grid is valid!';
-      this.warningMsg = 'Warning ! this game require a pc';
+      this.warningMsg = 'Warning ! this game require a pc.';
       this.timeIndicator = 'Time : ';
     } else {
       this.submitBoutonText = 'Verifier';
@@ -139,7 +140,7 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mediumBoutonText = 'Moyen';
       this.easyBoutonText = 'Facile';
       this.successMsg = 'Felicitation, la grille est valide !';
-      this.warningMsg = `Attention ! Il est conseille d' utiliser un ordinateur pour executer ce jeu`;
+      this.warningMsg = `Attention ! Il est conseillé d' utiliser un ordinateur pour executer ce jeu.`;
       this.timeIndicator = 'Temps : ';
     }
   }

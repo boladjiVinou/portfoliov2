@@ -23,7 +23,7 @@ export class ContactComponent implements OnInit {
       this.phone = 'Phone Number';
     } else {
       this.myProfil = 'Mon profil';
-      this.phone = `Numero de téléphone`;
+      this.phone = `Numéro de téléphone`;
     }
   }
 

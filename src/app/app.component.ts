@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 })
 export class AppComponent implements OnInit {
   title = 'Boladji-portfoliov2';
-  workingExperience = 'Antécédents Professionnels';
+  workingExperience = 'Expérience';
   constructor(private languageService: LanguageService, private router: Router){
 
   }
@@ -23,11 +23,13 @@ export class AppComponent implements OnInit {
   englishButtonChange(event: any) {
     if (event !== undefined) {
       this.languageService.setEnglishLangageState(true);
+      this.workingExperience = 'Experience';
     }
   }
   frenchButtonChange(event: any) {
     if (event !== undefined) {
       this.languageService.setEnglishLangageState(false);
+      this.workingExperience = 'Expérience';
     }
   }
 }

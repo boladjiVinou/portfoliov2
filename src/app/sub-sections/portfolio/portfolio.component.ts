@@ -59,11 +59,11 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     if (isEnglish) {
       this.projects.push({ key: 'Project I', value: `1st Project` });
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
-      this.projects.push({ key: 'Curling', value: `Curling` });
+      // this.projects.push({ key: 'Curling', value: `Curling` });
     } else {
       this.projects.push({ key: 'Projet I', value: `Projet 1`});
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
-      this.projects.push({ key: 'Curling', value: `Curling` });
+      // this.projects.push({ key: 'Curling', value: `Curling` });
     }
   }
 
