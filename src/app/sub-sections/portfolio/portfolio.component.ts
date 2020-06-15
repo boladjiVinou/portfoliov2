@@ -29,17 +29,21 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       this.zone.run(() => this.translateProjects(isEnglish));
     });
   }
+
   ngOnDestroy(){
       clearInterval(this.shakingSystem);
   }
+
   ngAfterViewInit() {
     this.shakingSystem  = setInterval(() => {
         this.shakeAProject();
     }, 7000);
   }
+
   getImageSrc(index: number): string{
     return this.projectsImgs[index].value;
   }
+
   shakeAProject(){
       if (this.projectShaker.length > 0){
         const idx = Math.floor(Math.random() * (this.projectShaker.length - 1));
