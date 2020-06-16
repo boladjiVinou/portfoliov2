@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { SudokuGenerator } from '../app/sub-sections/portfolio/sudoku/classes/SudokuGenerator';
+import { SudokuGenerator } from './../app/sub-sections/portfolio/sudoku/classes/SudokuGenerator';
 declare function postMessage(message: any): void;
 const sudokuGenerator = new SudokuGenerator();
 let generatingAGrid = false;

@@ -4,12 +4,12 @@ declare function postMessage(message: any): void;
 const sudokuGenerator = new SudokuGenerator();
 let generatingAGrid = false;
 onmessage = (ev: MessageEvent) => {
-    console.log('msg received');
+    console.log('msg received 2');
     if (!generatingAGrid){
         generatingAGrid = true;
         sudokuGenerator.generateAGrid(ev.data).then((value: any) => {
             generatingAGrid = false;
-            self.postMessage(value, '*');
+            self.postMessage(value);
         });
     }
 };

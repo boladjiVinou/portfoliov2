@@ -125,8 +125,13 @@
               "devServerTarget": "Boladji-portfoliov2:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "angular-cli-ghpages:deploy",
+          "options": {}
         }
       }
-    }},
+    }
+  },
   "defaultProject": "Boladji-portfoliov2"
 }
