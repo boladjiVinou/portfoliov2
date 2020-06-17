@@ -1,0 +1,49 @@
+<div id = 'render-container'>
+  <mat-progress-bar mode ="indeterminate" id ="progress-bar" mode="query"></mat-progress-bar>
+  <div id = 'curling-logo-container' *ngIf="hideLogo === false && hideHud===false">
+    <p></p>
+  </div>
+  <div id = 'game-option-container'>
+    <div class ='vertical-menu' id='start-menu' *ngIf="startMenu===true && hideHud===false">
+        <button mat-button (click)="startButtonClick()"> {{startLabel}}</button>
+        <div class ='horizontal-menu' id='option-menu'>
+            <p>{{soundLabel}}</p>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="language" id="frRadio" (change) = "playSound()" value="option1"  checked>
+              <label class="form-check-label text-dark" for="onRadio">
+                ON
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="language" id="engRadio"  (change) = "stopSound()" value="option2">
+              <label class="form-check-label text-dark" for="offgRadio">
+                OFF
+              </label>
+            </div>
+        </div>
+    </div>
+    <div class ='vertical-menu' id='player-menu' *ngIf="((startMenu===false) && (playerChoiceMade === false) && (hideHud===false))">
+          <button mat-button  (click) = "playerChoice(1)"> {{player1Label}}</button>
+          <button mat-button (click) = "playerChoice(2)">{{player2Label}}</button>
+    </div>
+    <div class ='vertical-menu' id='player-difficulty-menu' *ngIf="((startMenu===false) && (onePlayer === true) && (playerChoiceMade === true) && (difficultyChoiceMade===false) &&(hideHud===false))">
+          <button mat-button (click) ="difficultyChoice(1)"> {{easyLabel}}</button>
+          <button mat-button (click) ="difficultyChoice(2)"> {{mediumLabel}}</button>
+          <button mat-button (click) ="difficultyChoice(3)"> {{hardLabel}}</button>
+    </div>
+  </div>
+  <div id ='shooting-progress-div'>
+    <div id='real-progress-div'>
+    </div>
+  </div>
+  <div id ='game-info-container' *ngIf="playerChoiceMade">
+    <div id = 'player1-infos' >
+        <div id = 'player1-stones-indicator'  *ngFor="let item of this.game.GetPlayer1().getStones()"></div>
+    </div>
+    <div id = 'round-div'></div>
+    <div id = 'score-div'></div>
+    <div id = 'player2-infos'>
+        <div id = 'player2-stones-indicator' *ngFor="let item of this.game.GetPlayer2().getStones()"></div>
+    </div>
+  </div>
+</div>

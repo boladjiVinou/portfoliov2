@@ -1,0 +1,98 @@
+#render-container {
+    position: absolute;
+    top: 0px;
+    bottom:0px;
+    left:0px;
+    right: 0px;
+    color: #37474F;
+    display: flex;
+    justify-content: center;
+    #curling-logo-container {
+        position: absolute;
+        top:5vh;
+        color:rgb(255,255,255);
+        p {
+            font-size: 5vw;
+            font-family: 'Blippo', fantasy;
+        }
+    }
+    #game-option-container {
+        position: absolute;
+        bottom:5vh;
+        .vertical-menu {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            button{
+                margin-bottom:2vh;
+                font-size: 2vw;
+                width: 100%;
+                background-color: rgb(255,255,255);
+                font-family: 'Blippo', fantasy;
+            }
+        }
+        .vertical-menu {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            button{
+                font-size: 2vw;
+                width: 100%;
+                background-color: rgb(255,255,255);
+                font-family: 'Blippo', fantasy;
+            }
+            .horizontal-menu {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-evenly;
+                font-family: 'Blippo', fantasy;
+                font-size: 2vw;
+                p {
+                    margin: 0;
+                    margin-right: 2vw;
+                }
+                mat-radio-group {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-evenly;
+                    font-family: 'Blippo', fantasy;
+                    font-size: 2vw;
+                    mat-radio-button:nth-of-type(1){
+                        margin-right:2vw;
+                    }
+                }
+            }
+        }
+    }
+    #game-info-container {
+        
+        #player1-infos {
+
+        }
+        #round-div {
+        }
+        #score-div {    
+        }
+        #player2-infos {
+            
+        }
+    }
+    #shooting-progress-div {
+        position: absolute;
+        top: 15vh;
+        left: 1vw;
+        height: 40vh;
+        width: 2vw;
+        background-color: #dddddd; 
+        display: none;
+        flex-direction: column-reverse;
+        #real-progress-div {
+            margin: 10%;
+            background: forestgreen;
+        }
+    }
+}

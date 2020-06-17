@@ -10,10 +10,12 @@ import {ExperienceComponent} from './sub-sections/experience/experience.componen
 import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
 import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
 import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component';
+import {CurlingComponent} from './sub-sections/portfolio/curling/curling.component';
 
 import {LanguageService} from './services/languageService';
 import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
 import {SudokuService} from './sub-sections/portfolio/sudoku/sudoke.service';
+import {CurlingService} from './sub-sections/portfolio/curling/curling.service';
 
 @NgModule({
   declarations: [
@@ -23,13 +25,14 @@ import {SudokuService} from './sub-sections/portfolio/sudoku/sudoke.service';
     ExperienceComponent,
     PortfolioComponent,
     ProjectOneComponent,
-    SudokuComponent
+    SudokuComponent,
+    CurlingComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [LanguageService, ProjectOneRendererService, SudokuService],
+  providers: [LanguageService, ProjectOneRendererService, SudokuService, CurlingService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

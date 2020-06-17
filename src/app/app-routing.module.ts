@@ -6,6 +6,7 @@ import {ExperienceComponent} from './sub-sections/experience/experience.componen
 import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
 import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
 import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component';
+import {CurlingComponent} from './sub-sections/portfolio/curling/curling.component';
 
 import { BrowserModule } from '@angular/platform-browser';
 // import {} from './sub-sections/contact/contact.component';
@@ -46,6 +47,10 @@ const routes: Routes = [{
 {
   path: 'portfolio/Sudoku',
   component: SudokuComponent
+},
+{
+  path: 'portfolio/Curling',
+  component: CurlingComponent
 }
 ];
 

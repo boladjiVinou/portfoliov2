@@ -1,5 +1,5 @@
 <div id = "projects-container" class ='grid-container'>
-    <div class="card" (click) = "navigateToSelectedProject(i)" *ngFor="let item of projects, let i = index"  [ngClass]="{'shaked':projectShaker[i]}">
+    <div class="card" *ngFor="let item of projects, let i = index"  [ngClass]="{'shaked':projectShaker[i]}">
         <a routerLink ={{item.value}}>
             <img class="card-img-top" [src]="getImageSrc(i)">
             <div class="card-body">
