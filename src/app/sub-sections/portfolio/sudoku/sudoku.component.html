@@ -5,10 +5,10 @@
   </div>
   <progress *ngIf="gridLoaded === false" id ="progress-bar"></progress>
   <div id ='grid-container' *ngIf="gridLoaded === true">
-    <div *ngFor="let  row of sudokuGrid , let i = index" id = 'grid-row'>
-        <div *ngFor="let item of row , let j = index" id = 'grid-item'>
+    <div *ngFor="let  row of sudokuGrid , let i = index" class = 'grid-row'>
+        <div *ngFor="let item of row , let j = index" [ngClass]="{'grid-item-odd':((i+j)%2)===0, 'grid-item' : ((i+j)%2)===1}">
           <p *ngIf="item.isInput === false">{{item.value}}</p>
-          <input #tmp type="text" maxlength="1" *ngIf="item.isInput === true" (keyup)="insertInGrid($event, i,j)"  [ngClass]="{'wrong-input':  item.isWrong}">
+          <input #tmp type="number" maxlength="1" *ngIf="item.isInput === true" (keyup)="insertInGrid($event, i,j)"  [ngClass]="{'wrong-input':  item.isWrong}">
         </div>
     </div>
   </div>
