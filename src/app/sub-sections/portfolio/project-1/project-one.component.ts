@@ -46,12 +46,16 @@ export class ProjectOneComponent implements OnInit, OnDestroy,AfterViewInit {
   ngAfterViewInit(){
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.opacity = '1';
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.pause();
   }
   ngOnDestroy() {
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.opacity = '0.8';
     this.langageSubscription.unsubscribe();
     window.removeEventListener('resize', this.rendererResizer.bind(this));
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.play();
   }
   resetRender() {
     this.renderService.resetRender();

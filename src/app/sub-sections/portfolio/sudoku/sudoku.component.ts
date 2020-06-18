@@ -51,6 +51,8 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.backgroundColor = 'black';
     childrenContainer.style.opacity = '0.8';
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.play();
   }
   loadANewGrid(difficulty: number) {
     this.gridLoaded = false;
@@ -148,5 +150,7 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.backgroundColor = 'white';
     childrenContainer.style.opacity = '1';
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.pause();
   }
 }

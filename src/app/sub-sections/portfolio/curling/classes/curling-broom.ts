@@ -5,7 +5,7 @@ export class CurlingBroom {
     private loader1: OBJLoader = new OBJLoader();
     private broom: THREE.Mesh;
     private follower: EventListener;
-    private stoneFollower: NodeJS.Timer;
+    private stoneFollower: any;
     private up = false;
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {

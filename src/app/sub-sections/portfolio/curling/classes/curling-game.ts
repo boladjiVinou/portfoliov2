@@ -1,6 +1,6 @@
 import { CurlingPlayer, HumanCurlingPlayer, AICurlingPlayer } from './curling-player';
 import { CurlingStone} from './curling-stone';
-import { CurlingService } from '../../../curling-service';
+import { CurlingService } from './../curling.service';
 import { PhysicWorld } from './physic-world';
 import * as THREE from 'three';
 
@@ -9,9 +9,9 @@ export class CurlingGame {
     private player2: CurlingPlayer;
     private currentPlayer: CurlingPlayer = null;
     private curlingService: CurlingService;
-    private tickIntervalCall: NodeJS.Timer;
-    private timerIntervallCall: NodeJS.Timer;
-    followerInterval: NodeJS.Timer;
+    private tickIntervalCall: any;
+    private timerIntervallCall: any;
+    followerInterval: any;
     private physicWorld: PhysicWorld;
     private deltaTime = 0;
     private subTurn = 0;

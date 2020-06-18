@@ -16,7 +16,7 @@ export class CurlingService implements OnDestroy {
     private world: THREE.Object3D;
     private skybox: THREE.Mesh;
     private startRotatingSkybox = false;
-    private rotationIntervalMethod: NodeJS.Timer;
+    private rotationIntervalMethod: any;
     private cameraStartPosition: THREE.Vector3 = new THREE.Vector3(1100, 200, -25);
     private cameraAngle = Math.PI / 2;
     private ambientSound: THREE.Audio;
@@ -29,6 +29,7 @@ export class CurlingService implements OnDestroy {
      */
     public  init(): Promise<void> {
         return new Promise<void>((resolve) => {
+            console.log(' service initializing');
             this.scene = new THREE.Scene();
             this.renderer = new THREE.WebGLRenderer({antialias: true});
             // https://dustinpfister.github.io/2018/04/07/threejs-camera-perspective/
@@ -284,7 +285,7 @@ export class CurlingService implements OnDestroy {
             materials.push( new THREE.MeshBasicMaterial( { map: t[i] , side: THREE.BackSide } ) );
         }
         this.skybox = new THREE.Mesh( new THREE.BoxGeometry( 8000, 8000, 8000), materials );
-        this.skybox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, -1 ) );
+        // this.skybox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, -1 ) );
         this.skybox.position.set(0, -1000, 0);
         this.scene.add( this.skybox );
     }

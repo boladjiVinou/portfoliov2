@@ -13,9 +13,9 @@ export abstract class CurlingPlayer {
     protected currentStoneIndex = -1;
     protected stones: CurlingStone[];
     protected arrow = new CurlingArrow();
-    protected aimingInterval: NodeJS.Timer;
+    protected aimingInterval: any;
     protected arrowUpdater: EventListener;
-    protected shootIncreaserInterval: NodeJS.Timer;
+    protected shootIncreaserInterval: any;
     public abstract startAiming(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void>;
     public abstract startSweeping(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void>;
     public abstract destroy();
@@ -76,6 +76,7 @@ export class HumanCurlingPlayer extends CurlingPlayer {
         return new Promise<void>((resolve) => {
             this.isAiming = true;
             this.currentStoneIndex++;
+            console.log(this.stones[this.currentStoneIndex]);
             this.stones[this.currentStoneIndex].getMesh().position.set(665, 19, -14);
             this.stones[this.currentStoneIndex].getMesh().visible = true;
             this.arrow.getArrow().visible = true;

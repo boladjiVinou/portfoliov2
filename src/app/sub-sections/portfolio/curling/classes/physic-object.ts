@@ -1,22 +1,17 @@
 import * as THREE from 'three';
-
 export abstract class PhysicObject {
     private time = 0;
-    private initPos: THREE.Vector3;
-    private initSpeed: THREE.Vector3 = new THREE.Vector3();
     protected speed: THREE.Vector3 = new THREE.Vector3();
     private acceleration: THREE.Vector3 = new THREE.Vector3();
+    private speedNorm = 0;
     private angularSpeed = 0;
     private initAngularSpeed = 0;
+    private normInitSpeed = 0;
     private canCheckDisappearing = false;
     private theta = 0;
     private angularAcceleration: number;
     protected isFadingOut = false;
-    protected abstract getHeritedMesh(): THREE.Object3D;
-    public abstract getPostion(): THREE.Vector3;
-    public abstract setPostion(pos: THREE.Vector3);
-    public abstract isVisible(): boolean;
-    public abstract getBoundingBox(): THREE.Box3;
+    protected  realObject: THREE.Object3D = null;
     public abstract getId(): string;
     protected abstract makeDisappear();
     public getFadingState(): boolean {
@@ -31,6 +26,23 @@ export abstract class PhysicObject {
         } else {
             return 0;
         }
+    }
+    public setRealObject(object: THREE.Object3D) {
+        this.realObject = object;
+    }
+    public getBoundingBox(): THREE.Box3 {
+        return new THREE.Box3().setFromObject(this.realObject);
+    }
+    public getPostion(): THREE.Vector3 {
+        return this.realObject.position.clone();
+    }
+    public setPostion(pos: THREE.Vector3) {
+        this.realObject.position.x = pos.x;
+        this.realObject.position.y = pos.y;
+        this.realObject.position.z = pos.z;
+    }
+    protected getHeritedMesh(): THREE.Object3D {
+        return this.realObject;
     }
     public setDisapearingChecker( val: boolean) {
         this.canCheckDisappearing = val;
@@ -71,19 +83,27 @@ export abstract class PhysicObject {
         this.acceleration.z = acc.z;
     }
     public setSpeed(speed: THREE.Vector3) {
+        this.normInitSpeed = Math.round(Math.sqrt(Math.pow( this.speed.x , 2) + Math.pow( this.speed.z , 2)));
         this.speed.x = speed.x;
         this.speed.y = speed.y;
         this.speed.z = speed.z;
         this.setAcceleration(this.speed.clone().normalize().multiplyScalar(-450));
         this.time = 0;
-        this.initPos = this.getPostion().clone();
-        this.initSpeed = this.speed.clone();
+    }
+    public AddSpeed(deltaSpeed: THREE.Vector3){
+        this.speed.x += deltaSpeed.x;
+        this.speed.y += deltaSpeed.y;
+        this.speed.z += deltaSpeed.z;
+        this.setAcceleration(this.speed.clone().normalize().multiplyScalar(-450));
     }
     public getAcceleration(): THREE.Vector3 {
         return this.acceleration;
     }
     public getSpeed(): THREE.Vector3 {
         return this.speed.clone();
+    }
+    public getSpeedNorm(): number{
+        return this.speedNorm;
     }
     public makeDisappearIfNeeded() {
         if (this.canCheckDisappearing && this.isVisible()) {
@@ -97,22 +117,18 @@ export abstract class PhysicObject {
         }
     }
     public updatePosition(deltaTime: number) {
-        const norm = Math.round(Math.sqrt(Math.pow( this.speed.x , 2) + Math.pow( this.speed.z , 2)));
-        const normInitSpeed = Math.round(Math.sqrt(Math.pow( this.initSpeed.x , 2) + Math.pow( this.initSpeed.z , 2)));
-        if (norm > 10) {
+        this.speedNorm = Math.round(Math.sqrt(Math.pow( this.speed.x , 2) + Math.pow( this.speed.z , 2)));
+        if (this.speedNorm > 10) {
             // p = (1/2)at^2+vt+p0
-           this.time += deltaTime;
-           const position = this.acceleration.clone()
-           .multiplyScalar( this.time * this.time)
+           const deltaPos = this.acceleration.clone()
+           .multiplyScalar( deltaTime * deltaTime)
            .multiplyScalar(0.5)
-           .add(this.initSpeed.clone()
-           .multiplyScalar( this.time))
-           .add(this.initPos.clone());
-           this.setPostion(position);
+           .add(this.speed.clone()
+           .multiplyScalar( deltaTime));
+           this.realObject.position.add(deltaPos);
             // v = at + v0
            const speed = this.acceleration.clone()
-                .multiplyScalar(this.time)
-                .add(this.initSpeed.clone());
+                .multiplyScalar(deltaTime);
             // 90 -theta: angle avec axe horizontale
            if (this.theta !== 0) {
                const malus = Math.cos((Math.PI / 2) - this.theta) * (this.angularSpeed);
@@ -122,15 +138,20 @@ export abstract class PhysicObject {
                 speed.z -= malus;
                }
             }
-           this.setSpeed(speed);
-        } else {
+           this.AddSpeed(speed);
+        } else if (this.speedNorm > 0) {
             this.speed.set(0, 0, 0);
-            if (normInitSpeed) {
+            if (this.normInitSpeed) {
                 this.angularSpeed = 0;
             }
+            this.speedNorm = 0;
         }
         this.rotate(deltaTime);
         this.makeDisappearIfNeeded();
+    }
+
+    public isVisible(): boolean {
+        return this.realObject.visible;
     }
 
 }

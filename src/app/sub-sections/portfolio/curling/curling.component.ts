@@ -11,28 +11,28 @@ import { CurlingGame } from './Classes/curling-game';
 })
 export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  private startMenu = true;
-  private onePlayer = false;
-  private playerChoiceMade = false;
-  private difficultyChoiceMade = false;
-  private level = 1;
+  public startMenu = true;
+  public onePlayer = false;
+  public playerChoiceMade = false;
+  public difficultyChoiceMade = false;
+  public level = 1;
   private langageSubscription: Subscription;
-  private startLabel = 'COMMENCER';
-  private soundLabel = 'SON';
-  private player1Label = '1 JOUEUR';
-  private player2Label = '2 JOUEURS';
-  private easyLabel = 'FACILE';
-  private mediumLabel = 'MEDIUM';
-  private hardLabel = 'DIFFICILE';
-  private score  = '';
-  private currentPlayer = '';
-  private player1NbOfStones = 1;
-  private player2NbOfStones = 1;
-  private round = '';
-  private hideHud = true;
-  private hideLogo = false;
+  public startLabel = 'COMMENCER';
+  public soundLabel = 'SON';
+  public player1Label = '1 JOUEUR';
+  public player2Label = '2 JOUEURS';
+  public easyLabel = 'FACILE';
+  public mediumLabel = 'MEDIUM';
+  public hardLabel = 'DIFFICILE';
+  public score  = '';
+  public currentPlayer = '';
+  public player1NbOfStones = 1;
+  public player2NbOfStones = 1;
+  public round = '';
+  public hideHud = true;
+  public hideLogo = false;
   public game: CurlingGame;
-  private readonly nbOfStones = 8;
+  public readonly nbOfStones = 8;
   constructor(private curlingService: CurlingService, private principalService: LanguageService, private zone: NgZone) {
 
   }
@@ -112,14 +112,24 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   ngOnDestroy() {
     const progressBar = document.getElementById('shooting-progress-div');
-    progressBar.style.display = 'none';
+    if (progressBar) {
+      progressBar.style.display = 'none';
+    }
     this.game.clearGameTick();
     this.curlingService.stop();
+    const childrenContainer = document.querySelector('.children-container') as HTMLElement;
+    childrenContainer.style.opacity = '0.8';
+    window.removeEventListener('resize', this.rendererResizer.bind(this));
+    this.langageSubscription.unsubscribe();
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.play();
   }
   ngAfterViewInit(){
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
     childrenContainer.style.backgroundColor = 'black';
     childrenContainer.style.opacity = '1';
+    const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
+    videoElement.pause();
   }
   private rendererResizer(event) {
     const parent = document.querySelector('#render-container');

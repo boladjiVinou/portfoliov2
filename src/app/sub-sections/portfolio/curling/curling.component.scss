@@ -1,3 +1,4 @@
+
 #render-container {
     position: absolute;
     top: 0px;
@@ -7,6 +8,7 @@
     color: #37474F;
     display: flex;
     justify-content: center;
+
     #curling-logo-container {
         position: absolute;
         top:5vh;
@@ -14,6 +16,7 @@
         p {
             font-size: 5vw;
             font-family: 'Blippo', fantasy;
+            color: rgb(236, 59, 59);
         }
     }
     #game-option-container {
@@ -53,17 +56,6 @@
                 p {
                     margin: 0;
                     margin-right: 2vw;
-                }
-                mat-radio-group {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-evenly;
-                    font-family: 'Blippo', fantasy;
-                    font-size: 2vw;
-                    mat-radio-button:nth-of-type(1){
-                        margin-right:2vw;
-                    }
                 }
             }
         }

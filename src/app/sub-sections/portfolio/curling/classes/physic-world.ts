@@ -1,8 +1,7 @@
 import { PhysicObject } from './physic-object';
 import * as THREE from 'three';
-import { del } from 'selenium-webdriver/http';
-import { prependOnceListener } from 'cluster';
-
+// use this to reimplement your physic: 
+//  https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331
 export class PhysicWorld {
     private objects: PhysicObject[] = [];
     private dt = 0.1;
@@ -99,7 +98,11 @@ export class PhysicWorld {
         const objectsToUpdate: PhysicObject[] = [];
         this.collisionBuffer = [];
         let movingObjects = 0;
-        this.objects.forEach((value: PhysicObject) => {
+        this.objects.filter((x: PhysicObject) => {
+            const speed = x.getSpeed();
+            const norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
+            return norm > 0;
+        }).forEach((value: PhysicObject) => {
             let speed = value.getSpeed();
             let norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
             // si l objet actuel se deplace on calcule son impact sur ses voisins si il en a
@@ -147,6 +150,7 @@ export class PhysicWorld {
     }
      // Reminder: x positif est vers moi, z positif est a ma gauche, y positif est vers le haut
     private handleCollision(o1: PhysicObject, o2: PhysicObject) {
+        console.log('handling collision');
         const theta1 = o1.getTheta();
         const speed1 = o1.getSpeed();
         const v1 = Math.round(Math.sqrt(Math.pow( speed1.x , 2) + Math.pow( speed1.z , 2)));
