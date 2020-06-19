@@ -149,30 +149,11 @@ export class PhysicWorld {
      // Reminder: x positif est vers moi, z positif est a ma gauche, y positif est vers le haut
     private handleCollision(o1: PhysicObject, o2: PhysicObject) {
         console.log('handling collision');
-        const theta1 = o1.getTheta();
-        const speed1 = o1.getSpeed();
-        const v1 = Math.round(Math.sqrt(Math.pow( speed1.x , 2) + Math.pow( speed1.z , 2)));
-        const theta2 = o2.getTheta();
-        const speed2 = o2.getSpeed();
-        let v2 = Math.round(Math.sqrt(Math.pow( speed2.x , 2) + Math.pow( speed2.z , 2)));
-        if (v2 === 0) {
-            v2 = 1;
-        }
-        const newTheta1 = Math.atan(  (v2 / v1) * (Math.sin(theta2) / Math.cos(theta1)));
-        const newTheta2 = Math.atan( (v1 / v2) * (Math.sin(theta1) / Math.cos(theta2)));
-        const newV1 = Math.sqrt(Math.pow( v2 * Math.sin(theta2), 2) + Math.pow(v1 * Math.cos(theta1), 2));
-        const newV2 = Math.sqrt(Math.pow( v1 * Math.sin(theta1), 2) + Math.pow(v2 * Math.cos(theta2), 2));
-        const newV1Vector = new THREE.Vector3(newV1 * Math.sin(newTheta1), 0, newV1 * Math.cos(newTheta1));
-        const newV2Vector = new THREE.Vector3(newV2 * Math.sin(newTheta2), 0, newV2 * Math.cos(newTheta2));
-        o1.setSpeed(newV1Vector);
-        o2.setSpeed(newV2Vector.multiplyScalar(-1));
-         /*else {
-            const pos1 = o1.getPostion();
-            const pos2 = o2.getPostion();
-            let delta = pos2.sub(pos1);
-            delta = delta.normalize();
-            delta.multiplyScalar(30);
-            o2.setSpeed(delta);
-        }*/
+        // balls have same weight therefor to handle the collision we should just exchange the speeds
+        // but to make it a little bit realistic I will slow down them a little bit
+        const slowingFactor = 0.69;
+        const tmpU1 = o1.getSpeed().multiplyScalar(slowingFactor);
+        o1.setSpeed(o2.getSpeed().multiplyScalar(slowingFactor));
+        o2.setSpeed(tmpU1);
     }
 }

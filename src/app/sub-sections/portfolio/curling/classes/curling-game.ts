@@ -118,6 +118,7 @@ export class CurlingGame {
         });
     }
     private stoneFollower(stone: CurlingStone, cam: THREE.Camera) {
+        // a revoir
         const control = this.curlingService.getControls();
         const pos = stone.getPostion();
         control.object.position.set(cam.position.x, 400, -25); // -25 z

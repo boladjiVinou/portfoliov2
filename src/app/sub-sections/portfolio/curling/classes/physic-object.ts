@@ -21,8 +21,8 @@ export abstract class PhysicObject {
         const v1 = Math.round(Math.sqrt(Math.pow( this.speed.x , 2) + Math.pow( this.speed.z , 2)));
         if (v1 > 0) {
             const pos = this.getSpeed().normalize();
-            const zAxis = new THREE.Vector3(1, 0, 0); // 0 0 1
-            return pos.angleTo(zAxis);
+            const xAxis = new THREE.Vector3(-1, 0, 0); // 0 0 1
+            return pos.angleTo(xAxis);
         } else {
             return 0;
         }
@@ -147,7 +147,7 @@ export abstract class PhysicObject {
             this.speedNorm = 0;
         }
         this.rotate(deltaTime);
-        this.makeDisappearIfNeeded();
+        // this.makeDisappearIfNeeded();
     }
 
     public isVisible(): boolean {

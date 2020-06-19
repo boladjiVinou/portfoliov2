@@ -40,7 +40,7 @@ export class CurlingService implements OnDestroy {
             this.scene.add(this.camera);
             this.renderer.setClearColor(new Color(51, 63, 71), 1);
             this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.light = new THREE.PointLight(0xffffff, 0.87);
+            this.light = new THREE.PointLight(0xffffff, 0.8);
             this.light.position.set(0, 3000, 0);
             this.scene.add(this.light);
             const light2 = this.light.clone();
