@@ -99,9 +99,7 @@ export class PhysicWorld {
         this.collisionBuffer = [];
         let movingObjects = 0;
         this.objects.filter((x: PhysicObject) => {
-            const speed = x.getSpeed();
-            const norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
-            return norm > 0;
+            return x.isVisible();
         }).forEach((value: PhysicObject) => {
             let speed = value.getSpeed();
             let norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));

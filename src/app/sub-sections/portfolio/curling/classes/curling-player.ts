@@ -76,7 +76,6 @@ export class HumanCurlingPlayer extends CurlingPlayer {
         return new Promise<void>((resolve) => {
             this.isAiming = true;
             this.currentStoneIndex++;
-            console.log(this.stones[this.currentStoneIndex]);
             this.stones[this.currentStoneIndex].getMesh().position.set(665, 19, -14);
             this.stones[this.currentStoneIndex].getMesh().visible = true;
             this.arrow.getArrow().visible = true;
@@ -121,7 +120,7 @@ export class HumanCurlingPlayer extends CurlingPlayer {
                     progressBarParent.style.display = 'none';
                     clearInterval(this.shootIncreaserInterval);
                     this.shootIncreaserInterval = null;
-                    this.stones[this.currentStoneIndex].setSpeed(this.arrow.getDirection().multiplyScalar(this.shootPower * 10.1));
+                    this.stones[this.currentStoneIndex].setSpeed(this.arrow.getDirection().multiplyScalar(this.shootPower * 13));
                     this.shootPower = 0;
                     progressBar.style.height = this.shootPower.toString() + '%';
                     window.removeEventListener('mousedown', increaser);

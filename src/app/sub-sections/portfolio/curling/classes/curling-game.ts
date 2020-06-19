@@ -120,7 +120,7 @@ export class CurlingGame {
     private stoneFollower(stone: CurlingStone, cam: THREE.Camera) {
         const control = this.curlingService.getControls();
         const pos = stone.getPostion();
-        control.object.position.set(cam.position.x, 400, -25);
+        control.object.position.set(cam.position.x, 400, -25); // -25 z
         control.target = new THREE.Vector3(pos.x, pos.y, pos.z);
         cam.position.set(pos.x, 400, -25);
     }
@@ -161,6 +161,10 @@ export class CurlingGame {
                     this.stoneFollower(this.currentPlayer.getCurrentStone(), cam);
                     if (this.physicWorld.areAllObjectsStopped()) {
                         this.curlingService.stoneFollower = null;
+                        const control = this.curlingService.getControls();
+                        control.target.x = 0;
+                        control.target.y = 0;
+                        control.target.z = 0;
                         loop();
                     }
                 };

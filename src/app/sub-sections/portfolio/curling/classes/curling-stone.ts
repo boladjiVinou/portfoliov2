@@ -47,7 +47,6 @@ export class CurlingStone extends PhysicObject {
     protected makeDisappear() {
         let shouldNotDisappear = false;
         if (this.realObject !== undefined) {
-            console.log('making disappear stone ' + this.realObject.uuid);
             this.realObject.traverse((child: THREE.Mesh) => {
                 // tslint:disable-next-line:no-string-literal
                 if ( child.material && child.material['opacity'] > 0) {
@@ -61,7 +60,6 @@ export class CurlingStone extends PhysicObject {
             this.realObject.visible = shouldNotDisappear;
             if (this.realObject.visible) {
                 this.isFadingOut = true;
-                console.log('reducing visibility');
                 this.realObject.traverse((child: THREE.Object3D) => {
                     // tslint:disable-next-line:no-string-literal
                     if ( (child as THREE.Mesh).material && (child as THREE.Mesh).material['opacity'] > 0) {
@@ -70,7 +68,6 @@ export class CurlingStone extends PhysicObject {
                     }
                 });
             } else {
-                console.log('stone should disappear');
                 this.realObject.traverse((child: THREE.Object3D) => {
                     // tslint:disable-next-line:no-string-literal
                     if ( (child as THREE.Mesh).material && (child as THREE.Mesh).material['opacity'] <= 0) {
@@ -81,8 +78,6 @@ export class CurlingStone extends PhysicObject {
                 this.setSpeed(new THREE.Vector3());
                 this.isFadingOut = false;
             }
-        }else{
-            console.log('making disappear fail');
         }
     }
     private isInPointZone(position: THREE.Vector3): boolean {
@@ -120,9 +115,9 @@ export class CurlingStone extends PhysicObject {
         stone.realObject.traverse((o: THREE.Mesh) => {
             if (o.material) {
                 if (!isArray(o.material)) {
-                    o.material = o.material.clone();
+                    o.material = (o.material as THREE.Material) .clone();
                 } else {
-                    o.material.forEach((value: THREE.Material) => {
+                    (o.material as THREE.Material[]).forEach((value: THREE.Material) => {
                         value = value.clone();
                     });
                 }

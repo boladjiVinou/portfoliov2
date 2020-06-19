@@ -110,8 +110,8 @@ export abstract class PhysicObject {
             const position = this.getPostion();
             if ((position.z > 70 || position.z < -100)) {
                 this.makeDisappear();
-            } else if ((Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0)
-            && (position.x > -220 || position.x < -320)) {
+            } else if (((Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0)
+            && position.x > -220) || position.x < -320) {
                 this.makeDisappear();
             }
         }
