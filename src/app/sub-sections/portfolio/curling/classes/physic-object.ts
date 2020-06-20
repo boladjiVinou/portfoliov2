@@ -147,7 +147,7 @@ export abstract class PhysicObject {
             this.speedNorm = 0;
         }
         this.rotate(deltaTime);
-        // this.makeDisappearIfNeeded();
+        this.makeDisappearIfNeeded();
     }
 
     public isVisible(): boolean {

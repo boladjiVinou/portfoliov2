@@ -5,7 +5,7 @@
     <div class ='grid-item' id = 'grid-item-2'>
         <article>
           <h2  class="text-light">{{aboutMeTitle}}</h2>
-          <p *ngFor="let item of aboutMe" class="text-light">
+          <p *ngFor="let item of aboutMeBuffer , let i = index" class="text-light" [ngClass]="{'lastP': i === aboutMeIndex, 'normalP': i!== aboutMeIndex}"> 
               {{item}}
           </p>
         </article>

@@ -5,6 +5,26 @@ html {
       width: 0px;
       background: transparent; /* make scrollbar transparent */
   }
+  @keyframes fadeAnimation {
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+  }
+  @-o-keyframes fadeAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+  }
+  @-moz-keyframes fadeAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+  }
+  @-webkit-keyframes fadeAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+  }
 .grid-container {
     position: absolute;
     top:0px;
@@ -45,6 +65,20 @@ html {
         }
         p{
             text-align: center;
+        }
+        .lastP {
+            
+            &:after{
+                content : "|";
+               font-weight: bold;
+                margin: 0;
+                padding: 0;
+                color: greenyellow;
+                -webkit-animation: fadeAnimation 500ms infinite;
+                -moz-animation: fadeAnimation 500ms infinite;
+                -o-animation: fadeAnimation 500ms infinite;
+                 animation: fadeAnimation 500ms infinite;
+            }
         }
     }
 }

@@ -120,7 +120,10 @@ export class CurlingGame {
     private stoneFollower(stone: CurlingStone, cam: THREE.Camera) {
         // a revoir
         const control = this.curlingService.getControls();
-        const pos = stone.getPostion();
+        let pos = stone.getPostion();
+        if (stone.getSpeedNorm() === 0 ){
+            pos = this.physicWorld.getMostActiveObject().getPostion();
+        }
         control.object.position.set(cam.position.x, 400, -25); // -25 z
         control.target = new THREE.Vector3(pos.x, pos.y, pos.z);
         cam.position.set(pos.x, 400, -25);

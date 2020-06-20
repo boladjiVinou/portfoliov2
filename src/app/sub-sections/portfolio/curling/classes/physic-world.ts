@@ -8,6 +8,8 @@ export class PhysicWorld {
     private collisionBuffer: string[] = [];
     private previousCollisionBuffer: string[] = [];
     private allObjectsAreStopped = false;
+    private nbUpdate = 0;
+    private objectsToUpdate: PhysicObject[] = [];
     public constructor() {
         this.objects = [];
     }
@@ -95,7 +97,7 @@ export class PhysicWorld {
         });
     }
     public updateWorld() {
-        const objectsToUpdate: PhysicObject[] = [];
+        this.objectsToUpdate = [];
         this.collisionBuffer = [];
         let movingObjects = 0;
         this.objects.filter((x: PhysicObject) => {
@@ -123,13 +125,13 @@ export class PhysicWorld {
             speed = value.getSpeed();
             norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
             if (norm > 0 || value.getFadingState()) {
-                objectsToUpdate.push(value);
+                this.objectsToUpdate.push(value);
             } else if (value.isVisible()) {
-                objectsToUpdate.push(value);
+                this.objectsToUpdate.push(value);
             }
         });
         this.allObjectsAreStopped = (movingObjects === 0);
-        objectsToUpdate.forEach((value: PhysicObject) => {
+        this.objectsToUpdate.forEach((value: PhysicObject) => {
             value.updatePosition(this.dt);
             const speed = value.getSpeed();
             const norm = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
@@ -138,10 +140,25 @@ export class PhysicWorld {
             }
         });
         this.allObjectsAreStopped = (movingObjects === 0);
-        this.previousCollisionBuffer = [];
+        if (this.nbUpdate > 0 && (this.nbUpdate % 2 === 0)){
+            this.previousCollisionBuffer = [];
+            this.nbUpdate = 0;
+        }
+        else {
+            ++this.nbUpdate;
+        }
         this.collisionBuffer.forEach((value: string) => {
             this.previousCollisionBuffer.push(value);
         });
+    }
+    public getMostActiveObject(): PhysicObject {
+        this.objectsToUpdate = this.objectsToUpdate.sort((o1: PhysicObject, o2: PhysicObject) => {
+            return o1.getSpeedNorm() - o2.getSpeedNorm();
+        });
+        if (this.objectsToUpdate.length > 0){
+            return this.objectsToUpdate[this.objectsToUpdate.length - 1];
+        }
+        return null;
     }
     public areAllObjectsStopped(): boolean {
         return this.allObjectsAreStopped;
@@ -151,7 +168,7 @@ export class PhysicWorld {
         console.log('handling collision');
         // balls have same weight therefor to handle the collision we should just exchange the speeds
         // but to make it a little bit realistic I will slow down them a little bit
-        const slowingFactor = 0.69;
+        const slowingFactor = 0.9;
         const tmpU1 = o1.getSpeed().multiplyScalar(slowingFactor);
         o1.setSpeed(o2.getSpeed().multiplyScalar(slowingFactor));
         o2.setSpeed(tmpU1);

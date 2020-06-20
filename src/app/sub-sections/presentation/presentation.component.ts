@@ -9,7 +9,11 @@ import { Subscription } from 'rxjs';
 export class PresentationComponent implements OnInit {
   private langageSubscription: Subscription;
   public aboutMe: string[] = [];
+  public aboutMeBuffer: string[] = ['', '', '', '', ''];
   public aboutMeTitle = '';
+  private aboutMePointer = 0;
+  public aboutMeIndex = 0;
+  private updatingText = true;
   constructor(private languageService: LanguageService, private zone: NgZone){
 
   }
@@ -19,6 +23,33 @@ export class PresentationComponent implements OnInit {
           this.changeLangage(value);
         });
     });
+  }
+ private textUpdater() {
+    const handler = setTimeout(() => {
+      if (this.updatingText){
+        this.updatingText = true;
+        if (this.aboutMePointer === this.aboutMe[this.aboutMeIndex].length ){
+          ++this.aboutMeIndex;
+          this.aboutMePointer = 0;
+        }
+
+        if (this.aboutMeIndex < this.aboutMe.length){
+            this.aboutMeBuffer[this.aboutMeIndex] += this.aboutMe[this.aboutMeIndex][this.aboutMePointer];
+        }
+        ++this.aboutMePointer;
+        if (this.aboutMeIndex < this.aboutMe.length){
+          this.textUpdater();
+        }else{
+          this.updatingText = false;
+          if (this.aboutMeIndex >= this.aboutMe.length){
+            --this.aboutMeIndex;
+          }
+          clearTimeout(handler);
+        }
+      }else{
+        clearTimeout(handler);
+      }
+    }, 50);
   }
   changeLangage(isEnglish: boolean) {
     this.aboutMe = [];
@@ -43,6 +74,18 @@ export class PresentationComponent implements OnInit {
       this.aboutMe.push(`elle m ' a aussi permis d' en savoir plus sur des domaines tels que le multimedia, les systèmes numériques, l' infonuagique et l' intelligence artificielle.`);
       this.aboutMe.push(`Sur ce site (encore en construction) vous pourrez en apprendre d' avantage sur mes différentes réalisations.`);
       this.aboutMeTitle = 'À propos de moi';
+    }
+    if (!this.updatingText){
+      this.aboutMeBuffer = this.aboutMe.map((x) => x);
+    }else{
+      this.updatingText = false;
+      setTimeout(() => {
+        this.updatingText = true;
+        this.aboutMeBuffer = ['', '', '', '', ''];
+        this.aboutMeIndex = 0;
+        this.aboutMePointer = 0;
+        this.textUpdater();
+      }, 51);
     }
   }
 }
