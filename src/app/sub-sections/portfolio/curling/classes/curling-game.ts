@@ -4,6 +4,10 @@ import { CurlingService } from './../curling.service';
 import { PhysicWorld } from './physic-world';
 import * as THREE from 'three';
 
+// x: 330 1ere ligne
+// x : -265 2e ligne
+// x: -450 centre cible
+// 50 rayon du cercle
 export class CurlingGame {
     private player1: CurlingPlayer;
     private player2: CurlingPlayer;
@@ -23,12 +27,41 @@ export class CurlingGame {
             this.deltaTime += 1;
         }, 1);
         this.curlingService.worldUpdater = this.gameTick.bind(this);
+      /*  window.addEventListener('keydown', (event: KeyboardEvent ) => {
+            if (this.currentPlayer !== null){
+                const pos =  this.currentPlayer.getCurrentStone().getPostion();
+                switch (event.key){
+                    case 'w':
+                        pos.x -= 1;
+                        break;
+                    case 's':
+                        pos.x += 1;
+                        break;
+                    case 'a':
+                        pos.z += 1;
+                        break;
+                    case 'd':
+                        pos.z -= 1;
+                        break;
+                }
+                this.currentPlayer.getCurrentStone().setPostion(pos);
+                console.log(pos);
+            }
+        });*/
     }
     public GetPlayer1(): CurlingPlayer {
         return this.player1;
     }
     public GetPlayer2(): CurlingPlayer {
         return this.player2;
+    }
+    public getCurrentPlayerName(): string
+    {
+        if (this.currentPlayer)
+        {
+            return this.currentPlayer.getName();
+        }
+        return '';
     }
     public clearGameTick() {
         clearInterval(this.tickIntervalCall);
@@ -122,7 +155,10 @@ export class CurlingGame {
         const control = this.curlingService.getControls();
         let pos = stone.getPostion();
         if (stone.getSpeedNorm() === 0 ){
-            pos = this.physicWorld.getMostActiveObject().getPostion();
+            const activeObj = this.physicWorld.getMostActiveObject();
+            if (activeObj){
+                pos = activeObj.getPostion();
+            }
         }
         control.object.position.set(cam.position.x, 400, -25); // -25 z
         control.target = new THREE.Vector3(pos.x, pos.y, pos.z);
@@ -159,17 +195,21 @@ export class CurlingGame {
         this.setNextPlayer();
         const loop = () => {
             this.updateTurn();
+            let stopping = false;
             cam.position.set(startPos.x, startPos.y, startPos.z);
             this.currentPlayer.startAiming(cam, this.curlingService.renderer).then(() => {
                 this.curlingService.stoneFollower = () => {
                     this.stoneFollower(this.currentPlayer.getCurrentStone(), cam);
-                    if (this.physicWorld.areAllObjectsStopped()) {
-                        this.curlingService.stoneFollower = null;
-                        const control = this.curlingService.getControls();
-                        control.target.x = 0;
-                        control.target.y = 0;
-                        control.target.z = 0;
-                        loop();
+                    if ( !stopping && this.physicWorld.areAllObjectsStopped()) {
+                        stopping = true;
+                        setTimeout(() => {
+                            this.curlingService.stoneFollower = null;
+                            const control = this.curlingService.getControls();
+                            control.target.x = 0;
+                            control.target.y = 0;
+                            control.target.z = 0;
+                            loop();
+                        }, 3000);
                     }
                 };
                 this.currentPlayer.startSweeping(cam, this.curlingService.renderer);
@@ -195,5 +235,11 @@ export class CurlingGame {
         scene.add(this.player2.getBroom().getMesh());
         scene.add(this.player1.getArrow().getArrow());
         scene.add(this.player2.getArrow().getArrow());
+    }
+    public getRound(){
+        return this.round;
+    }
+    public getSubTurn(){
+        return this.subTurn;
     }
 }

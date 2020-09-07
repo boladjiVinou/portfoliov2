@@ -2,15 +2,22 @@ import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader';
 import * as THREE from 'three';
 import { PhysicObject } from './physic-object';
 import { isArray } from 'util';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+import * as Constant from './Constant';
 export enum StoneState {
-    isStopped = 1,
-    isInPointsZone
+    unused = 1,
+    isStopped,
+    isInPointsZone,
+    isInBroomZone,
+    isRunning
 }
 export class CurlingStone extends PhysicObject {
     private loader1: OBJLoader = new OBJLoader();
     private matLoader: MTLLoader = new MTLLoader();
     private secondSens = false;
-    tracker: any;
+    private tracker: any;
+    private state = new BehaviorSubject<StoneState>(StoneState.unused);
     public init(color: string): Promise<void> {
         return new Promise<void>((resolve) => {
             this.matLoader.setPath('../../../../../../assets/curling/curling_Stone/');
@@ -85,26 +92,30 @@ export class CurlingStone extends PhysicObject {
         const distance = Math.pow((position.x - center.x), 2) + Math.pow((position.z  - center.z), 2);
         return distance < 70;
     }
-    public trackState(): Promise<StoneState> {
-        return new Promise<StoneState>((resolve) => {
-            const stateTracker = () => {
-                if (this.isInPointZone(this.getPostion()) &&
-                                (Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0)) {
-                    console.log('point zone');
-                    resolve(StoneState.isInPointsZone);
-                    clearInterval(this.tracker);
-                    this.tracker = null;
-                    return;
-                } else if (Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0) {
-                    console.log('stone stopped');
-                    resolve(StoneState.isStopped);
-                    clearInterval(this.tracker);
-                    this.tracker = null;
-                    return;
-                }
-            };
-            this.tracker = setInterval(stateTracker, 30);
-        });
+    private  isInBroomSection(): boolean
+    {
+        const x = this.realObject.position.x;
+        return x < Constant.FIRST_LINE_X && x > Constant.SECOND_LINE_X;
+    }
+    public trackState(): Observable<StoneState> {
+        const stateTracker = () => {
+            if (Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0) {
+                console.log('stone stopped');
+                this.state.next(StoneState.isStopped);
+                clearInterval(this.tracker);
+                this.tracker = null;
+                return;
+            }
+            else if (this.isInBroomSection())
+            {
+                this.state.next(StoneState.isInBroomZone);
+            }
+            else {
+                this.state.next(StoneState.isRunning);
+            }
+        };
+        this.tracker = setInterval(stateTracker, 30);
+        return this.state.asObservable();
     }
     public getId(): string {
         return this.realObject.name.toString();
@@ -124,6 +135,11 @@ export class CurlingStone extends PhysicObject {
             }
         });
         return stone;
+    }
+    public doVictoryAnimation() {
+        const sens = (Math.random() > 0.5) ?  1 : -1;
+        this.setAngularSpeed(10 * sens);
+        this.setSpeed(new THREE.Vector3(0, 10, 0));
     }
     public getMesh(): THREE.Object3D {
         return this.realObject;

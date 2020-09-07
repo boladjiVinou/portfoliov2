@@ -1,5 +1,6 @@
 import { PhysicObject } from './physic-object';
 import * as THREE from 'three';
+import * as Constant from './Constant';
 // use this to reimplement your physic: 
 //  https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331
 export class PhysicWorld {
@@ -10,6 +11,7 @@ export class PhysicWorld {
     private allObjectsAreStopped = false;
     private nbUpdate = 0;
     private objectsToUpdate: PhysicObject[] = [];
+    private gravity = 9.8;
     public constructor() {
         this.objects = [];
     }
@@ -20,12 +22,11 @@ export class PhysicWorld {
         this.dt = dt;
     }
     private getStonesInCircle(): PhysicObject[] {
-        // centre: -294, 19, -20
-        const radius = 70;
+        const radius = Constant.GOAL_RADIUS;
         return this.objects.filter((value: PhysicObject) => {
             if (value.isVisible()) {
                 const pos = value.getPostion();
-                const distance = Math.pow((pos.x + 294), 2) + Math.pow((pos.z + 20), 2);
+                const distance = Math.pow((pos.x - Constant.GOAL_CENTER_X), 2) + Math.pow((pos.z), 2);
                 return distance <= Math.pow(radius, 2);
             } else {
                 return false;
@@ -33,7 +34,7 @@ export class PhysicWorld {
         });
     }
     public generateDesiredPosition(level: number): THREE.Vector3 {
-        const center = new THREE.Vector3(-294, 19, -20);
+        const center = new THREE.Vector3(Constant.GOAL_CENTER_X, 0, 0);
         const stones = this.getStonesInCircle();
         const aiStones = stones.filter((value: PhysicObject) => {
             return value.getId().startsWith('AIPlayer');
@@ -41,34 +42,26 @@ export class PhysicWorld {
         const humanStones = stones.filter((value: PhysicObject) => {
             return !value.getId().startsWith('AIPlayer');
         });
-        // 3 difficile
-        // centre: -294, 19, -20
-        // droite: -297.88 19 -90.7
-        // gauche: -297.88 19 90.7
-        // devant: -244.6 19 -18
-        // derriere: -354.7 19 -18
-        // (x + 294.19)^ 2 + (z + 20)^ 2 = 70^2
         const dest = new THREE.Vector3(0, 19, 0);
         let radiusZone = 0;
         switch (level) {
             case 1:
-                radiusZone = 75;
+                radiusZone = Constant.GOAL_RADIUS * 1.5;
                 break;
             case 2:
-                radiusZone = 50;
+                radiusZone =  Constant.GOAL_RADIUS;
                 break;
             case 3:
-                radiusZone = 25;
+                radiusZone =  Constant.GOAL_RADIUS / 4;
                 break;
         }
         do {
-            const radius = Math.random() * radiusZone;
-            const angle = Math.random() * Math.PI * 2;
+            let radius = Math.random() * radiusZone;
+            let angle = Math.random() * Math.PI * 2;
             dest.x = center.x + radius * Math.cos(angle);
             dest.z = center.z + radius * Math.sin(angle);
-            if (level > 1) {
-                ++radiusZone;
-            }
+            ++radius;
+            ++angle;
         } while (aiStones.some((value: PhysicObject) => {
             const valPos = value.getPostion();
             const distance = Math.pow((valPos.x - dest.x), 2) + Math.pow((valPos.z  - dest.z), 2);
@@ -80,7 +73,7 @@ export class PhysicWorld {
       // v^2 = v0^2 + 2aDeltaX
       // vo^2 = v^2 - 2aDeltaX
       const deltaPos = desiredPos.clone().sub(initPos);
-      const acc = deltaPos.clone().normalize().multiplyScalar(-450);
+      const acc = deltaPos.clone().normalize().multiplyScalar(Constant.ACCELERATION);
       const v0Squared = (acc.clone().multiplyScalar(-2)).multiply(deltaPos);
       const result = new THREE.Vector3(-Math.sqrt(v0Squared.x), 0 , Math.sqrt(v0Squared.z));
       if (deltaPos.clone().normalize().z < 0) {
@@ -140,7 +133,7 @@ export class PhysicWorld {
             }
         });
         this.allObjectsAreStopped = (movingObjects === 0);
-        if (this.nbUpdate > 0 && (this.nbUpdate % 2 === 0)){
+        if (this.nbUpdate > 0 && (this.nbUpdate === 5)){
             this.previousCollisionBuffer = [];
             this.nbUpdate = 0;
         }

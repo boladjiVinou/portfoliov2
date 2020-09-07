@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import { Scene, WebGLRenderer, Color, Object3D, Audio, HemisphereLight } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader';
+import { isArray } from 'util';
 
 @Injectable()
 export class CurlingService implements OnDestroy {
     private scene: Scene;
     private camera: THREE.PerspectiveCamera;
     public renderer: WebGLRenderer;
-    private light: THREE.PointLight;
+    public light: THREE.HemisphereLight;
     private controls: any;
     private loader1: OBJLoader = new OBJLoader();
     private matLoader: MTLLoader = new MTLLoader();
@@ -17,9 +18,10 @@ export class CurlingService implements OnDestroy {
     private skybox: THREE.Mesh;
     private startRotatingSkybox = false;
     private rotationIntervalMethod: any;
-    private cameraStartPosition: THREE.Vector3 = new THREE.Vector3(1100, 200, -25);
+    private cameraStartPosition: THREE.Vector3 = new THREE.Vector3(1000, 200, 0);
     private cameraAngle = Math.PI / 2;
     private ambientSound: THREE.Audio;
+    private elevationDir = 1;
     // tslint:disable-next-line:ban-types
     public stoneFollower: Function = null;
     // tslint:disable-next-line:ban-types
@@ -40,27 +42,8 @@ export class CurlingService implements OnDestroy {
             this.scene.add(this.camera);
             this.renderer.setClearColor(new Color(51, 63, 71), 1);
             this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.light = new THREE.PointLight(0xffffff, 0.87);
-            this.light.position.set(0, 3000, 0);
+            this.light = new THREE.HemisphereLight(0xffffff, 0x000000, 1);
             this.scene.add(this.light);
-            const light2 = this.light.clone();
-            light2.position.set(0, -3000, 0);
-            this.scene.add(light2);
-            //
-            const light3 = this.light.clone();
-            light3.position.set(-3000, 0, 0);
-            this.scene.add(light3);
-            const light4 = this.light.clone();
-            light4.position.set(3000, 0, 0);
-            this.scene.add(light4);
-            const light5 = this.light.clone();
-            light5.position.set(0, 0, 3000);
-            this.scene.add(light5);
-            const light6 = this.light.clone();
-            light6.position.set(0, 0, -3000);
-            this.scene.add(light6);
-
-            //
             this.setController();
             this.createSkybox();
             this.camera.position.set(this.cameraStartPosition.x, this.cameraStartPosition.y, this.cameraStartPosition.z );
@@ -73,6 +56,33 @@ export class CurlingService implements OnDestroy {
         });
     }
     ngOnDestroy(): void {
+        cancelAnimationFrame(this.animate.bind(this));
+        const materialCleaner = (material: any) => {
+            for (const key of Object.keys(material)) {
+                const value = material[key];
+                if (value && typeof value === 'object' && 'minFilter' in value) {
+                    value.dispose();
+                }
+            }
+        };
+        this.scene.traverse((object: THREE.Mesh) => {
+            if (object.isMesh){
+                object.geometry.dispose();
+                if (!object.material){
+                    return;
+                }
+                if (!isArray(object.material)) {
+                    materialCleaner(object.material);
+                } else {
+                    for (const material of object.material as THREE.Material[]) {
+                        materialCleaner(material);
+                    }
+                }
+            }
+        });
+        this.scene.children = [];
+        this.scene.dispose();
+        this.renderer.dispose();
         console.log(' service destroyed');
     }
     public stop() {
@@ -179,60 +189,14 @@ export class CurlingService implements OnDestroy {
     }
     private loadCurlingWorld(): Promise<void> {
         return new Promise<void>((resolve) => {
-            this.matLoader.setPath('../../../assets/curling/skybox/');
-            this.matLoader.load('unityexport.mtl', (materials: { preload: () => void; }) => {
-            materials.preload();
-            this.loader1.setMaterials(materials);
-            this.loader1.load('../../../assets/curling/skybox/unityexport.obj', (world: Object3D) => {
-                world.traverse((children: THREE.Mesh) => {
-                    if (children.name === 'LowPoly - Terrain') {
-                        if ( !Array.isArray(children.material )) {
-                            // tslint:disable-next-line:no-string-literal
-                            children.material['color'] = new THREE.Color('#BBDEFB');
-                            children.material.needsUpdate = true;
-                        }
-                    }
-                });
-                this.world = world;
-                this.world.scale.set(30, 30, 30);
-                this.scene.add(this.world);
-                this.createCurlingRunway().then((value: THREE.Object3D) => {
-                    value.rotateX(-Math.PI / 2);
-                    value.rotateZ(Math.PI);
-                    value.translateX(-800);
-                    value.scale.x = 0.7;
-                    value.translateZ(14);
-                    value.translateY(-100);
-                    value.traverse((child: THREE.Mesh) => {
-                        if (!Array.isArray(child.material) && child.material !== undefined) {
-                            // tslint:disable-next-line:no-string-literal
-                            if (!(child.material['color'] as THREE.Color).equals( new THREE.Color('#FF0000'))) {
-                                // tslint:disable-next-line:no-string-literal
-                                child.material['color'] = new THREE.Color('#E1F5FE');
-                                child.material.needsUpdate = true;
-                            } else {
-                                // tslint:disable-next-line:no-string-literal
-                                child.material['color'] = new THREE.Color('#0000FF');
-                                child.material.needsUpdate = true;
-                            }
-                        } else {
-                            if (Array.isArray(child.material)) {
-                                child.material.forEach((mat: THREE.Material) => {
-                                    // tslint:disable-next-line:no-string-literal
-                                    mat['color'] = new THREE.Color('#E1F5FE');
-                                    mat.needsUpdate = true;
-                                });
-                            }
-                        }
-                    });
-                    this.scene.add(value);
-                    resolve();
-                    return;
-                });
+            this.createCurlingRunway().then((value: THREE.Object3D) => {
+                value.scale.set(28, 28, 28);
+                value.rotateX(Math.PI / 2);
+                value.translateY(-12);
+                this.scene.add(value);
+                resolve();
+                return;
             });
-          }, null , (error: Error) => {
-            console.log(error);
-          });
         });
     }
     /**
@@ -257,10 +221,10 @@ export class CurlingService implements OnDestroy {
     private createCurlingRunway(): Promise<THREE.Object3D> {
         return new Promise<THREE.Object3D>((resolve) => {
             this.matLoader.setPath('../../../assets/curling/curling_rink/');
-            this.matLoader.load('curling_rink.mtl', (materials: { preload: () => void; }) => {
+            this.matLoader.load('piste2.mtl', (materials: { preload: () => void; }) => {
             materials.preload();
             this.loader1.setMaterials(materials);
-            this.loader1.load('../../../assets/curling/curling_rink/curling_rink.obj', (rink: Object3D) => {
+            this.loader1.load('../../../assets/curling/curling_rink/piste2.obj', (rink: Object3D) => {
                 resolve(rink);
                 return;
             });
@@ -281,12 +245,12 @@ export class CurlingService implements OnDestroy {
             t[i].repeat.x  = 1 / 6;
             t[i].offset.x = i / 6;
             t[i].minFilter = THREE.NearestFilter;
-            t[i].generateMipmaps = false;
+            t[i].generateMipmaps = true;
             materials.push( new THREE.MeshBasicMaterial( { map: t[i] , side: THREE.BackSide } ) );
         }
         this.skybox = new THREE.Mesh( new THREE.BoxGeometry( 8000, 8000, 8000), materials );
-        // this.skybox.applyMatrix( new THREE.Matrix4().makeScale( 1, 1, -1 ) );
         this.skybox.position.set(0, -1000, 0);
+        this.skybox.name = 'skybox';
         this.scene.add( this.skybox );
     }
 

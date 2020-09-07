@@ -3,6 +3,8 @@ import { CurlingBroom } from './curling-broom';
 import { CurlingArrow } from './curling-arrow';
 import * as THREE from 'three';
 import { PhysicWorld } from './physic-world';
+import { STONE_INIT_X, STONE_INIT_Y, STONE_INIT_Z } from './Constant';
+import { isArray } from 'util';
 
 export abstract class CurlingPlayer {
     protected playerName = '';
@@ -62,6 +64,9 @@ export abstract class CurlingPlayer {
     public getStones(): CurlingStone[] {
         return this.stones;
     }
+    public getRemainingNbStones(): Array<number>{
+        return  new Array(this.stones.length - (this.currentStoneIndex + 1));
+    }
     public getArrow(): CurlingArrow {
         return this.arrow;
     }
@@ -70,13 +75,15 @@ export abstract class CurlingPlayer {
     }
 
 }
+
+
 export class HumanCurlingPlayer extends CurlingPlayer {
 
     public startAiming(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void> {
         return new Promise<void>((resolve) => {
             this.isAiming = true;
             this.currentStoneIndex++;
-            this.stones[this.currentStoneIndex].getMesh().position.set(665, 19, -14);
+            this.stones[this.currentStoneIndex].getMesh().position.set(STONE_INIT_X, STONE_INIT_Y, STONE_INIT_Z);
             this.stones[this.currentStoneIndex].getMesh().visible = true;
             this.arrow.getArrow().visible = true;
             // actualisation de la fleche
@@ -95,7 +102,7 @@ export class HumanCurlingPlayer extends CurlingPlayer {
                     } else {
                         this.shootPower = 0;
                     }
-                    progressBar.style.height = this.shootPower.toString() + '%';
+                    progressBar.style.width = this.shootPower.toString() + '%';
                 }, 200);
             };
             let angularSpeed = 10;
@@ -120,9 +127,9 @@ export class HumanCurlingPlayer extends CurlingPlayer {
                     progressBarParent.style.display = 'none';
                     clearInterval(this.shootIncreaserInterval);
                     this.shootIncreaserInterval = null;
-                    this.stones[this.currentStoneIndex].setSpeed(this.arrow.getDirection().multiplyScalar(this.shootPower * 13));
+                    this.stones[this.currentStoneIndex].setSpeed(this.arrow.getDirection().multiplyScalar(this.shootPower * 12));
                     this.shootPower = 0;
-                    progressBar.style.height = this.shootPower.toString() + '%';
+                    progressBar.style.width = this.shootPower.toString() + '%';
                     window.removeEventListener('mousedown', increaser);
                     window.removeEventListener('mouseup', increaserStopper);
                     window.removeEventListener('keypress', rotator);
@@ -140,13 +147,28 @@ export class HumanCurlingPlayer extends CurlingPlayer {
         });
     }
     public startSweeping(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void> {
+        this.broom.setUpdateCancel(false);
         return new Promise<void>((resolve) => {
-            this.getCurrentStone().trackState().then((state: StoneState) => {
-                this.broom.desactivateBroom(renderer);
-                resolve();
-                return;
+            let previousState = StoneState.unused;
+            const subscription = this.getCurrentStone().trackState().subscribe((state: StoneState) => {
+                if (state === StoneState.isInBroomZone  && state !== previousState)
+                {
+                    if (!this.broom.getMesh().visible)
+                    {
+                        this.broom.activateBroom(cam, renderer);
+                    }
+                }
+                else if ( (previousState === StoneState.isInBroomZone && state !== StoneState.isInBroomZone)
+                || state === StoneState.isStopped )
+                {
+                    this.broom.setUpdateCancel(true);
+                    this.broom.desactivateBroom(renderer);
+                    subscription.unsubscribe();
+                    resolve();
+                    return;
+                }
+                previousState = state;
             });
-            this.broom.activateBroom(cam, renderer);
         });
     }
     public destroy(): void {
@@ -158,6 +180,8 @@ export class HumanCurlingPlayer extends CurlingPlayer {
         }
     }
 }
+
+
 export class AICurlingPlayer extends CurlingPlayer {
     private physicWorld: PhysicWorld = null;
     private difficulty = 0;
@@ -170,11 +194,11 @@ export class AICurlingPlayer extends CurlingPlayer {
     public startAiming(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void> {
         return new Promise<void>((resolve) => {
             this.currentStoneIndex++;
-            this.stones[this.currentStoneIndex].getMesh().position.set(665, 19, -14);
+            this.stones[this.currentStoneIndex].getMesh().position.set(STONE_INIT_X, STONE_INIT_Y, STONE_INIT_Z);
             this.stones[this.currentStoneIndex].getMesh().visible = true;
             this.arrow.getArrow().visible = true;
             const destination = this.physicWorld.generateDesiredPosition(this.difficulty);
-            const speed = this.physicWorld.computeInitialSpeed(destination, new THREE.Vector3(665, 19, -14));
+            const speed = this.physicWorld.computeInitialSpeed(destination, new THREE.Vector3(STONE_INIT_X, STONE_INIT_Y, STONE_INIT_Z));
             const speedMagn = Math.round(Math.sqrt(Math.pow( speed.x , 2) + Math.pow( speed.z , 2)));
             // actualisation de la ligne de visee
             this.arrow.simulateArrowUpdate(speed.clone().normalize()).then(() => {
@@ -201,14 +225,14 @@ export class AICurlingPlayer extends CurlingPlayer {
                             } else {
                                 this.shootPower = 0;
                             }
-                            progressBar.style.height = this.shootPower.toString() + '%';
+                            progressBar.style.width = this.shootPower.toString() + '%';
                         } else {
                             this.stones[this.currentStoneIndex].setSpeed(this.arrow.getDirection().multiplyScalar(speedMagn));
                             this.shootPower = 0;
                             this.arrow.getArrow().visible = false;
                             this.stones[this.currentStoneIndex].setDisapearingChecker(true);
                             progressBarParent.style.display = 'none';
-                            progressBar.style.height = this.shootPower.toString() + '%';
+                            progressBar.style.width = this.shootPower.toString() + '%';
                             resolve();
                             clearInterval(this.shootIncreaserInterval);
                             this.shootIncreaserInterval = null;
@@ -223,13 +247,28 @@ export class AICurlingPlayer extends CurlingPlayer {
     }
 
     public startSweeping(cam: THREE.Camera, renderer: THREE.WebGLRenderer): Promise<void> {
+        this.broom.setUpdateCancel(false);
         return new Promise<void>((resolve) => {
-            this.getCurrentStone().trackState().then((state: StoneState) => {
-                this.broom.stopBroomSimulation();
-                resolve();
-                return;
+            let previousState = StoneState.unused;
+            const subscription = this.getCurrentStone().trackState().subscribe((state: StoneState) => {
+                if (state === StoneState.isInBroomZone && state !== previousState)
+                {
+                    if (!this.broom.getMesh().visible)
+                    {
+                        this.broom.simulateBroomMovements(this.getCurrentStone());
+                    }
+                }
+                else if ( (previousState === StoneState.isInBroomZone && state !== StoneState.isInBroomZone)
+                 || state === StoneState.isStopped )
+                {
+                    this.broom.setUpdateCancel(true);
+                    this.broom.stopBroomSimulation();
+                    subscription.unsubscribe();
+                    resolve();
+                    return;
+                }
+                previousState = state;
             });
-            this.broom.simulateBroomMovements(this.getCurrentStone());
         });
     }
 

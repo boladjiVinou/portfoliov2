@@ -8,7 +8,6 @@ html {
 
 main{
     flex-grow: 0.985;
-    //overflow: auto;
     position: relative;
     article{
             top: 0px;
@@ -28,18 +27,6 @@ main{
                     height: 100%;
                     z-index: -100;
                 }
-                /*.background-video {
-                    object-fit: fill;
-                    width: 100%;
-                    height: 100%;
-                    z-index: -100;
-                    -webkit-filter: blur(4.5px);
-                    -moz-filter: blur(4.5px);
-                    -o-filter: blur(4.5px);
-                    -ms-filter: blur(4.5px);
-                    filter: blur(4.5px);
-                    padding: -10px -10px;
-                }*/
             }
             .children-container{
                 position: absolute;
@@ -50,8 +37,6 @@ main{
                 z-index: 1;
                 background-color: black;
                 opacity: 0.8;
-
-                //background: transparent;
             }
     }
 }
@@ -72,61 +57,3 @@ footer {
         justify-content: center;
     }
 }
-/*.header-container {
-    position: absolute;
-    top: 0px;
-    right:0px;
-    left:0px;
-    height: 56px;
-    header {
-        position: absolute;
-        top:0px;
-        bottom: 0px;
-        right: 0px;
-        left:0px;
-        height: 56px;
-    }
-}
-main{
-    position: absolute;
-    top:56px;
-    bottom: 16px;
-    right: 0px;
-    left:0px;
-    article{
-        position: absolute;
-        top:0px;
-        bottom: 0px;
-        right: 0px;
-        left:0px;
-        .background-container{
-            position: absolute;
-            top:0px;
-            bottom: 0px;
-            right: 0px;
-            left:0px;
-            background-image: url('../assets/black-and-white-photography-of-a-mother-board-3520692.jpg');
-            //background-attachment: fixed;
-            background-size: cover;
-        }
-    }
-}
-
-footer {
-    
-    ul {
-        position: absolute;
-        top:0px;
-        bottom: 0px;
-        left:0px;
-        right:0px;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-    }
-}
-*/

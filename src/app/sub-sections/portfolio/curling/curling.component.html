@@ -6,6 +6,7 @@
   <div id = 'game-option-container'>
     <div class ='vertical-menu' id='start-menu' *ngIf="startMenu===true && hideHud===false">
         <button mat-button (click)="startButtonClick()"> {{startLabel}}</button>
+        <button mat-button (click) = "chooseInfos()"> {{infosLabel}}</button>
         <div class ='horizontal-menu' id='option-menu'>
             <p>{{soundLabel}}</p>
             <div class="form-check form-check-inline">
@@ -22,7 +23,13 @@
             </div>
         </div>
     </div>
-    <div class ='vertical-menu' id='player-menu' *ngIf="((startMenu===false) && (playerChoiceMade === false) && (hideHud===false))">
+    <div *ngIf="infosChoiceMade" id = 'infos-div'>
+       <div id = 'infos-text'>{{infosDDescriptionLabel}}</div>
+       <button  mat-button (click) = "cancelInfosDisplay()">
+        {{infosLabelBackLabel}}
+       </button>
+    </div>
+    <div class ='vertical-menu' id='player-menu' *ngIf="((infosChoiceMade ===false) && (startMenu===false) && (playerChoiceMade === false) && (hideHud===false))">
           <button mat-button  (click) = "playerChoice(1)"> {{player1Label}}</button>
           <button mat-button (click) = "playerChoice(2)">{{player2Label}}</button>
     </div>
@@ -36,14 +43,18 @@
     <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" id='real-progress-div'>
     </div>
   </div>
-  <div id ='game-info-container' *ngIf="playerChoiceMade">
+  <div id ='game-info-container' *ngIf="gameStarted===true">
     <div id = 'player1-infos' >
-        <div id = 'player1-stones-indicator'  *ngFor="let item of this.game.GetPlayer1().getStones()"></div>
+        <div id = 'player1-stones-indicator'  *ngFor="let item of this.game.GetPlayer1().getRemainingNbStones()">
+          <img src = "../../../assets/stone2d2.png">
+        </div>
     </div>
-    <div id = 'round-div'></div>
-    <div id = 'score-div'></div>
+    <div id = 'round-div' class = 'text-light'>{{getStep()}}</div>
+    <div id = 'player-div'>{{game.getCurrentPlayerName()}}</div>
     <div id = 'player2-infos'>
-        <div id = 'player2-stones-indicator' *ngFor="let item of this.game.GetPlayer2().getStones()"></div>
+        <div id = 'player2-stones-indicator' *ngFor="let item of this.game.GetPlayer2().getRemainingNbStones()">
+          <img src = "../../../assets/stone2d3.png">
+        </div>
     </div>
   </div>
 </div>

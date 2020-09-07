@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import * as Constant from './Constant';
+import { Mesh } from 'three';
 export abstract class PhysicObject {
     private time = 0;
     protected speed: THREE.Vector3 = new THREE.Vector3();
@@ -87,14 +89,14 @@ export abstract class PhysicObject {
         this.speed.x = speed.x;
         this.speed.y = speed.y;
         this.speed.z = speed.z;
-        this.setAcceleration(this.speed.clone().normalize().multiplyScalar(-450));
+        this.setAcceleration(this.speed.clone().normalize().multiplyScalar(Constant.ACCELERATION));
         this.time = 0;
     }
     public AddSpeed(deltaSpeed: THREE.Vector3){
         this.speed.x += deltaSpeed.x;
         this.speed.y += deltaSpeed.y;
         this.speed.z += deltaSpeed.z;
-        this.setAcceleration(this.speed.clone().normalize().multiplyScalar(-450));
+        this.setAcceleration(this.speed.clone().normalize().multiplyScalar(Constant.ACCELERATION));
     }
     public getAcceleration(): THREE.Vector3 {
         return this.acceleration;
@@ -108,10 +110,13 @@ export abstract class PhysicObject {
     public makeDisappearIfNeeded() {
         if (this.canCheckDisappearing && this.isVisible()) {
             const position = this.getPostion();
-            if ((position.z > 70 || position.z < -100)) {
+            const z = Constant.RUNWAY_WIDTH / 2;
+            const xMax = Constant.GOAL_CENTER_X - Constant.GOAL_RADIUS + 3;
+            const xMin = Constant.GOAL_CENTER_X + Constant.GOAL_RADIUS - 3;
+            if ((position.z > z || position.z < -z)) {
                 this.makeDisappear();
             } else if (((Math.round(Math.sqrt(Math.pow( this.speed.x, 2) + Math.pow( this.speed.z , 2))) <= 0)
-            && position.x > -220) || position.x < -320) {
+            && position.x > xMin) || position.x < xMax) {
                 this.makeDisappear();
             }
         }
@@ -141,9 +146,7 @@ export abstract class PhysicObject {
            this.AddSpeed(speed);
         } else if (this.speedNorm > 0) {
             this.speed.set(0, 0, 0);
-            if (this.normInitSpeed) {
-                this.angularSpeed = 0;
-            }
+            this.angularSpeed = 0;
             this.speedNorm = 0;
         }
         this.rotate(deltaTime);

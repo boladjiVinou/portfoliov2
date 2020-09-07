@@ -7,6 +7,7 @@ export class CurlingBroom {
     private follower: EventListener;
     private stoneFollower: any;
     private up = false;
+    private cancelCurrentUpdate = false;
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.loader1.load('../../../../../../assets/curling/curling_broom/broom.obj', (broom: THREE.Mesh) => {
@@ -42,13 +43,18 @@ export class CurlingBroom {
             this.mouseFollower(event, camera, renderer);
         };
         this.broom.visible = true;
-        renderer.domElement.addEventListener('mousemove', this.follower);
-        renderer.domElement.addEventListener('click', this.brush.bind(this));
+        window.addEventListener('mousemove', this.follower.bind(this));
+        window.addEventListener('click', this.brush.bind(this));
     }
     public simulateBroomMovements(stone: CurlingStone) {
         this.broom.visible = true;
         this.up = false;
         this.stoneFollower = setInterval(() => {
+            if (this.cancelCurrentUpdate)
+            {
+                this.stopBroomSimulation();
+                return;
+            }
             if (Math.random() > 0.5) {
                 this.broom.visible = true;
                 const stonePos = stone.getPostion();
@@ -65,8 +71,8 @@ export class CurlingBroom {
     }
     public desactivateBroom(renderer: THREE.WebGLRenderer) {
         this.broom.visible = false;
-        renderer.domElement.removeEventListener('mousemove', this.follower);
-        renderer.domElement.removeEventListener('click', this.brush)
+        window.removeEventListener('mousemove', this.follower.bind(this));
+        window.removeEventListener('click', this.brush.bind(this));
     }
     public getMesh(): THREE.Mesh {
         return this.broom;
@@ -78,5 +84,9 @@ export class CurlingBroom {
             this.broom.position.z += 5;
         }
         this.up = !this.up;
+    }
+    public setUpdateCancel(value: boolean)
+    {
+        this.cancelCurrentUpdate = value;
     }
 }

@@ -25,6 +25,10 @@ export class PresentationComponent implements OnInit {
     });
   }
  private textUpdater() {
+    let delay = 50;
+    if (this.aboutMePointer === this.aboutMe[this.aboutMeIndex].length){
+      delay = 1000;
+    }
     const handler = setTimeout(() => {
       if (this.updatingText){
         this.updatingText = true;
@@ -49,7 +53,7 @@ export class PresentationComponent implements OnInit {
       }else{
         clearTimeout(handler);
       }
-    }, 50);
+    }, delay);
   }
   changeLangage(isEnglish: boolean) {
     this.aboutMe = [];

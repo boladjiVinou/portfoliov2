@@ -15,9 +15,13 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
   public onePlayer = false;
   public playerChoiceMade = false;
   public difficultyChoiceMade = false;
+  public infosChoiceMade = false;
   public level = 1;
   private langageSubscription: Subscription;
   public startLabel = 'COMMENCER';
+  public infosLabel = 'INFORMATIONS';
+  public infosLabelBackLabel = 'RETOUR';
+  public infosDDescriptionLabel = 'Cliquez gauche pour tirer, appuyez sur la touche S pour mettre la pierre en rotation, cliquer gauche à répétition pour faire un balayage.';
   public soundLabel = 'SON';
   public player1Label = '1 JOUEUR';
   public player2Label = '2 JOUEURS';
@@ -30,6 +34,7 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
   public player2NbOfStones = 1;
   public round = '';
   public hideHud = true;
+  public gameStarted = false;
   public hideLogo = false;
   public game: CurlingGame;
   public readonly nbOfStones = 8;
@@ -73,6 +78,9 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.easyLabel = 'EASY';
       this.mediumLabel = 'MEDIUM';
       this.hardLabel = 'HARD';
+      this.infosLabel = 'INFORMATIONS';
+      this.infosLabelBackLabel = 'BACK';
+      this.infosDDescriptionLabel = 'Left click to shoot, press S to rotate stone, left click repeatedly to sweep.';
     } else {
       this.startLabel = 'COMMENCER';
       this.soundLabel = 'SON :';
@@ -81,15 +89,19 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.easyLabel = 'FACILE';
       this.mediumLabel = 'MEDIUM';
       this.hardLabel = 'DIFFICILE';
+      this.infosLabel = 'INFORMATIONS';
+      this.infosLabelBackLabel = 'RETOUR';
+      this.infosDDescriptionLabel = 'Cliquez gauche pour tirer, appuyez sur la touche S pour mettre la pierre en rotation, cliquer gauche à répétition pour faire un balayage.';
     }
   }
   difficultyChoice(level: number) {
     this.level = level;
     this.difficultyChoiceMade = true;
-    this.game.initPlayers(true, 4, this.level).then(() => {
+    this.game.initPlayers(true, 8, this.level).then(() => {
       this.game.startGame();
       this.hideLogo = true;
       this.hideHud = true;
+      this.gameStarted = true;
     });
 
   }
@@ -100,15 +112,19 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   playerChoice(choice: number) {
     this.onePlayer = false;
+    this.playerChoiceMade = true;
     if (choice === 1) {
       this.onePlayer = true;
     }
-    this.game.initPlayers(false, this.nbOfStones).then(() => {
-      this.game.startGame();
-      this.hideLogo = true;
-      this.hideHud = true;
-      this.playerChoiceMade = true;
-    });
+    else{
+      this.game.initPlayers(false, this.nbOfStones).then(() => {
+        this.game.startGame();
+        this.hideLogo = true;
+        this.hideHud = true;
+        this.playerChoiceMade = true;
+        this.gameStarted = true;
+      });
+    }
   }
   ngOnDestroy() {
     const progressBar = document.getElementById('shooting-progress-div');
@@ -138,4 +154,17 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  public getStep(){
+    return this.game.getRound().toString() + ' : ' + this.game.getSubTurn().toString();
+  }
+
+  public chooseInfos(){
+    this.infosChoiceMade = true;
+    this.startMenu = false;
+  }
+  public cancelInfosDisplay()
+  {
+    this.infosChoiceMade = false;
+    this.startMenu = true;
+  }
 }

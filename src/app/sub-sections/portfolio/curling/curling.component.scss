@@ -16,7 +16,7 @@
         p {
             font-size: 5vw;
             font-family: 'Blippo', fantasy;
-            color: rgb(236, 59, 59);
+            color:whitesmoke;
         }
     }
     #game-option-container {
@@ -59,31 +59,88 @@
                 }
             }
         }
+        #infos-div{
+            #infos-text{
+                background: rgba(0, 0, 0, 0.4);
+                font-size: 1.5vw;
+                color: white;
+            }
+            button{
+                font-size: 1.5vw;
+                width: auto;
+                background-color: rgb(255,255,255);
+                font-family: 'Blippo', fantasy;
+            }
+        }
+        
     }
     #game-info-container {
-        
+        position: absolute;
+        top: 0px;
+        bottom:0px;
+        left:0px;
+        right: 0px;
         #player1-infos {
-
+            position: absolute;
+            width: 30px;
+            padding: 0px;
+            margin: 0px;
+            left:2px;
+            #player1-stones-indicator{
+                img{
+                    width: 25px;
+                    height: 25px;
+                }
+            }
         }
         #round-div {
+            position: absolute;
+            z-index: 2;
+            top:0px;
+            left:47%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 40px;
+        }
+        #player-div{
+            position: absolute;
+            z-index: 2;
+            top:60px;
+            left:47%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
         }
         #score-div {    
+            z-index: 6;
         }
         #player2-infos {
-            
+            position: absolute;
+            width: 30px;
+            padding: 0px;
+            margin: 0px;
+            right:2px;
+            #player2-stones-indicator{
+                img{
+                    width: 25px;
+                    height: 25px;
+                }
+            }
         }
     }
     #shooting-progress-div {
         position: absolute;
-        top: 15vh;
-        left: 1vw;
-        height: 40vh;
-        width: 2vw;
-        background-color: #dddddd; 
+        bottom: 2vh;
+        left: 5vw;
+        right: 5vw;
+        height: 2vh;
+        background-color: transparent; 
+        border: 1px solid rgb(0,0,0) ;
+        border-radius: 8px;
         display: none;
-        flex-direction: column-reverse;
+        flex-direction: row;
         #real-progress-div {
-            margin: 10%;
+            margin: 0%;
             background: forestgreen;
         }
     }

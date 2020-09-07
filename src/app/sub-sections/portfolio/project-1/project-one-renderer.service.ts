@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import { Scene, WebGLRenderer, Color, Object3D } from 'three';
 // const OrbitControls = require('three-orbitcontrols');
@@ -7,8 +7,10 @@ import { OBJLoader} from 'three/examples/jsm/loaders/OBJLoader.js';
 import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader.js';
 import {Bot} from './Classes/Bot';
 import { IRRay } from './Classes/IRRay';
+import { isArray } from 'util';
 @Injectable()
-export class ProjectOneRendererService {
+export class ProjectOneRendererService implements OnDestroy {
+
 // Donnees de base necessaires au visualiseur
 private scene: Scene;
 private camera: THREE.PerspectiveCamera;
@@ -232,5 +234,36 @@ public animate() {
       this.myBot.animate();
     }
     requestAnimationFrame(this.animate.bind(this));
+}
+
+ngOnDestroy(): void {
+  cancelAnimationFrame(this.animate.bind(this));
+  const materialCleaner = (material: any) => {
+    for (const key of Object.keys(material)) {
+        const value = material[key];
+        if (value && typeof value === 'object' && 'minFilter' in value) {
+            value.dispose();
+        }
+    }
+  };
+  this.scene.traverse((object: THREE.Mesh) => {
+      if (object.isMesh){
+          object.geometry.dispose();
+          if (!object.material){
+              return;
+          }
+          if (!isArray(object.material)) {
+              materialCleaner(object.material);
+          } else {
+              for (const material of object.material as THREE.Material[]) {
+                  materialCleaner(material);
+              }
+          }
+      }
+  });
+  this.scene.children = [];
+  this.scene.dispose();
+  this.renderer.dispose();
+  console.log('project 1 service destroyed');
 }
 }
