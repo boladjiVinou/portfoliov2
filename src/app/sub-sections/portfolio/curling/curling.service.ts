@@ -4,6 +4,7 @@ import { Scene, WebGLRenderer, Color, Object3D, Audio, HemisphereLight } from 't
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader';
 import { isArray } from 'util';
+import * as SHADERS from './classes/curling-shaders';
 
 @Injectable()
 export class CurlingService implements OnDestroy {
@@ -22,6 +23,7 @@ export class CurlingService implements OnDestroy {
     private cameraAngle = Math.PI / 2;
     private ambientSound: THREE.Audio;
     private elevationDir = 1;
+    private snowParticles: THREE.Points;
     // tslint:disable-next-line:ban-types
     public stoneFollower: Function = null;
     // tslint:disable-next-line:ban-types
@@ -194,6 +196,7 @@ export class CurlingService implements OnDestroy {
                 value.rotateX(Math.PI / 2);
                 value.translateY(-12);
                 this.scene.add(value);
+                this.createParticleSystem();
                 resolve();
                 return;
             });
@@ -254,6 +257,69 @@ export class CurlingService implements OnDestroy {
         this.scene.add( this.skybox );
     }
 
+    private createParticleSystem() {
+        const vertices = [];
+        const colors = [];
+       // const scales = [];
+        for ( let i = 0; i < 300; i ++ ) {
+
+            const x = THREE.MathUtils.randFloatSpread( 2000 );
+            const y = THREE.MathUtils.randFloatSpread( 2000 );
+            const z = THREE.MathUtils.randFloatSpread( 2000 );
+            vertices.push( x, y, z );
+           // scales.push(500);
+            colors.push(new THREE.Color('#ffffff'));
+        }
+        // console.log(vertices);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        // this.particlesGeometry.setAttribute('scale', new THREE.Float32BufferAttribute( scales, 1 ) );
+
+        const material =  new THREE.ShaderMaterial( {
+
+            uniforms: {
+                color: { value: new THREE.Color( 0xffffff ) },
+                mytime: {value: 10.0}
+            },
+            vertexShader: SHADERS.particlesVertexShader,
+            fragmentShader: SHADERS.particlesFragmentShader
+
+        } );
+        // new THREE.PointsMaterial( { color: 0xffffff , size : 5});
+
+        this.snowParticles = new THREE.Points( geometry, material );
+        this.snowParticles.visible = false;
+        this.scene.add(this.snowParticles);
+    }
+
+    private animateParticleSytem() {
+        if (this.snowParticles.visible){
+            let start = 1;
+            while (start < 900) {
+                // tslint:disable-next-line:no-string-literal
+                if (this.snowParticles.geometry['attributes']['position']['array'][start] < -200) {
+                    let newY = THREE.MathUtils.randFloatSpread( 2000 );
+                    if (newY < 0) {
+                        newY += 1000;
+                    }
+                // tslint:disable-next-line:no-string-literal
+                    this.snowParticles.geometry['attributes']['position']['array'][start] =  newY;
+                }else{
+                     // tslint:disable-next-line:no-string-literal
+                     this.snowParticles.geometry['attributes']['position']['array'][start] =
+                     // tslint:disable-next-line:no-string-literal
+                     this.snowParticles.geometry['attributes']['position']['array'][start] - 1 ;
+                }
+                start += 3;
+            }
+            // tslint:disable-next-line:no-string-literal
+            this.snowParticles.geometry['attributes']['position']['needsUpdate'] = true;
+        }
+    }
+    public activateSnow(): void{
+        this.snowParticles.visible = true;
+    }
     public getScene(): THREE.Scene {
         return this.scene;
     }
@@ -279,6 +345,7 @@ export class CurlingService implements OnDestroy {
         if (this.stoneFollower) {
             this.stoneFollower();
         }
+        this.animateParticleSytem();
         this.renderer.render(this.scene, this.camera);
         this.rotateSkybox();
         requestAnimationFrame(this.animate.bind(this));

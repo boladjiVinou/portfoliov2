@@ -36,6 +36,7 @@ export abstract class CurlingPlayer {
             stoneModel.init(color).then(() => {
                 for (let i = 0; i < nb; i++) {
                     this.stones.push(stoneModel.clone());
+                    this.stones[this.stones.length - 1].setOwner(this.playerName);
                 }
                 resolve();
                 return;
@@ -70,10 +71,13 @@ export abstract class CurlingPlayer {
     public getArrow(): CurlingArrow {
         return this.arrow;
     }
-    public getName() {
+    public getName(): string {
         return this.playerName;
     }
-
+    public hasStones(): boolean {
+        console.log('stone index ' + this.currentStoneIndex + ' stone length ' + this.stones.length);
+        return (this.currentStoneIndex + 1 < this.stones.length);
+    }
 }
 
 

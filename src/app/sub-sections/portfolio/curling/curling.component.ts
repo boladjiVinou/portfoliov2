@@ -38,6 +38,7 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
   public hideLogo = false;
   public game: CurlingGame;
   public readonly nbOfStones = 8;
+  private winLabel = 'Vainqueur: ';
   constructor(private curlingService: CurlingService, private principalService: LanguageService, private zone: NgZone) {
 
   }
@@ -55,6 +56,7 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
       window.addEventListener('resize', this.rendererResizer.bind(this));
       this.curlingService.initAudio();
       this.curlingService.animate();
+      this.curlingService.activateSnow();
     });
     this.langageSubscription = this.principalService.getEnglishLangageState().subscribe((value) => {
       this.zone.run(() => {
@@ -81,6 +83,7 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.infosLabel = 'INFORMATIONS';
       this.infosLabelBackLabel = 'BACK';
       this.infosDDescriptionLabel = 'Left click to shoot, press S to rotate stone, left click repeatedly to sweep.';
+      this.winLabel = 'Winner: ';
     } else {
       this.startLabel = 'COMMENCER';
       this.soundLabel = 'SON :';
@@ -92,6 +95,10 @@ export class CurlingComponent implements OnInit, OnDestroy, AfterViewInit {
       this.infosLabel = 'INFORMATIONS';
       this.infosLabelBackLabel = 'RETOUR';
       this.infosDDescriptionLabel = 'Cliquez gauche pour tirer, appuyez sur la touche S pour mettre la pierre en rotation, cliquer gauche à répétition pour faire un balayage.';
+      this.winLabel = 'Vainqueur: ';
+    }
+    if (this.game){
+      this.game.setWinLabel(this.winLabel);
     }
   }
   difficultyChoice(level: number) {

@@ -3,6 +3,7 @@ import { CurlingStone} from './curling-stone';
 import { CurlingService } from './../curling.service';
 import { PhysicWorld } from './physic-world';
 import * as THREE from 'three';
+import * as Constant from './Constant';
 
 // x: 330 1ere ligne
 // x : -265 2e ligne
@@ -15,11 +16,12 @@ export class CurlingGame {
     private curlingService: CurlingService;
     private tickIntervalCall: any;
     private timerIntervallCall: any;
-    followerInterval: any;
+    private followerInterval: any;
     private physicWorld: PhysicWorld;
     private deltaTime = 0;
     private subTurn = 0;
     private round = 0;
+    private winLabel = 'Vainqueur: ';
     public constructor(service: CurlingService) {
         this.curlingService = service;
         this.physicWorld = new PhysicWorld();
@@ -27,7 +29,9 @@ export class CurlingGame {
             this.deltaTime += 1;
         }, 1);
         this.curlingService.worldUpdater = this.gameTick.bind(this);
-      /*  window.addEventListener('keydown', (event: KeyboardEvent ) => {
+    }
+    private debugPositions() {
+        window.addEventListener('keydown', (event: KeyboardEvent ) => {
             if (this.currentPlayer !== null){
                 const pos =  this.currentPlayer.getCurrentStone().getPostion();
                 switch (event.key){
@@ -47,7 +51,7 @@ export class CurlingGame {
                 this.currentPlayer.getCurrentStone().setPostion(pos);
                 console.log(pos);
             }
-        });*/
+        });
     }
     public GetPlayer1(): CurlingPlayer {
         return this.player1;
@@ -194,26 +198,33 @@ export class CurlingGame {
         const startPos = cam.position.clone();
         this.setNextPlayer();
         const loop = () => {
-            this.updateTurn();
-            let stopping = false;
-            cam.position.set(startPos.x, startPos.y, startPos.z);
-            this.currentPlayer.startAiming(cam, this.curlingService.renderer).then(() => {
-                this.curlingService.stoneFollower = () => {
-                    this.stoneFollower(this.currentPlayer.getCurrentStone(), cam);
-                    if ( !stopping && this.physicWorld.areAllObjectsStopped()) {
-                        stopping = true;
-                        setTimeout(() => {
-                            this.curlingService.stoneFollower = null;
-                            const control = this.curlingService.getControls();
-                            control.target.x = 0;
-                            control.target.y = 0;
-                            control.target.z = 0;
-                            loop();
-                        }, 3000);
-                    }
-                };
-                this.currentPlayer.startSweeping(cam, this.curlingService.renderer);
-            });
+            if (this.player1.hasStones() || this.player2.hasStones()) {
+                console.log(this.player1.hasStones());
+                console.log(this.player2.hasStones());
+                this.updateTurn();
+                let stopping = false;
+                cam.position.set(startPos.x, startPos.y, startPos.z);
+                this.currentPlayer.startAiming(cam, this.curlingService.renderer).then(() => {
+                    this.curlingService.stoneFollower = () => {
+                        this.stoneFollower(this.currentPlayer.getCurrentStone(), cam);
+                        if ( !stopping && this.physicWorld.areAllObjectsStopped()) {
+                            stopping = true;
+                            setTimeout(() => {
+                                this.curlingService.stoneFollower = null;
+                                const control = this.curlingService.getControls();
+                                control.target.x = 0;
+                                control.target.y = 0;
+                                control.target.z = 0;
+                                loop();
+                            }, 3000);
+                        }
+                    };
+                    this.currentPlayer.startSweeping(cam, this.curlingService.renderer);
+                });
+            }else {
+                console.log('Should handle end');
+                this.handleEnd();
+            }
         };
         loop();
     }
@@ -241,5 +252,33 @@ export class CurlingGame {
     }
     public getSubTurn(){
         return this.subTurn;
+    }
+    private handleEnd() {
+        this.lookAtCircle();
+        const allStones = this.physicWorld.getStonesInCircle() as CurlingStone[];
+        if (allStones.length > 0) {
+            const winner = allStones[0].getOwner();
+            const winnerStones = allStones.filter ((stone: CurlingStone) => {
+                return stone.getOwner() === winner;
+            });
+            winnerStones.forEach( (stone: CurlingStone) => {
+                stone.doVictoryAnimation();
+            });
+            alert(this.winLabel + ' ' + winner + ' !');
+        }
+        else {
+            alert(this.winLabel + ' None !');
+        }
+    }
+    private lookAtCircle(): void {
+        const control = this.curlingService.getControls();
+        const pos = new THREE.Vector3(Constant.GOAL_CENTER_X, 0 , 0);
+        const cam = this.curlingService.getCamera();
+        control.object.position.set(cam.position.x, 400, -25); // -25 z
+        control.target = new THREE.Vector3(pos.x, pos.y, pos.z);
+        cam.position.set(pos.x, 400, -25);
+    }
+    public setWinLabel(label: string) {
+        this.winLabel = label;
     }
 }

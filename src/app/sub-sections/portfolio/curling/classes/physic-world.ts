@@ -11,7 +11,6 @@ export class PhysicWorld {
     private allObjectsAreStopped = false;
     private nbUpdate = 0;
     private objectsToUpdate: PhysicObject[] = [];
-    private gravity = 9.8;
     public constructor() {
         this.objects = [];
     }
@@ -21,7 +20,7 @@ export class PhysicWorld {
     public setDeltaTime(dt: number) {
         this.dt = dt;
     }
-    private getStonesInCircle(): PhysicObject[] {
+    public getStonesInCircle(): PhysicObject[] {
         const radius = Constant.GOAL_RADIUS;
         return this.objects.filter((value: PhysicObject) => {
             if (value.isVisible()) {
@@ -31,6 +30,12 @@ export class PhysicWorld {
             } else {
                 return false;
             }
+        }).sort((a: PhysicObject, b: PhysicObject) => {
+            const aPos = a.getPostion();
+            const aDistance = Math.pow((aPos.x - Constant.GOAL_CENTER_X), 2) + Math.pow((aPos.z), 2);
+            const bPos = b.getPostion();
+            const bDistance = Math.pow((bPos.x - Constant.GOAL_CENTER_X), 2) + Math.pow((bPos.z), 2);
+            return aDistance - bDistance;
         });
     }
     public generateDesiredPosition(level: number): THREE.Vector3 {

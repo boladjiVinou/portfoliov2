@@ -15,9 +15,10 @@ export enum StoneState {
 export class CurlingStone extends PhysicObject {
     private loader1: OBJLoader = new OBJLoader();
     private matLoader: MTLLoader = new MTLLoader();
-    private secondSens = false;
     private tracker: any;
+    private victoryAnimater: any;
     private state = new BehaviorSubject<StoneState>(StoneState.unused);
+    private owner: string;
     public init(color: string): Promise<void> {
         return new Promise<void>((resolve) => {
             this.matLoader.setPath('../../../../../../assets/curling/curling_Stone/');
@@ -137,9 +138,18 @@ export class CurlingStone extends PhysicObject {
         return stone;
     }
     public doVictoryAnimation() {
-        const sens = (Math.random() > 0.5) ?  1 : -1;
-        this.setAngularSpeed(10 * sens);
-        this.setSpeed(new THREE.Vector3(0, 10, 0));
+        const yMin = this.realObject.position.y;
+        const yMax = yMin + 10;
+        let sens  = 1;
+        this.victoryAnimater = setInterval(() => {
+            this.realObject.rotateY(Math.PI / 15);
+            if (this.realObject.position.y === yMax) {
+                sens = -1;
+            } else if  (this.realObject.position.y === yMin) {
+                sens = 1;
+            }
+            this.realObject.position.y += (sens);
+        }, 50);
     }
     public getMesh(): THREE.Object3D {
         return this.realObject;
@@ -148,5 +158,14 @@ export class CurlingStone extends PhysicObject {
         if (this.tracker) {
             clearInterval(this.tracker);
         }
+        if (this.victoryAnimater){
+            clearInterval(this.victoryAnimater);
+        }
+    }
+    public setOwner(inOwner: string): void {
+        this.owner = inOwner;
+    }
+    public getOwner(): string {
+        return this.owner;
     }
 }
