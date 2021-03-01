@@ -23,7 +23,7 @@
     "jquery": "^3.5.1",
     "logic-solver": "^2.0.1",
     "rxjs": "~6.5.4",
-    "three": "^0.117.1",
+    "three": "^0.125.0",
     "tslib": "^1.10.0",
     "underscore": "^1.10.2",
     "zone.js": "~0.10.2"
