@@ -114,6 +114,7 @@ export class HumanCurlingPlayer extends CurlingPlayer {
             // sensibilite pour la rotation
             const rotator = (ev: KeyboardEvent) => {
                 if (ev.key === 's') {
+                    console.log('should  rotate');
                     ++counter;
                     if (counter < 3) {
                         angularSpeed *= -1;

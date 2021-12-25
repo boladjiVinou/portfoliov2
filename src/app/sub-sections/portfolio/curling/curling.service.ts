@@ -83,7 +83,6 @@ export class CurlingService implements OnDestroy {
             }
         });
         this.scene.children = [];
-        this.scene.dispose();
         this.renderer.dispose();
         console.log(' service destroyed');
     }
@@ -295,26 +294,23 @@ export class CurlingService implements OnDestroy {
 
     private animateParticleSytem() {
         if (this.snowParticles.visible){
-            let start = 1;
-            while (start < 900) {
-                // tslint:disable-next-line:no-string-literal
-                if (this.snowParticles.geometry['attributes']['position']['array'][start] < -200) {
+            for (let i = 0; i < 300; i++)
+            {
+                const particleY = this.snowParticles.geometry.getAttribute('position').getY(i);
+                if (particleY < -200)
+                {
                     let newY = THREE.MathUtils.randFloatSpread( 2000 );
                     if (newY < 0) {
                         newY += 1000;
                     }
-                // tslint:disable-next-line:no-string-literal
-                    this.snowParticles.geometry['attributes']['position']['array'][start] =  newY;
-                }else{
-                     // tslint:disable-next-line:no-string-literal
-                     this.snowParticles.geometry['attributes']['position']['array'][start] =
-                     // tslint:disable-next-line:no-string-literal
-                     this.snowParticles.geometry['attributes']['position']['array'][start] - 1 ;
+                    this.snowParticles.geometry.getAttribute('position').setY(i, newY);
                 }
-                start += 3;
+                else
+                {
+                    this.snowParticles.geometry.getAttribute('position').setY(i, particleY - 1);
+                }
             }
-            // tslint:disable-next-line:no-string-literal
-            this.snowParticles.geometry['attributes']['position']['needsUpdate'] = true;
+            this.snowParticles.geometry.attributes.position.needsUpdate = true;
         }
     }
     public activateSnow(): void{

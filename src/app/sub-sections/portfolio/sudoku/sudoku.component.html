@@ -8,7 +8,7 @@
     <div *ngFor="let  row of sudokuGrid , let i = index" class = 'grid-row'>
         <div *ngFor="let item of row , let j = index" [ngClass]="{'grid-item-odd':((i+j)%2)===0, 'grid-item' : ((i+j)%2)===1}">
           <p *ngIf="item.isInput === false">{{item.value}}</p>
-          <input #tmp type="number" maxlength="1" *ngIf="item.isInput === true" (keyup)="insertInGrid($event, i,j)"  [ngClass]="{'wrong-input':  item.isWrong}">
+          <input #tmp maxlength="1" *ngIf="item.isInput === true" (keyup)="insertInGrid($event, i,j)"  [ngClass]="{'wrong-input':  item.isWrong}">
         </div>
     </div>
   </div>

@@ -154,17 +154,11 @@ private loadTable(): Promise<void> {
       const material = new THREE.LineBasicMaterial({
         color: 0xFFA000
       });
-      const geometry1 = new THREE.Geometry();
-      geometry1.vertices.push(
-        new THREE.Vector3( 5.37, 35.3, 50),
-        new THREE.Vector3( 5.37, 35.3, -50 )
-      );
+      // tslint:disable-next-line:max-line-length
+      const geometry1 = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3( 5.37, 35.3, 50), new THREE.Vector3( 5.37, 35.3, -50 )]);
       const line1 = new THREE.Line( geometry1, material );
-      const geometry2 = new THREE.Geometry();
-      geometry2.vertices.push(
-        new THREE.Vector3( -5.37, 35.3, 50),
-        new THREE.Vector3( -5.37, 35.3, -50 )
-      );
+      // tslint:disable-next-line:max-line-length
+      const geometry2 =  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3( -5.37, 35.3, 50), new THREE.Vector3( -5.37, 35.3, -50 )]);
       const line2 = new THREE.Line( geometry2, material );
       this.scene.add( line1 );
       this.scene.add( line2 );
@@ -262,7 +256,7 @@ ngOnDestroy(): void {
       }
   });
   this.scene.children = [];
-  this.scene.dispose();
+ // this.scene.dispose();
   this.renderer.dispose();
   console.log('project 1 service destroyed');
 }

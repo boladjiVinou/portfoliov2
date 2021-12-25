@@ -32,7 +32,7 @@ export class ExperienceComponent implements OnInit, OnDestroy {
     this.experiences = [];
     if (isEnglish) {
       // tslint:disable-next-line:max-line-length
-      this.experiences.push({ title: 'Full-time Employment in ETL Development (July 2019 - Today)', place: 'MEDFAR Clinical Solutions', tasks: [`Integration of Medical data by developping C# and SQL scripts`, `Improvement of custom data transfer softwares.`]});
+      this.experiences.push({ title: 'Full-time Employment in ETL Development (July 2019 - December 2020)', place: 'MEDFAR Clinical Solutions', tasks: [`Integration of Medical data by developping C# and SQL scripts`, `Improvement of custom data transfer softwares.`]});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: `Part-time internship in software development (January 2019 - April 2019)`, place: 'Hydro-Quebec TransEnergie', tasks: [`Development with VB.Net of forms used by technicians for their calculations as part of the test procedures on a smart relay.`, 'Bug fixes in existing forms.'] });
       // tslint:disable-next-line:max-line-length
@@ -41,7 +41,7 @@ export class ExperienceComponent implements OnInit, OnDestroy {
       this.experiences.push({ title: 'Full time internship in software development (May 2017 - August 2017)', place: 'Hydro-Quebec TransEnergie', tasks: ['Development with the C# of an application making it possible to direct the technician in the process of maintenance of a smart relay.', 'Unit test design.'] });
     } else {
         // tslint:disable-next-line:max-line-length
-      this.experiences.push({ title: 'Developpeur ETL Junior (Juillet 2019 - Aujourdhui)', place: 'MEDFAR Solutions Cliniques', tasks: [`Developpement avec les languages C# et SQL de scripts pour l' integration de donnnees medicales`, `Amelioration des logiciels custom de transferts de donnees`]});
+      this.experiences.push({ title: 'Developpeur ETL Junior (Juillet 2019 - Décembre 2020)', place: 'MEDFAR Solutions Cliniques', tasks: [`Developpement avec les languages C# et SQL de scripts pour l' integration de donnnees medicales`, `Amelioration des logiciels custom de transferts de donnees`]});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Stage à temps partiel en développement logiciel (Janvier 2019 - Avril 2019)', place: 'Hydro-Quebec TransEnergie', tasks: ['Développement avec le langage VB.Net de formulaires utilisés par les techniciens pour leurs calculs dans le cadre des procédures de tests d’un relais intelligent.', 'Correction de bugs dans des formulaires existants.'] });
       // tslint:disable-next-line:max-line-length

@@ -144,7 +144,7 @@ export abstract class PhysicObject {
                }
             }
            this.AddSpeed(speed);
-        } else if (this.speedNorm > 0) {
+        } else if (this.speedNorm !== 0) {
             this.speed.set(0, 0, 0);
             this.angularSpeed = 0;
             this.speedNorm = 0;

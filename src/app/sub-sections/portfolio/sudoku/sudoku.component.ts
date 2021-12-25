@@ -148,7 +148,6 @@ export class SudokuComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   ngAfterViewInit(){
     const childrenContainer = document.querySelector('.children-container') as HTMLElement;
-    childrenContainer.style.backgroundColor = '#ffff70';
     childrenContainer.style.opacity = '1';
     const videoElement = document.getElementById('background-vid1') as HTMLVideoElement;
     videoElement.pause();
