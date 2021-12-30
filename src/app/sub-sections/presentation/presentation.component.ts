@@ -69,12 +69,12 @@ export class PresentationComponent implements OnInit {
       this.aboutMeTitle = 'About Me';
     } else {
       // tslint:disable-next-line:max-line-length
-      this.aboutMe.push(`Je m’appelle Boladji Vinou, je suis un diplomé en génie informatique.`);
+      this.aboutMe.push(`Je m’ appelle Boladji Vinou, je suis un diplomé en génie informatique.`);
       // tslint:disable-next-line:max-line-length
-      this.aboutMe.push(`Je dispose d' une solide base en programmation orientée objet ainsi que procédurale avec le language C++.`);
+      this.aboutMe.push(`Je dispose d' une solide base en programmation orientée-objet ainsi que procédurale avec le language C++.`);
       // tslint:disable-next-line:max-line-length
-      this.aboutMe.push(`J'ai une bonne comprehension des aspects hardware et software de l'informatique,`);
-      this.aboutMe.push(`Je dispose également des connaissances sur d'autres domaines tels que le multimedia, les systèmes numériques, l' infonuagique et l' intelligence artificielle.`);
+      this.aboutMe.push(`J'ai une bonne compréhension des aspects hardware et software de l'informatique,`);
+      this.aboutMe.push(`Je dispose également des connaissances sur d'autres domaines tels que le multimédia, les systèmes numériques, l' infonuagique et l' intelligence artificielle.`);
       this.aboutMe.push(`Sur ce site (encore en construction) vous pourrez en apprendre d' avantage sur mes différentes réalisations.`);
       this.aboutMeTitle = 'À propos de moi';
     }

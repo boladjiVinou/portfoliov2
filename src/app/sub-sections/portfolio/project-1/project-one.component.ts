@@ -66,7 +66,7 @@ export class ProjectOneComponent implements OnInit, OnDestroy,AfterViewInit {
       this.projectTitle = 'Project I';
       this.boutonText = 'Restart the simulation';
       // tslint:disable-next-line:max-line-length
-      this.projectDescription.push(`My fistr project at school was to design a bot equipped with an AT-Mega 32 microcontroller. It was supposed to analyze the walls of a mine, to make a graphical rendering of the curves of each wall, and then compute the percentage of area occupied from the distances read during the run. (we supposed that there is no void behind the walls.). The simulation below illustrates the bot run during this project.`);
+      this.projectDescription.push(`My first project at school was to design a bot equipped with an AT-Mega 32 microcontroller. It was supposed to analyze the walls of a mine, to make a graphical rendering of the curves of each wall, and then compute the percentage of area occupied from the distances read during the run. (we supposed that there is no void behind the walls.). The simulation below illustrates the bot run during this project.`);
     } else {
       this.projectTitle = 'Projet I';
       this.boutonText = 'Recommencer la simulation';

@@ -7,10 +7,9 @@ import {PortfolioComponent} from './sub-sections/portfolio/portfolio.component';
 import {ProjectOneComponent} from './sub-sections/portfolio/project-1/project-one.component';
 import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component';
 import {CurlingComponent} from './sub-sections/portfolio/curling/curling.component';
-
+import { ChessComponent } from './sub-sections/portfolio/chess/chess.component';
 import { BrowserModule } from '@angular/platform-browser';
-// import {} from './sub-sections/contact/contact.component';
-import { from } from 'rxjs';
+
 const routes: Routes = [{
   path: '',
   component: PresentationComponent
@@ -51,6 +50,10 @@ const routes: Routes = [{
 {
   path: 'portfolio/Curling',
   component: CurlingComponent
+},
+{
+  path: 'portfolio/Chess',
+  component: ChessComponent
 }
 ];
 

@@ -16,9 +16,6 @@ export class AppComponent implements OnInit {
     // Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     // Add 'implements OnInit' to the class.
     this.languageService.initLangage(false);
-    // this.aboutSelected = true;
-    // https://www.techiediaries.com/angular-router-routerlink-navigate-navigatebyurl/
-    // this.router.navigateByUrl('about');
   }
   englishButtonChange(event: any) {
     if (event !== undefined) {
