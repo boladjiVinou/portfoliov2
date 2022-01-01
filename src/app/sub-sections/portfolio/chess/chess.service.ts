@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { copyFileSync } from 'fs';
 import * as THREE from 'three';
 import { Color, Scene, SpotLightHelper, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
@@ -13,44 +12,50 @@ export class ChessService implements OnDestroy {
     private camera: THREE.PerspectiveCamera;
     private controls: OrbitControls;
     private container: Element;
-    private pointLight: THREE.PointLight = new THREE.PointLight( 0xffffff, 1, 150);
-    private pointLightHelper: THREE.Mesh;
-    private angle = 0;
+    private camreaIdealPosiion = new THREE.Vector3(722.2176644540187, 1460.165275547255, -16.547152691981342); // start x: 12898.264904688718, y: 11203.707713608126, z: 14319.672926075744
+    private parentNode: THREE.Object3D;
+    private parentNodeInitialPosition: THREE.Vector3;
+    private shouldAnimateParentNode = true;
+    private parentNodeAnimationDelta = 5;
 
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.scene = new THREE.Scene();
-            this.scene.background = new THREE.Color(0x0c2b40
-                );
-            this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true, logarithmicDepthBuffer: true});
+            this.scene.background = new THREE.Color(0x0c2b40);
+            this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true, depth: true , logarithmicDepthBuffer: true});
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
             this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 50000);
-            this.camera.position.set(1600, 800, 5);
+            this.camera.position.set(12898.264904688718, 13000, 14319.672926075744);
+
             const axisHelper = new THREE.AxesHelper(10);
-            this.scene.add(axisHelper);
+            // this.scene.add(axisHelper);
             this.scene.add(this.camera);
+
+            this.parentNode = new THREE.Object3D();
             const chessBoard = new ChessBoard();
             const board = chessBoard.getBoard();
             board.forEach((chessLine) => {
                 chessLine.forEach((chessCase) => {
-                    this.scene.add(chessCase);
+                    this.parentNode.add(chessCase);
                 });
             });
             const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
-            this.pointLightHelper = new THREE.Mesh(new THREE.SphereGeometry(3), new THREE.MeshBasicMaterial({color: this.pointLight.color}));
             const room = new LivingRoom();
             room.init();
             room.getChildren().forEach(piece => {
-                this.scene.add(piece);
+                this.parentNode.add(piece);
             });
+            this.parentNode.translateY(-3000);
+            this.parentNodeInitialPosition = this.parentNode.position.clone();
+            this.scene.add(this.parentNode);
+
             const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
-            spotLight.position.set(0, 2000, 0);
+            spotLight.position.set(0, 3000, 0);
             this.scene.add(spotLight);
             this.scene.add(ambientLight);
-            const light = new THREE.PointLight(0xffffff, 0.3);
-            light.castShadow = true;
-            this.camera.add(light);
+            this.camera.add(new THREE.PointLight(0xffffff, 0.4));
             this.renderer.setPixelRatio(window.devicePixelRatio);
             this.initController();
             resolve();
@@ -58,39 +63,56 @@ export class ChessService implements OnDestroy {
         });
     }
 
-    private movePointLight()
+    private animateParentNode()
     {
-        this.pointLightHelper.position.set(500 * Math.cos(this.angle), 50 * Math.cos(this.angle), 500 * Math.sin(this.angle));
-        this.pointLight.position.set( this.pointLightHelper.position.x,  this.pointLightHelper.position.y,  this.pointLightHelper.position.z);
-        this.angle += 0.003;
-        if (this.angle > 6.28) {
-            this.angle %= 6.28;
+        if (this.shouldAnimateParentNode)
+        {
+            if (this.parentNode.position.y > this.parentNodeInitialPosition.y + 200 || this.parentNode.position.y < this.parentNodeInitialPosition.y)
+            {
+                this.parentNodeAnimationDelta *= -1;
+            }
+            this.parentNode.position.y += this.parentNodeAnimationDelta;
         }
     }
 
-    private slowlyCreateGrid(board: ChessCase[][])
+    public moveCameraToIdealPosition(): Promise<void>
     {
-        let i = 0;
-        let j = 0;
-        const caseAdder = () => {
-                if (i < 8)
-                {
-                    if (j === 8)
-                    {
-                        ++i;
-                        j = 0;
-                    }
-                    this.scene.add(board[i][j]);
-                    ++j;
+        return new Promise<void>((resolve) => {
+            const cameraPositionUpdater = setInterval(() => {
+                const increment = 6;
+                if (this.camera.position.x < this.camreaIdealPosiion.x) {
+                    this.camera.position.x += increment;
                 }
-            };
-        setInterval(() => {
-                if (i < 8)
+                else if (this.camera.position.x > this.camreaIdealPosiion.x && (this.camera.position.x - this.camreaIdealPosiion.x >= increment))
                 {
-                    caseAdder();
-                    console.log('adding');
+                this.camera.position.x -= increment;
                 }
-            }, 1000);
+                if (this.camera.position.z < this.camreaIdealPosiion.z && this.camera.position.z < 0) {
+                    this.camera.position.z += increment;
+                } else if (this.camera.position.z < this.camreaIdealPosiion.z && this.camera.position.z > 0) {
+                    this.camera.position.z -= increment;
+                }
+                if (this.camera.position.z > this.camreaIdealPosiion.z)
+                {
+                    this.camera.position.z -= increment;
+                }
+                if (this.camera.position.y < this.camreaIdealPosiion.y)
+                {
+                    this.camera.position.y += increment;
+                } else if (this.camera.position.y > this.camreaIdealPosiion.y && (this.camera.position.y - this.camreaIdealPosiion.y >= increment)) {
+                    this.camera.position.y -= increment;
+                }
+                const magn = new THREE.Vector3().subVectors(this.camera.position, this.camreaIdealPosiion);
+                if (magn.length() < 10)
+                {
+                    this.camera.position.set(this.camreaIdealPosiion.x, this.camreaIdealPosiion.y, this.camreaIdealPosiion.z);
+                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    clearInterval(cameraPositionUpdater);
+                    resolve();
+                    return;
+                }
+            }, 30);
+        });
     }
 
     ngOnDestroy(): void {
@@ -146,9 +168,9 @@ export class ChessService implements OnDestroy {
     }
 
     public animate() {
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
-        // this.movePointLight();
         requestAnimationFrame(this.animate.bind(this));
+        this.controls.update();
+        this.animateParentNode();
+        this.renderer.render(this.scene, this.camera);
     }
 }

@@ -31,7 +31,7 @@ export class ExperienceComponent implements OnInit, OnDestroy {
   translateExperience(isEnglish: boolean) {
     this.experiences = [];
     if (isEnglish) {
-      this.experiences.push({ title: 'Full-time Employment in Software Development', place: 'Dental-Wings', tasks: ['Implementation / improvement of functionalities in the front-end application of an intra-oral scanner', 'Implementation of 2D and 3D algorithms']});
+      this.experiences.push({ title: 'Full-time Employment in Software Development (January 2021 - Today)', place: 'Dental-Wings', tasks: ['Implementation / improvement of functionalities in the front-end application of an intra-oral scanner', 'Implementation of 2D and 3D algorithms']});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Full-time Employment in ETL Development (July 2019 - December 2020)', place: 'MEDFAR Clinical Solutions', tasks: [`Integration of Medical data by developping C# and SQL scripts`, `Improvement of custom data transfer softwares.`]});
       // tslint:disable-next-line:max-line-length

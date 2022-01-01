@@ -1,3 +1,12 @@
-<div id ='render-container'>
-    <progress id ="progress-bar"></progress>
+<div class="chess-container">
+    <div id ="render-container">
+        <progress id ="progress-bar"></progress>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf = "displayWarning === true">
+        {{warningMsg}}
+    </div>
+    <button class="chess-menu-button" (click) ="onMenuClick()" *ngIf ="menuOpened===false"  style="background: url('../../../../../assets/chess/play-button.png'); background-size:cover"></button>
+    <div class="chess-menu"  *ngIf ="menuOpened">
+    
+    </div>
 </div>

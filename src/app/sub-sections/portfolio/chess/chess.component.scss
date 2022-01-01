@@ -1,10 +1,43 @@
-#render-container {
+.chess-container
+{
     position: absolute;
     top: 0px;
     bottom:0px;
     left:0px;
     right: 0px;
-    color: #37474F;
-    display: flex;
-    justify-content: center;
+    #render-container
+    {
+        position: absolute;
+        top: 0px;
+        bottom:0px;
+        left:0px;
+        right: 0px;
+        color: #37474F;
+        display: flex;
+        justify-content: center;
+    }
+
+    .chess-menu-button
+    {
+        position: absolute;
+        top: 40px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+    }
+
+    .chess-menu
+    {
+        width: 50%;
+        position: absolute;
+        top: 0px;
+        bottom:0px;
+        right: 25%;
+        left:25%;
+        background-color: white;
+        opacity: 0.5;
+    }
 }
+
+  
