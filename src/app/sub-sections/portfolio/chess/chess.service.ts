@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { Color, Scene, SpotLightHelper, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import { ChessBoard } from './classes/chessboard';
-import { ChessCase } from './classes/chessCase';
 import { LivingRoom } from './classes/livingroom';
 @Injectable()
 export class ChessService implements OnDestroy {
@@ -12,11 +11,13 @@ export class ChessService implements OnDestroy {
     private camera: THREE.PerspectiveCamera;
     private controls: OrbitControls;
     private container: Element;
-    private camreaIdealPosiion = new THREE.Vector3(722.2176644540187, 1460.165275547255, -16.547152691981342); // start x: 12898.264904688718, y: 11203.707713608126, z: 14319.672926075744
+    private camreaFrontIdealPosiion = new THREE.Vector3(3000.2176644540187, 3200, 0); // start x: 12898.264904688718, y: 11203.707713608126, z: 14319.672926075744
+    private cameraTopIdealPosition = new THREE.Vector3(0, 4000, 0);
     private parentNode: THREE.Object3D;
     private parentNodeInitialPosition: THREE.Vector3;
     private shouldAnimateParentNode = true;
     private parentNodeAnimationDelta = 5;
+    private ambientSound: THREE.Audio;
 
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
@@ -55,11 +56,13 @@ export class ChessService implements OnDestroy {
             spotLight.position.set(0, 3000, 0);
             this.scene.add(spotLight);
             this.scene.add(ambientLight);
-            this.camera.add(new THREE.PointLight(0xffffff, 0.4));
+            this.camera.add(new THREE.PointLight(0xffffff, 0.3));
             this.renderer.setPixelRatio(window.devicePixelRatio);
             this.initController();
-            resolve();
-            return;
+            this.initSound().then(() => {
+                resolve();
+                return;
+            });
         });
     }
 
@@ -74,44 +77,107 @@ export class ChessService implements OnDestroy {
             this.parentNode.position.y += this.parentNodeAnimationDelta;
         }
     }
-
-    public moveCameraToIdealPosition(): Promise<void>
+    public setCameraControl(isEnabled: boolean)
     {
+        this.controls.enabled = isEnabled;
+    }
+
+    private initSound(): Promise<void>
+    {
+        return new Promise<void>((resolve) => {
+            // instantiate a listener
+            const audioListener = new THREE.AudioListener();
+            // add the listener to the camera
+            this.camera.add( audioListener );
+            // instantiate audio object
+            this.ambientSound = new THREE.Audio( audioListener );
+            // add the audio object to the scene
+            this.scene.add( this.ambientSound  );
+            // instantiate a loader
+            const loader = new THREE.AudioLoader();
+            // load a resource
+            loader.load(
+                // resource URL
+                '../../../../../assets/chess/Juan-Sanchez-Now-The-Silence.mp3',
+                // onLoad callback
+                ( audioBuffer ) => {
+                    this.ambientSound.setBuffer(audioBuffer);
+                    // this.ambientSound.play();
+                    this.ambientSound.setLoop(true);
+                    resolve();
+                    return;
+                },
+                // onProgress callback
+                ( xhr ) => {
+                    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+                },
+                // onError callback
+                ( err: any )  => {
+                    console.log( err);
+                }
+            );
+        });
+    }
+    public stopSound() {
+        if (this.ambientSound !== undefined && this.ambientSound.isPlaying) {
+            this.ambientSound.stop();
+        }
+    }
+    public playSound() {
+        if (this.ambientSound !== undefined) {
+            this.ambientSound.play();
+            this.ambientSound.setLoop(true);
+        }
+    }
+
+    public moveCameraToIdealPosition(viewFromTop: boolean): Promise<void>
+    {
+        this.shouldAnimateParentNode = false;
         return new Promise<void>((resolve) => {
             const cameraPositionUpdater = setInterval(() => {
                 const increment = 6;
-                if (this.camera.position.x < this.camreaIdealPosiion.x) {
+                if (this.camera.position.x < this.camreaFrontIdealPosiion.x) {
                     this.camera.position.x += increment;
                 }
-                else if (this.camera.position.x > this.camreaIdealPosiion.x && (this.camera.position.x - this.camreaIdealPosiion.x >= increment))
+                else if (this.camera.position.x > this.camreaFrontIdealPosiion.x && (this.camera.position.x - this.camreaFrontIdealPosiion.x >= increment))
                 {
                 this.camera.position.x -= increment;
                 }
-                if (this.camera.position.z < this.camreaIdealPosiion.z && this.camera.position.z < 0) {
+                if (this.camera.position.z < this.camreaFrontIdealPosiion.z && this.camera.position.z < 0) {
                     this.camera.position.z += increment;
-                } else if (this.camera.position.z < this.camreaIdealPosiion.z && this.camera.position.z > 0) {
+                } else if (this.camera.position.z < this.camreaFrontIdealPosiion.z && this.camera.position.z > 0) {
                     this.camera.position.z -= increment;
                 }
-                if (this.camera.position.z > this.camreaIdealPosiion.z)
+                if (this.camera.position.z > this.camreaFrontIdealPosiion.z)
                 {
                     this.camera.position.z -= increment;
                 }
-                if (this.camera.position.y < this.camreaIdealPosiion.y)
+                if (this.camera.position.y < this.camreaFrontIdealPosiion.y)
                 {
                     this.camera.position.y += increment;
-                } else if (this.camera.position.y > this.camreaIdealPosiion.y && (this.camera.position.y - this.camreaIdealPosiion.y >= increment)) {
+                } else if (this.camera.position.y > this.camreaFrontIdealPosiion.y && (this.camera.position.y - this.camreaFrontIdealPosiion.y >= increment)) {
                     this.camera.position.y -= increment;
                 }
-                const magn = new THREE.Vector3().subVectors(this.camera.position, this.camreaIdealPosiion);
+                const magn = new THREE.Vector3().subVectors(this.camera.position, this.camreaFrontIdealPosiion);
                 if (magn.length() < 10)
                 {
-                    this.camera.position.set(this.camreaIdealPosiion.x, this.camreaIdealPosiion.y, this.camreaIdealPosiion.z);
-                    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    if (viewFromTop)
+                    {
+                        this.camera.position.set(this.cameraTopIdealPosition.x, this.cameraTopIdealPosition.y, this.cameraTopIdealPosition.z);
+                    }
+                    else
+                    {
+                        this.camera.position.set(this.camreaFrontIdealPosiion.x, this.camreaFrontIdealPosiion.y, this.camreaFrontIdealPosiion.z);
+                    }
+                    this.camera.rotateY(Math.PI / 4);
+                    this.camera.lookAt(0, -3000, 0);
+                    this.camera.zoom *= 1.5;
+                    this.camera.updateProjectionMatrix();
                     clearInterval(cameraPositionUpdater);
                     resolve();
                     return;
                 }
-            }, 30);
+            }, 15);
         });
     }
 
@@ -168,9 +234,9 @@ export class ChessService implements OnDestroy {
     }
 
     public animate() {
-        requestAnimationFrame(this.animate.bind(this));
         this.controls.update();
         this.animateParentNode();
         this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.animate.bind(this));
     }
 }

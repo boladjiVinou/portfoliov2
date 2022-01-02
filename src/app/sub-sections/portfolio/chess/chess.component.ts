@@ -3,6 +3,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
 import { ChessService } from './chess.service';
+import { ChoiceContainer } from './classes/choicecontainer';
 
 @Component({
     selector: 'app-chess',
@@ -13,7 +14,18 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     private langageSubscription: Subscription;
     public displayWarning = false;
     public menuOpened = false;
+    public showMenuButton = true;
     public warningMsg: string;
+    public aiTypeLabel: string;
+    // ['Depth First Search', 'Reinforcement Learning', 'Baysian networks'], ['Recherche en largeur', 'Apprentissage par reenforcement', 'Reseaux Bayesien']
+    public aiChoices = new ChoiceContainer(['A star'], ['A étoile']);
+    public difficultyLabel: string;
+    public difficultyChoices = new ChoiceContainer(['Easy', 'Medium', 'Hard'], ['Facile', 'Normal', 'Difficile']);
+    public viewLabel: string;
+    public viewChoices = new ChoiceContainer(['From Front', 'From Top'], ['De face', 'De Haut']);
+    public soundLabel: string;
+    public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
+    public playLabel: string;
     constructor(private chessService: ChessService, private languageService: LanguageService , private zone: NgZone){
     }
     ngOnInit(): void {
@@ -29,6 +41,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
         else
         {
             this.chessService.init().then(() => {
+                this.chessService.setCameraControl(false);
                 const container = document.querySelector('#render-container');
                 container.removeChild(document.getElementById('progress-bar'));
                 this.chessService.setupHtmlContainer(container);
@@ -58,15 +71,61 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
         if (isEnglish)
         {
             this.warningMsg = 'This application is not available on mobile, please use a computer.';
+            this.aiTypeLabel = 'AI Type';
+            this.difficultyLabel = 'Difficulty';
+            this.viewLabel = 'View';
+            this.soundLabel = 'Sound';
+            this.playLabel = 'Play';
         }
         else
         {
             this.warningMsg = `Cette application est indisponible sur mobile, veuillez utiliser un ordinateur.`;
+            this.aiTypeLabel = `Type d' IA`;
+            this.difficultyLabel = 'Difficulté';
+            this.viewLabel = 'Vue';
+            this.soundLabel = 'Son';
+            this.playLabel = 'Jouer';
         }
+        this.aiChoices.setLangage(isEnglish);
+        this.difficultyChoices.setLangage(isEnglish);
+        this.viewChoices.setLangage(isEnglish);
+        this.soundChoices.setLangage(isEnglish);
+    }
+    private updateSound(stopSound)
+    {
+        if (stopSound)
+        {
+            this.chessService.stopSound();
+        }
+        else
+        {
+            this.chessService.playSound();
+        }
+    }
+    public onSoundPrevChoice()
+    {
+        this.soundChoices.previousChoice();
+        this.updateSound(this.soundChoices.getChoiceIndex() === 0);
+    }
+    public onSoundNextChoice()
+    {
+        this.soundChoices.nextChoice();
+        this.updateSound(this.soundChoices.getChoiceIndex() === 0);
+    }
+    public startGame()
+    {
+        this.menuOpened = false;
+        this.chessService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
+
+        });
     }
     public onMenuClick()
     {
         this.menuOpened = !this.menuOpened;
+        if (this.menuOpened )
+        {
+            this.showMenuButton = false;
+        }
     }
 
 }

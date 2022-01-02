@@ -5,8 +5,40 @@
     <div class="alert alert-danger" role="alert" *ngIf = "displayWarning === true">
         {{warningMsg}}
     </div>
-    <button class="chess-menu-button" (click) ="onMenuClick()" *ngIf ="menuOpened===false"  style="background: url('../../../../../assets/chess/play-button.png'); background-size:cover"></button>
+    <button class="chess-menu-button" (click) ="onMenuClick()" *ngIf ="showMenuButton"  style="background: url('../../../../../assets/chess/play-button.png'); background-size:cover"></button>
     <div class="chess-menu"  *ngIf ="menuOpened">
-    
+        <div class="menu-section">
+            <p class ="choice-title">{{aiTypeLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click) ="aiChoices.previousChoice()"></button>
+                <p>{{aiChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click) ="aiChoices.nextChoice()"></button>
+            </div>
+        </div>
+        <div class="menu-section">
+            <p class ="choice-title">{{difficultyLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click) ="difficultyChoices.previousChoice()"></button>
+                <p>{{difficultyChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click) ="difficultyChoices.nextChoice()"></button>
+            </div>
+        </div>
+        <div class="menu-section">
+            <p class ="choice-title">{{viewLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click) ="viewChoices.previousChoice()"></button>
+                <p>{{viewChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click) ="viewChoices.previousChoice()"></button>
+            </div>
+        </div>
+        <div class="menu-section">
+            <p class ="choice-title">{{soundLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click) ="onSoundPrevChoice()"></button>
+                <p>{{soundChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click) ="onSoundNextChoice()"></button>
+            </div>
+        </div>
+        <button id="play-button" type="button" class="btn btn-success" (click)="startGame()">{{playLabel}}</button>
     </div>
 </div>
