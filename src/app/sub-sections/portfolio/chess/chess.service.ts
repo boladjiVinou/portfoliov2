@@ -11,7 +11,7 @@ export class ChessService implements OnDestroy {
     private camera: THREE.PerspectiveCamera;
     private controls: OrbitControls;
     private container: Element;
-    private camreaFrontIdealPosiion = new THREE.Vector3(3000.2176644540187, 3200, 0); // start x: 12898.264904688718, y: 11203.707713608126, z: 14319.672926075744
+    private camreaFrontIdealPosiion = new THREE.Vector3(3000.2176644540187, 3200, 0);
     private cameraTopIdealPosition = new THREE.Vector3(0, 4000, 0);
     private parentNode: THREE.Object3D;
     private parentNodeInitialPosition: THREE.Vector3;
@@ -36,32 +36,34 @@ export class ChessService implements OnDestroy {
 
             this.parentNode = new THREE.Object3D();
             const chessBoard = new ChessBoard();
-            const board = chessBoard.getBoard();
-            board.forEach((chessLine) => {
-                chessLine.forEach((chessCase) => {
-                    this.parentNode.add(chessCase);
+            chessBoard.init().then(() => {
+                const board = chessBoard.getBoard();
+                board.forEach((chessLine) => {
+                    chessLine.forEach((chessCase) => {
+                        this.parentNode.add(chessCase);
+                    });
                 });
-            });
-            const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
-            const room = new LivingRoom();
-            room.init();
-            room.getChildren().forEach(piece => {
-                this.parentNode.add(piece);
-            });
-            this.parentNode.translateY(-3000);
-            this.parentNodeInitialPosition = this.parentNode.position.clone();
-            this.scene.add(this.parentNode);
+                const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
+                const room = new LivingRoom();
+                room.init();
+                room.getChildren().forEach(piece => {
+                    this.parentNode.add(piece);
+                });
+                this.parentNode.translateY(-3000);
+                this.parentNodeInitialPosition = this.parentNode.position.clone();
+                this.scene.add(this.parentNode);
 
-            const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
-            spotLight.position.set(0, 3000, 0);
-            this.scene.add(spotLight);
-            this.scene.add(ambientLight);
-            this.camera.add(new THREE.PointLight(0xffffff, 0.3));
-            this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.initController();
-            this.initSound().then(() => {
-                resolve();
-                return;
+                const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
+                spotLight.position.set(0, 3000, 0);
+                this.scene.add(spotLight);
+                this.scene.add(ambientLight);
+                this.camera.add(new THREE.PointLight(0xffffff, 0.3));
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.initController();
+                this.initSound().then(() => {
+                    resolve();
+                    return;
+                });
             });
         });
     }
@@ -102,7 +104,6 @@ export class ChessService implements OnDestroy {
                 // onLoad callback
                 ( audioBuffer ) => {
                     this.ambientSound.setBuffer(audioBuffer);
-                    // this.ambientSound.play();
                     this.ambientSound.setLoop(true);
                     resolve();
                     return;

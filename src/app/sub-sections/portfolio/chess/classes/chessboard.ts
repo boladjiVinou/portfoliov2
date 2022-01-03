@@ -5,8 +5,21 @@ export class ChessBoard
 {
     private board: ChessCase[][] = [];
     // green: y up, red: x to me, z: blue left
-    constructor() {
-        const firstCase = new WhiteChessCase();
+    public init(): Promise<void>
+    {
+        return new Promise<void>((resolve) => {
+            this.createCases();
+            this.loadChessPieces().then(() =>
+            {
+                resolve();
+                return;
+            });
+        });
+    }
+
+    private createCases(): void
+    {
+        const firstCase = new WhiteChessCase({I: 0, J: 0});
         for (let i = 0; i < 8 ; ++i)
         {
             const line: ChessCase[] = [];
@@ -17,24 +30,33 @@ export class ChessBoard
             else
             {
                 if (this.board[i - 1][7] instanceof WhiteChessCase) {
-                    line.push(new WhiteChessCase());
+                    line.push(new WhiteChessCase({I: i, J: 0}));
                 }
                 else {
-                    line.push(new BlackChessCase());
+                    line.push(new BlackChessCase({I: i, J: 0}));
                 }
             }
             this.setCasePosition(line[line.length - 1], i, 0);
             for (let j = 1; j < 8 ; ++j) {
                 if (line[j - 1] instanceof WhiteChessCase) {
-                    line.push(new BlackChessCase());
+                    line.push(new BlackChessCase({I: i, J: j}));
                 }
                 else {
-                    line.push(new WhiteChessCase());
+                    line.push(new WhiteChessCase({I: i, J: j}));
                 }
                 this.setCasePosition( line[line.length - 1], i, j);
             }
             this.board.push(line);
         }
+    }
+
+    private loadChessPieces(): Promise<void>
+    {
+        return new Promise<void>((resolve) =>
+        {
+            resolve();
+            return;
+        });
     }
 
     private setCasePosition(chessCase: ChessCase, line: number, column: number): void
