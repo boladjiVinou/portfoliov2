@@ -1,25 +1,25 @@
-import { CaseBoardPosition } from '../chessCase';
-import { PiecesChessManager } from '../chessmanager';
+import { ICaseBoardPosition } from '../chessCase';
+import { IPiecesRequestSupplier } from '../chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class KnightPiece extends ChessPiece
 {
-    constructor(position: CaseBoardPosition, mvtValidator: PiecesChessManager, color: PieceColor)
+    constructor(color: PieceColor)
     {
-        super('../../../../../../../assets/chess/knight_-_low_poly/scene.gltf', position, mvtValidator, color);
-        this.positionInBoard = position;
+        super('../../../../../../../assets/chess/knight_-_low_poly/scene.gltf', color);
     }
-    getPossibleDestinations(): CaseBoardPosition[]
+    getPossibleDestinations(): ICaseBoardPosition[]
     {
-        const possiblesMoves: CaseBoardPosition[] = [];
-        possiblesMoves.push({I: this.positionInBoard.I + 2, J: this.positionInBoard.J + 1});
-        possiblesMoves.push({I: this.positionInBoard.I + 2, J: this.positionInBoard.J - 1});
-        possiblesMoves.push({I: this.positionInBoard.I - 2, J: this.positionInBoard.J + 1});
-        possiblesMoves.push({I: this.positionInBoard.I - 2, J: this.positionInBoard.J - 1});
-        possiblesMoves.push({I: this.positionInBoard.I + 1, J: this.positionInBoard.J + 2});
-        possiblesMoves.push({I: this.positionInBoard.I + 1, J: this.positionInBoard.J - 2});
-        possiblesMoves.push({I: this.positionInBoard.I - 1, J: this.positionInBoard.J + 2});
-        possiblesMoves.push({I: this.positionInBoard.I - 1, J: this.positionInBoard.J - 2});
+        const possiblesMoves: ICaseBoardPosition[] = [];
+        const positionInBoard = this.currentCase.getCasePosition();
+        possiblesMoves.push({I: positionInBoard.I + 2, J: positionInBoard.J + 1});
+        possiblesMoves.push({I: positionInBoard.I + 2, J: positionInBoard.J - 1});
+        possiblesMoves.push({I: positionInBoard.I - 2, J: positionInBoard.J + 1});
+        possiblesMoves.push({I: positionInBoard.I - 2, J: positionInBoard.J - 1});
+        possiblesMoves.push({I: positionInBoard.I + 1, J: positionInBoard.J + 2});
+        possiblesMoves.push({I: positionInBoard.I + 1, J: positionInBoard.J - 2});
+        possiblesMoves.push({I: positionInBoard.I - 1, J: positionInBoard.J + 2});
+        possiblesMoves.push({I: positionInBoard.I - 1, J: positionInBoard.J - 2});
 
         return possiblesMoves.filter(position => this.positionAvailabilityChecker.canMoveTo(this, position));
     }

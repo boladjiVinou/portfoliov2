@@ -2,7 +2,7 @@ import { NgZone } from '@angular/core';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
-import { ChessService } from './chess.service';
+import { ChessRenderingService } from './chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
 
 @Component({
@@ -26,7 +26,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     public soundLabel: string;
     public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
     public playLabel: string;
-    constructor(private chessService: ChessService, private languageService: LanguageService , private zone: NgZone){
+    constructor(private chessRenderingService: ChessRenderingService, private languageService: LanguageService , private zone: NgZone){
     }
     ngOnInit(): void {
         this.langageSubscription = this.languageService.getEnglishLangageState().subscribe((value) => {
@@ -40,12 +40,12 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         else
         {
-            this.chessService.init().then(() => {
-                this.chessService.setCameraControl(false);
+            this.chessRenderingService.init().then(() => {
+                // this.chessRenderingService.setCameraControl(false);
                 const container = document.querySelector('#render-container');
                 container.removeChild(document.getElementById('progress-bar'));
-                this.chessService.setupHtmlContainer(container);
-                this.chessService.animate();
+                this.chessRenderingService.setupHtmlContainer(container);
+                this.chessRenderingService.animate();
             });
         }
     }
@@ -95,11 +95,11 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     {
         if (stopSound)
         {
-            this.chessService.stopSound();
+            this.chessRenderingService.stopSound();
         }
         else
         {
-            this.chessService.playSound();
+            this.chessRenderingService.playSound();
         }
     }
     public onSoundPrevChoice()
@@ -115,7 +115,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     public startGame()
     {
         this.menuOpened = false;
-        this.chessService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
+        this.chessRenderingService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
 
         });
     }

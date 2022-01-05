@@ -1,19 +1,18 @@
-import { CaseBoardPosition } from '../chessCase';
-import { PiecesChessManager } from '../chessmanager';
+import { ICaseBoardPosition } from '../chessCase';
+import { IPiecesRequestSupplier } from '../chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class BishopPiece extends ChessPiece
 {
-    constructor(position: CaseBoardPosition, mvtValidator: PiecesChessManager, color: PieceColor)
+    constructor(color: PieceColor)
     {
-        super('../../../../../../../assets/chess/low_poly_bishop/scene.gltf', position, mvtValidator, color);
-        this.positionInBoard = position;
+        super('../../../../../../../assets/chess/low_poly_bishop/scene.gltf', color);
     }
-    getPossibleDestinations(): CaseBoardPosition[]
+    getPossibleDestinations(): ICaseBoardPosition[]
     {
-        const possiblesMoves: CaseBoardPosition[] = [];
+        const possiblesMoves: ICaseBoardPosition[] = [];
         // upper left search
-        let possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        let possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J -= 1;
         while (possiblePosition.I >= 0 && possiblePosition.J >= 0)
@@ -26,7 +25,7 @@ export class BishopPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I - 1, J: possiblePosition.J - 1};
         }
         // upper right search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J += 1;
         while (possiblePosition.I >= 0 && possiblePosition.J < 8)
@@ -39,7 +38,7 @@ export class BishopPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I - 1, J: possiblePosition.J + 1};
         }
         // lower left search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J -= 1;
         while (possiblePosition.I < 8 && possiblePosition.J >= 0)
@@ -52,7 +51,7 @@ export class BishopPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I + 1, J: possiblePosition.J - 1};
         }
         // lower right search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J += 1;
         while (possiblePosition.I < 8 && possiblePosition.J < 8)
@@ -66,5 +65,4 @@ export class BishopPiece extends ChessPiece
         }
         return possiblesMoves;
     }
-
 }

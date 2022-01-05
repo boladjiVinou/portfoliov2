@@ -1,9 +1,17 @@
 import * as THREE from 'three';
-import { Vector2, Vector3 } from 'three';
+import { Color, Vector2, Vector3 } from 'three';
 import { BlackChessCase, ChessCase, WhiteChessCase } from './chessCase';
+import { BishopPiece } from './pieces/bishoppiece';
+import { ChessPiece, PieceColor } from './pieces/chesspiece';
+import { KingPiece } from './pieces/kingpiece';
+import { KnightPiece } from './pieces/knightpiece';
+import { PawnPiece } from './pieces/pawnpiece';
+import { QueenPiece } from './pieces/queenpiece';
+import { RookPiece } from './pieces/rookpiece';
 export class ChessBoard
 {
     private board: ChessCase[][] = [];
+    private pieces: ChessPiece[] = [];
     // green: y up, red: x to me, z: blue left
     public init(): Promise<void>
     {
@@ -54,9 +62,202 @@ export class ChessBoard
     {
         return new Promise<void>((resolve) =>
         {
-            resolve();
-            return;
+            const promises: Promise<void>[] = [];
+            promises.push(this.initPawns(PieceColor.BLACK));
+            promises.push(this.initPawns(PieceColor.WHITE));
+
+            promises.push(this.initRooks(PieceColor.BLACK));
+            promises.push(this.initRooks(PieceColor.WHITE));
+
+            promises.push(this.initKnight(PieceColor.BLACK));
+            promises.push(this.initKnight(PieceColor.WHITE));
+
+            promises.push(this.initBishop(PieceColor.BLACK));
+            promises.push(this.initBishop(PieceColor.WHITE));
+
+            promises.push(this.initKing(PieceColor.BLACK));
+            promises.push(this.initKing(PieceColor.WHITE));
+
+            promises.push(this.initQueen(PieceColor.BLACK));
+            promises.push(this.initQueen(PieceColor.WHITE));
+
+            Promise.all(promises).then(() =>
+            {
+                resolve();
+                return;
+            });
         });
+    }
+    private initQueen(color: PieceColor)
+    {
+        return new Promise<void>(resolve =>
+            {
+                const queen = new QueenPiece(color);
+                queen.init().then(() =>
+                {
+                    if (color === PieceColor.BLACK)
+                    {
+                        this.board[0][3].acceptVisitor(queen);
+                    }
+                    else
+                    {
+                        this.board[7][3].acceptVisitor(queen);
+                    }
+                    this.pieces.push(queen);
+                    resolve();
+                    return;
+                });
+            });
+    }
+    private initKing(color: PieceColor)
+    {
+        return new Promise<void>(resolve =>
+            {
+                const king = new KingPiece(color);
+                king.init().then(() =>
+                {
+                    if (color === PieceColor.BLACK)
+                    {
+                        this.board[0][4].acceptVisitor(king);
+                    }
+                    else
+                    {
+                        this.board[7][4].acceptVisitor(king);
+                    }
+                    this.pieces.push(king);
+                    resolve();
+                    return;
+                });
+            });
+    }
+    private initBishop(color: PieceColor)
+    {
+        return new Promise<void>(resolve =>
+            {
+                let row = 7;
+                if (color === PieceColor.BLACK)
+                {
+                    row = 0;
+                }
+                let col = 2;
+                const bishopIniter = () =>
+                {
+                    const bishop = new BishopPiece(color);
+                    bishop.init().then(() =>
+                    {
+                        this.board[row][col].acceptVisitor(bishop);
+                        this.pieces.push(bishop);
+                        if (col === 2)
+                        {
+                            col = 5;
+                            bishopIniter();
+                        }
+                        else
+                        {
+                            resolve();
+                            return;
+                        }
+                    });
+                };
+                bishopIniter();
+            });
+    }
+    private initKnight(color: PieceColor): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+            {
+                let row = 7;
+                if (color === PieceColor.BLACK)
+                {
+                    row = 0;
+                }
+                let col = 1;
+                const knightIniter = () =>
+                {
+                    const knight = new KnightPiece(color);
+                    knight.init().then(() =>
+                    {
+                        this.board[row][col].acceptVisitor(knight);
+                        this.pieces.push(knight);
+                        if (col === 1)
+                        {
+                            col = 6;
+                            knightIniter();
+                        }
+                        else
+                        {
+                            resolve();
+                            return;
+                        }
+                    });
+                };
+                knightIniter();
+            });
+    }
+    private initPawns(color: PieceColor): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+        {
+            let row = 6;
+            if (color === PieceColor.BLACK)
+            {
+                row = 1;
+            }
+            let i = 0;
+            const pawnIniter = () =>
+            {
+                const pawn = new PawnPiece(color);
+                pawn.init().then(() =>
+                {
+                    this.board[row][i].acceptVisitor(pawn);
+                    this.pieces.push(pawn);
+                    ++i;
+                    if (i < 8)
+                    {
+                        pawnIniter();
+                    }
+                    else
+                    {
+                        resolve();
+                        return;
+                    }
+                });
+            };
+            pawnIniter();
+        });
+    }
+
+    private initRooks(color: PieceColor): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+            {
+                let row = 7;
+                if (color === PieceColor.BLACK)
+                {
+                    row = 0;
+                }
+                let col = 0;
+                const rookIniter = () =>
+                {
+                    const rook = new RookPiece(color);
+                    rook.init().then(() =>
+                    {
+                        this.board[row][col].acceptVisitor(rook);
+                        this.pieces.push(rook);
+                        if (col === 0)
+                        {
+                            col = 7;
+                            rookIniter();
+                        }
+                        else
+                        {
+                            resolve();
+                            return;
+                        }
+                    });
+                };
+                rookIniter();
+            });
     }
 
     private setCasePosition(chessCase: ChessCase, line: number, column: number): void
@@ -69,5 +270,9 @@ export class ChessBoard
     public getBoard(): ChessCase[][]
     {
         return this.board;
+    }
+    public getPieces(): ChessPiece[]
+    {
+        return this.pieces;
     }
 }

@@ -1,58 +1,70 @@
 import * as THREE from 'three';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { CaseBoardPosition } from '../chessCase';
-import { PiecesChessManager } from '../chessmanager';
-export abstract class ChessPiece
+import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../chessCase';
+import { IPiecesRequestSupplier } from '../chessmovesmanager';
+import { PieceModelLoader } from './piecemodelloader';
+export abstract class ChessPiece implements ICaseVisitor
 {
     private modelPath: string;
     private mesh: THREE.Object3D;
-    protected positionInBoard: CaseBoardPosition;
-    protected positionAvailabilityChecker: PiecesChessManager;
+    protected positionAvailabilityChecker: IPiecesRequestSupplier;
     protected hasMovedOnce = false;
     protected color: PieceColor;
-    constructor(modelPath: string, position: CaseBoardPosition, mvtValidator: PiecesChessManager, color: PieceColor)
+    protected currentCase: IVisitedCase;
+    constructor(modelPath: string, color: PieceColor)
     {
         this.modelPath = modelPath;
-        this.positionInBoard = position;
-        this.positionAvailabilityChecker = mvtValidator;
         this.color = color;
     }
-    protected loadModel(): Promise<void>
+    visit( host: IVisitedCase): void
     {
-        return new Promise<void>((resolve) =>
+        if (host.hasAccepted(this))
         {
-            const loader = new GLTFLoader();
-            loader.load(this.modelPath, (model: GLTF) =>
-            {
-                this.mesh = model.scene;
-                resolve();
-                return;
-            },
-            null,
-            ( error ) =>
-            {
-                console.log( 'An error happened while loading chesspiece model', error );
-            });
-
-        });
+            this.hasMovedOnce = (this.currentCase != null);
+            this.currentCase = host;
+            this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+        }
+        else
+        {
+            throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
+        }
     }
-    abstract getPossibleDestinations(): CaseBoardPosition[];
+    quitCase(): void
+    {
+        this.currentCase.removeVisitor();
+    }
+    public init(): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+            {
+                PieceModelLoader.getInstance().getModel(this.modelPath).then((model) =>
+                {
+                    this.mesh = model;
+                    this.mesh.scale.set(25, 25, 25);
+                    if (this.color === PieceColor.BLACK)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                    resolve();
+                    return;
+                });
+            });
+    }
+    public setNavigationChecker( mvtValidator: IPiecesRequestSupplier): void
+    {
+        this.positionAvailabilityChecker = mvtValidator;
+    }
+    abstract getPossibleDestinations(): ICaseBoardPosition[];
     public canJumpOverOtherPieces(): boolean
     {
         return false;
     }
-    public set3DPosition(position: THREE.Vector3): void
+    protected set3DPosition(position: THREE.Vector3): void
     {
         this.mesh.position.set(position.x, position.y, position.z);
-    }
-    public setBoardPosition(position: CaseBoardPosition)
-    {
-        if (!this.hasMovedOnce && this.positionInBoard.I !== position.I && this.positionInBoard.J !== position.J)
-        {
-            this.hasMovedOnce = true;
-        }
-        this.positionInBoard.I = position.I;
-        this.positionInBoard.J = position.J;
     }
     public getHasMovedOnce(): boolean
     {
@@ -61,6 +73,10 @@ export abstract class ChessPiece
     public hasSameColor(piece: ChessPiece): boolean
     {
         return this.color === piece.color;
+    }
+    public getModel(): THREE.Object3D
+    {
+        return this.mesh;
     }
 }
 export enum PieceColor

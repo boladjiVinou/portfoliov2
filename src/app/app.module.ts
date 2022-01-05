@@ -17,7 +17,7 @@ import {LanguageService} from './services/languageService';
 import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
 import {SudokuService} from './sub-sections/portfolio/sudoku/sudoke.service';
 import {CurlingService} from './sub-sections/portfolio/curling/curling.service';
-import { ChessService } from './sub-sections/portfolio/chess/chess.service';
+import { ChessRenderingService } from './sub-sections/portfolio/chess/chessrendering.service';
 
 @NgModule({
   declarations: [
@@ -35,7 +35,7 @@ import { ChessService } from './sub-sections/portfolio/chess/chess.service';
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [LanguageService, ProjectOneRendererService, SudokuService, CurlingService, ChessService],
+  providers: [LanguageService, ProjectOneRendererService, SudokuService, CurlingService, ChessRenderingService],
   bootstrap: [AppComponent] // https://getbootstrap.com/
 })
 export class AppModule { }

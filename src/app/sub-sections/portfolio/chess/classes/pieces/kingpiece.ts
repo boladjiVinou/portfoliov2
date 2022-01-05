@@ -1,64 +1,66 @@
-import { CaseBoardPosition } from '../chessCase';
-import { KingSpecialRequestSupplier, PiecesChessManager} from '../chessmanager';
+import { ICaseBoardPosition } from '../chessCase';
+import { IKingSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class KingPiece extends ChessPiece
 {
-    private specialRequestSupplier: KingSpecialRequestSupplier;
-    constructor(position: CaseBoardPosition, mvtValidator: PiecesChessManager, specialReqSupplier: KingSpecialRequestSupplier, color: PieceColor)
+    private specialRequestsSupplier: IKingSpecialRequestSupplier;
+    constructor(color: PieceColor)
     {
-        super('../../../../../../../assets/chess/low_poly_king/scene.gltf', position, mvtValidator, color);
-        this.positionInBoard = position;
-        this.specialRequestSupplier = specialReqSupplier;
+        super('../../../../../../../assets/chess/low_poly_king/scene.gltf', color);
     }
-    getPossibleDestinations(): CaseBoardPosition[]
+    public setNavigationChecker( mvtValidator: IKingSpecialRequestSupplier): void
     {
-        const possiblesMoves: CaseBoardPosition[] = [];
-        let possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        this.positionAvailabilityChecker = mvtValidator;
+    }
+    getPossibleDestinations(): ICaseBoardPosition[]
+    {
+        const possiblesMoves: ICaseBoardPosition[] = [];
+        let possiblePosition = this.currentCase.getCasePosition();
         // upper
         possiblePosition.I -= 1;
         possiblesMoves.push(possiblePosition);
         // lower
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblesMoves.push(possiblePosition);
         // left
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
         // right
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
         // upper left
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
         // upper right
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
         // lower left
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
         // lower right
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
         // castling search 1
-        if (this.specialRequestSupplier.canMakeAKingCastle(this, possiblePosition))
+        if ( this.specialRequestsSupplier.canMakeAKingCastle(this, possiblePosition))
         {
-            possiblesMoves.push(this.specialRequestSupplier.getKingCastlingPosition(this));
+            possiblesMoves.push(this.specialRequestsSupplier.getKingCastlingPosition(this));
         }
         // castling search 2
-        if (this.specialRequestSupplier.canMakeAQueenCastle(this, possiblePosition))
+        if (this.specialRequestsSupplier.canMakeAQueenCastle(this, possiblePosition))
         {
-            possiblesMoves.push(this.specialRequestSupplier.getQueenCastlingPosition(this));
+            possiblesMoves.push(this.specialRequestsSupplier.getQueenCastlingPosition(this));
         }
         return possiblesMoves.filter(position => this.positionAvailabilityChecker.canMoveTo(this, position));
     }

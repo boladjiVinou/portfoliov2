@@ -1,18 +1,17 @@
-import { CaseBoardPosition } from '../chessCase';
-import { PiecesChessManager } from '../chessmanager';
+import { ICaseBoardPosition } from '../chessCase';
+import { IPiecesRequestSupplier } from '../chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class QueenPiece extends ChessPiece
 {
-    constructor(position: CaseBoardPosition, mvtValidator: PiecesChessManager, color: PieceColor)
+    constructor(color: PieceColor)
     {
-        super('../../../../../../../assets/chess/queen_-_low_poly/scene.gltf', position, mvtValidator, color);
-        this.positionInBoard = position;
+        super('../../../../../../../assets/chess/queen_-_low_poly/scene.gltf', color);
     }
-    getPossibleDestinations(): CaseBoardPosition[]
+    getPossibleDestinations(): ICaseBoardPosition[]
     {
-        const possiblesMoves: CaseBoardPosition[] = [];
-        let possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        const possiblesMoves: ICaseBoardPosition[] = [];
+        let possiblePosition = this.currentCase.getCasePosition();
         // upper search
         possiblePosition.I -= 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
@@ -21,7 +20,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I - 1, J: possiblePosition.J};
         }
         // lower search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
         {
@@ -29,7 +28,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I + 1, J: possiblePosition.J};
         }
         // left search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J -= 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
         {
@@ -37,7 +36,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I, J: possiblePosition.J - 1};
         }
         // right search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J += 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
         {
@@ -46,7 +45,7 @@ export class QueenPiece extends ChessPiece
         }
 
         // upper left search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J -= 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
@@ -55,7 +54,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I - 1, J: possiblePosition.J - 1};
         }
         // upper right search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J += 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
@@ -64,7 +63,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I - 1, J: possiblePosition.J + 1};
         }
         // lower left search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J -= 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
@@ -73,7 +72,7 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I + 1, J: possiblePosition.J - 1};
         }
         // lower right search
-        possiblePosition = {I: this.positionInBoard.I , J: this.positionInBoard.J};
+        possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J += 1;
         while (this.positionAvailabilityChecker.canMoveTo(this, possiblePosition))
