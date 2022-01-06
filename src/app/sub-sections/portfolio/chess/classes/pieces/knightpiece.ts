@@ -27,4 +27,19 @@ export class KnightPiece extends ChessPiece
     {
         return true;
     }
+    public init(): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+            {
+                super.init().then(() =>
+                {
+                    if (this.color === PieceColor.BLACK)
+                    {
+                        this.getModel().rotateY(Math.PI);
+                    }
+                    resolve();
+                    return;
+                });
+            });
+    }
 }

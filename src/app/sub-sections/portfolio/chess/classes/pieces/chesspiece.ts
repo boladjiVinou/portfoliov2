@@ -40,14 +40,22 @@ export abstract class ChessPiece implements ICaseVisitor
                 {
                     this.mesh = model;
                     this.mesh.scale.set(25, 25, 25);
+                    let material: THREE.Material;
                     if (this.color === PieceColor.BLACK)
                     {
-
+                        material = new THREE.MeshPhongMaterial({color: 0x222222 });
                     }
                     else
                     {
-
+                        material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x888888)//
+                            , emissive: new THREE.Color(0x222222), roughness: 0, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
                     }
+                    this.mesh.traverse(child => {
+                        if (child instanceof THREE.Mesh)
+                        {
+                            (child as THREE.Mesh).material = material.clone();
+                        }
+                    });
                     resolve();
                     return;
                 });

@@ -11,8 +11,8 @@ export class ChessRenderingService implements OnDestroy {
     private camera: THREE.PerspectiveCamera;
     private controls: OrbitControls;
     private container: Element;
-    private camreaFrontIdealPosiion = new THREE.Vector3(3000.2176644540187, 3200, 0);
-    private cameraTopIdealPosition = new THREE.Vector3(0, 4000, 0);
+    private camreaFrontIdealPosiion = new THREE.Vector3(850, -400, 0);
+    private cameraTopIdealPosition = new THREE.Vector3(0, 0, 0);
     private parentNode: THREE.Object3D;
     private parentNodeInitialPosition: THREE.Vector3;
     private shouldAnimateParentNode = true;
@@ -63,7 +63,8 @@ export class ChessRenderingService implements OnDestroy {
                 this.scene.add(ambientLight);
                 this.camera.add(new THREE.PointLight(0xffffff, 0.3));
                 this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.initController();
+                this.camera.lookAt(0, -1000, 0);
+                // this.initController();
                 this.initSound().then(() => {
                     resolve();
                     return;
@@ -164,19 +165,18 @@ export class ChessRenderingService implements OnDestroy {
                     this.camera.position.y -= increment;
                 }
                 const magn = new THREE.Vector3().subVectors(this.camera.position, this.camreaFrontIdealPosiion);
-                if (magn.length() < 10)
+                if (magn.length() < 4500)
                 {
                     if (viewFromTop)
                     {
                         this.camera.position.set(this.cameraTopIdealPosition.x, this.cameraTopIdealPosition.y, this.cameraTopIdealPosition.z);
+                        this.camera.lookAt(-150, -3000, 0);
                     }
                     else
                     {
                         this.camera.position.set(this.camreaFrontIdealPosiion.x, this.camreaFrontIdealPosiion.y, this.camreaFrontIdealPosiion.z);
+                        this.camera.lookAt(-1500, -3000, 0);
                     }
-                    this.camera.rotateY(Math.PI / 4);
-                    this.camera.lookAt(0, -3000, 0);
-                    this.camera.zoom *= 1.5;
                     this.camera.updateProjectionMatrix();
                     clearInterval(cameraPositionUpdater);
                     resolve();
@@ -239,7 +239,7 @@ export class ChessRenderingService implements OnDestroy {
     }
 
     public animate() {
-        this.controls.update();
+        // this.controls.update();
         this.animateParentNode();
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.animate.bind(this));
