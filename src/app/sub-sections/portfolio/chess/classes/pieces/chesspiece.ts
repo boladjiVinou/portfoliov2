@@ -1,8 +1,9 @@
 import * as THREE from 'three';
-import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../chessCase';
-import { IPiecesRequestSupplier } from '../chessmovesmanager';
+import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
+import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
+import { IOutlinable } from '../sceneinteraction/chessinteractor';
 import { PieceModelLoader } from './piecemodelloader';
-export abstract class ChessPiece implements ICaseVisitor
+export abstract class ChessPiece implements ICaseVisitor, IOutlinable
 {
     private modelPath: string;
     private mesh: THREE.Object3D;
@@ -10,16 +11,57 @@ export abstract class ChessPiece implements ICaseVisitor
     protected hasMovedOnce = false;
     protected color: PieceColor;
     protected currentCase: IVisitedCase;
+    private possibleDestinations: ICaseBoardPosition[];
     constructor(modelPath: string, color: PieceColor)
     {
         this.modelPath = modelPath;
         this.color = color;
+    }
+    onDeselect(): void
+    {
+        this.possibleDestinations.forEach( destination =>
+        {
+            this.positionAvailabilityChecker.setCaseAvailability(false, destination);
+        });
+        this.possibleDestinations = [];
+    }
+    onOutline(): void
+    {
+        this.possibleDestinations = this.getPossibleDestinations();
+        this.possibleDestinations.forEach( destination =>
+        {
+            this.positionAvailabilityChecker.setCaseAvailability(true, destination);
+        });
+    }
+    isFriendWith(piece: ChessPiece): boolean
+    {
+        return this.color === piece.color;
+    }
+    animatedVisit(host: IVisitedCase): Promise<void>
+    {
+        return new Promise<void>(resolve =>
+            {
+                if (host.hasAccepted(this))
+                {
+                    this.hasMovedOnce = (this.currentCase != null);
+                    this.quitCase();
+                    this.currentCase = host;
+                    this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0))); // temporary
+                    resolve();
+                    return;
+                }
+                else
+                {
+                    throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
+                }
+            });
     }
     visit( host: IVisitedCase): void
     {
         if (host.hasAccepted(this))
         {
             this.hasMovedOnce = (this.currentCase != null);
+            this.quitCase();
             this.currentCase = host;
             this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
         }
@@ -30,7 +72,11 @@ export abstract class ChessPiece implements ICaseVisitor
     }
     quitCase(): void
     {
-        this.currentCase.removeVisitor();
+        if (this.hasMovedOnce)
+        {
+            this.currentCase.removeVisitor();
+            this.currentCase = null;
+        }
     }
     public init(): Promise<void>
     {
@@ -85,6 +131,10 @@ export abstract class ChessPiece implements ICaseVisitor
     public getModel(): THREE.Object3D
     {
         return this.mesh;
+    }
+    protected isAValidPosition(position: ICaseBoardPosition)
+    {
+        return position.I >= 0 && position.I < 8 && position.J >= 0 && position.J < 8;
     }
 }
 export enum PieceColor

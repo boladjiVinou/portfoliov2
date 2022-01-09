@@ -1,5 +1,5 @@
-import { ICaseBoardPosition } from '../chessCase';
-import { IKingSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessmovesmanager';
+import { ICaseBoardPosition } from '../board/chessCase';
+import { IKingSpecialRequestSupplier} from '../board/chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class KingPiece extends ChessPiece
@@ -12,46 +12,51 @@ export class KingPiece extends ChessPiece
     public setNavigationChecker( mvtValidator: IKingSpecialRequestSupplier): void
     {
         this.positionAvailabilityChecker = mvtValidator;
+        this.specialRequestsSupplier = mvtValidator;
     }
     getPossibleDestinations(): ICaseBoardPosition[]
     {
-        const possiblesMoves: ICaseBoardPosition[] = [];
+        let possiblesMoves: ICaseBoardPosition[] = [];
         let possiblePosition = this.currentCase.getCasePosition();
-        // upper
+        //
         possiblePosition.I -= 1;
         possiblesMoves.push(possiblePosition);
-        // lower
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblesMoves.push(possiblePosition);
-        // left
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
-        // right
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
-        // upper left
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
-        // upper right
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I -= 1;
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
-        // lower left
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J -= 1;
         possiblesMoves.push(possiblePosition);
-        // lower right
+        //
         possiblePosition = this.currentCase.getCasePosition();
         possiblePosition.I += 1;
         possiblePosition.J += 1;
         possiblesMoves.push(possiblePosition);
+
+        possiblesMoves = possiblesMoves.filter(position => this.isAValidPosition(position) && //
+        ( this.positionAvailabilityChecker.caseIsEmpty(position) || this.positionAvailabilityChecker.positionOccupiedByOpponent(this, position)));
+
         // castling search 1
         if ( this.specialRequestsSupplier.canMakeAKingCastle(this, possiblePosition))
         {
@@ -62,7 +67,7 @@ export class KingPiece extends ChessPiece
         {
             possiblesMoves.push(this.specialRequestsSupplier.getQueenCastlingPosition(this));
         }
-        return possiblesMoves.filter(position => this.positionAvailabilityChecker.canMoveTo(this, position));
+        return possiblesMoves;
     }
 
 }

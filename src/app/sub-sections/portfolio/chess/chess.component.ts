@@ -2,7 +2,7 @@ import { NgZone } from '@angular/core';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
-import { ChessRenderingService } from './chessrendering.service';
+import { ChessRenderingService } from './classes/rendering/chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
 
 @Component({

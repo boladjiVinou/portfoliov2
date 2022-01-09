@@ -1,5 +1,4 @@
-import { ICaseBoardPosition } from '../chessCase';
-import { IPiecesRequestSupplier } from '../chessmovesmanager';
+import { ICaseBoardPosition } from '../board/chessCase';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class KnightPiece extends ChessPiece
@@ -21,7 +20,8 @@ export class KnightPiece extends ChessPiece
         possiblesMoves.push({I: positionInBoard.I - 1, J: positionInBoard.J + 2});
         possiblesMoves.push({I: positionInBoard.I - 1, J: positionInBoard.J - 2});
 
-        return possiblesMoves.filter(position => this.positionAvailabilityChecker.canMoveTo(this, position));
+        return possiblesMoves.filter(position => this.isAValidPosition(position) && //
+                                    (this.positionAvailabilityChecker.caseIsEmpty(position) || this.positionAvailabilityChecker.positionOccupiedByOpponent(this, position)));
     }
     canJumpOverOtherPieces(): boolean
     {
