@@ -34,9 +34,10 @@ export class ChessInteractor
         const renderPass = new RenderPass(scene, camera);
         this.postEffectComposer.addPass(renderPass);
         this.outlinePass = new OutlinePass(new THREE.Vector2(this.renderer.domElement.clientWidth, this.renderer.domElement.clientHeight), scene, camera);
-        this.outlinePass.edgeStrength = 8;
+        this.outlinePass.edgeStrength = 100 ;
         this.outlinePass.visibleEdgeColor.set(0x00ff00);
         this.outlinePass.hiddenEdgeColor.set(0x000000);
+        this.outlinePass.renderToScreen = false;
         this.postEffectComposer.addPass(this.outlinePass);
         this.raycaster = new THREE.Raycaster();
         this.camera = camera;
@@ -75,7 +76,8 @@ export class ChessInteractor
                     node = node.parent;
                 }
                 this.outlinablesMap.get(node.uuid).onOutline();
-                this.previousOutlinableFound = this.outlinablesMap.get(intersectedObjects[0].object.uuid);
+                this.previousOutlinableFound = this.outlinablesMap.get(node.uuid);
+                this.outlinePass.renderToScreen = true;
             }
             else if (this.previousOutlinableFound != null)
             {
@@ -89,6 +91,7 @@ export class ChessInteractor
                         this.previousOutlinableFound = null;
                         this.outlinePass.selectedObjects = [];
                         this.isSelectingSomething = false;
+                        this.outlinePass.renderToScreen = false;
                     });
                 }
                 else
@@ -97,6 +100,7 @@ export class ChessInteractor
                     this.previousOutlinableFound = null;
                     this.outlinePass.selectedObjects = [];
                     this.isSelectingSomething = false;
+                    this.outlinePass.renderToScreen = false;
                 }
             }
         }

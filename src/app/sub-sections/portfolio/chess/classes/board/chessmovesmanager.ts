@@ -68,7 +68,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
         const chessCase = this.chessBoard[position.I][position.J];
         if (!chessCase.isEmpty())
         {
-            return (chessCase.getVisitor() as ChessPiece).isFriendWith(piece);
+            return !(chessCase.getVisitor() as ChessPiece).isFriendWith(piece);
         }
         else
         {

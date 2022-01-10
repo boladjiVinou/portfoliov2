@@ -8,35 +8,32 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     private positionInBoard: ICaseBoardPosition;
     private currentVisitor: ICaseVisitor = null;
     protected available = false;
-    private nativeMaterial: THREE.Material;
-    private highLightMaterial: THREE.Material;
     constructor(material: THREE.Material, position: ICaseBoardPosition)
     {
-        super(new THREE.BoxGeometry(ChessCase.width, ChessCase.height, ChessCase.depth), material);
+        super(ChessCase.generateGeometry(), [material, new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x48b15d)//
+            , emissive: new THREE.Color(0, 0, 0), roughness: 0, metalness: 0.39, flatShading: false, wireframe: false, vertexColors: false, fog: false})]);
         this.positionInBoard = position;
-        this.nativeMaterial = material;
-        this.highLightMaterial = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x0a8583)//
-            , emissive: new THREE.Color(0, 0, 0), roughness: 0.25, metalness: 0.3, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+    }
+    private static generateGeometry(): THREE.BoxGeometry
+    {
+        const geo = new THREE.BoxGeometry(ChessCase.width, ChessCase.height, ChessCase.depth);
+        geo.clearGroups();
+        geo.addGroup(0, geo.index.count, 0);
+        return geo;
     }
     setIsAvailable(isAvailable: boolean): void
     {
         this.available = isAvailable;
         // https://stackoverflow.com/questions/43694731/three-js-switch-between-lambert-and-phong
+        // https://threejs.org/examples/#webgl_postprocessing_unreal_bloom_selective
         if (this.available)
         {
-            this.material = this.highLightMaterial;
+            this.geometry.groups[0].materialIndex = 1;
         }
         else
         {
-            this.material = this.nativeMaterial;
+            this.geometry.groups[0].materialIndex = 0;
         }
-        if (Array.isArray(this.material))
-        {
-            this.material.forEach(submaterial => {
-                submaterial.needsUpdate = true;
-            });
-        }
-        this.material.needsUpdate = true;
     }
     isAvailable(): boolean
     {

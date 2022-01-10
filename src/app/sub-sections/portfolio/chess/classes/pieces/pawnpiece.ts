@@ -1,5 +1,5 @@
 import { ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
-import { IPawnSpecialRequestSupplier} from '../board/chessmovesmanager';
+import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../board/chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class PawnPiece extends ChessPiece
@@ -26,10 +26,10 @@ export class PawnPiece extends ChessPiece
     {
         return this.hasMovedTwoSquare;
     }
-    public setNavigationChecker( mvtValidator: IPawnSpecialRequestSupplier): void
+    public setNavigationChecker( mvtValidator: IPiecesRequestSupplier): void
     {
         this.positionAvailabilityChecker = mvtValidator;
-        this.specialMovementValidator = mvtValidator;
+        this.specialMovementValidator = mvtValidator as IPawnSpecialRequestSupplier;
     }
     getPossibleDestinations(): ICaseBoardPosition[]
     {

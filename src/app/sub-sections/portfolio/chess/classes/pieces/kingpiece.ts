@@ -1,5 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
-import { IKingSpecialRequestSupplier} from '../board/chessmovesmanager';
+import { IKingSpecialRequestSupplier, IPiecesRequestSupplier} from '../board/chessmovesmanager';
 import { ChessPiece, PieceColor } from './chesspiece';
 
 export class KingPiece extends ChessPiece
@@ -9,10 +9,10 @@ export class KingPiece extends ChessPiece
     {
         super('../../../../../../../assets/chess/low_poly_king/scene.gltf', color);
     }
-    public setNavigationChecker( mvtValidator: IKingSpecialRequestSupplier): void
+    public setNavigationChecker( mvtValidator: IPiecesRequestSupplier): void
     {
         this.positionAvailabilityChecker = mvtValidator;
-        this.specialRequestsSupplier = mvtValidator;
+        this.specialRequestsSupplier = mvtValidator as IKingSpecialRequestSupplier;
     }
     getPossibleDestinations(): ICaseBoardPosition[]
     {
