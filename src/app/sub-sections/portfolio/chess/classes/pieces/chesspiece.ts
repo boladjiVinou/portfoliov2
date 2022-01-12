@@ -96,11 +96,13 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                         material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x888888)//
                             , emissive: new THREE.Color(0x222222), roughness: 0, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
                     }
+                    this.getModel().name = this.getName();
                     this.mesh.traverse(child => {
                         if (child instanceof THREE.Mesh)
                         {
                             (child as THREE.Mesh).material = material.clone();
                         }
+                        child.name = this.getName();
                     });
                     resolve();
                     return;
@@ -112,6 +114,12 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
         this.positionAvailabilityChecker = mvtValidator;
     }
     abstract getPossibleDestinations(): ICaseBoardPosition[];
+    public getName(): string
+    {
+        const dateStr = Date.now().toString(36); // convert num to base 36 and stringif
+        const randomStr = Math.random().toString(36).substring(2, 8); // start at index 2 to skip decimal point
+        return `${dateStr}-${randomStr}`;
+    }
     public canJumpOverOtherPieces(): boolean
     {
         return false;

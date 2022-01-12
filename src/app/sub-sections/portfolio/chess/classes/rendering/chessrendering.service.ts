@@ -186,6 +186,7 @@ export class ChessRenderingService implements OnDestroy {
                         this.camera.lookAt(-1500, -3000, 0);
                     }
                     this.camera.updateProjectionMatrix();
+                    this.chessInteractor.setEnable(true);
                     clearInterval(cameraPositionUpdater);
                     resolve();
                     return;
@@ -247,11 +248,13 @@ export class ChessRenderingService implements OnDestroy {
         if (this.chessInteractor != null)
         {
             this.chessInteractor.trackWindowEvents();
+            this.chessInteractor.onResize();
         }
     }
 
     private resizeListener(event){
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.camera.updateProjectionMatrix();
         if (this.chessInteractor != null)
         {
             this.chessInteractor.onResize();
@@ -261,11 +264,11 @@ export class ChessRenderingService implements OnDestroy {
     public animate() {
         // this.controls.update();
         this.animateParentNode();
+        this.renderer.render(this.scene, this.camera);
         if (this.chessInteractor != null)
         {
             this.chessInteractor.animate();
         }
-        this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.animate.bind(this));
     }
 }

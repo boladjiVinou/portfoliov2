@@ -14,7 +14,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     private langageSubscription: Subscription;
     public displayWarning = false;
     public menuOpened = false;
-    public showMenuButton = true;
+    public showMenuButton = false;
     public warningMsg: string;
     public aiTypeLabel: string;
     // ['Depth First Search', 'Reinforcement Learning', 'Baysian networks'], ['Recherche en largeur', 'Apprentissage par reenforcement', 'Reseaux Bayesien']
@@ -46,6 +46,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
                 container.removeChild(document.getElementById('progress-bar'));
                 this.chessRenderingService.setupHtmlContainer(container);
                 this.chessRenderingService.animate();
+                this.showMenuButton = true;
             });
         }
     }

@@ -262,7 +262,8 @@ export class ChessBoard
 
     private setCasePosition(chessCase: ChessCase, line: number, column: number): void
     {
-        chessCase.position.setZ(((ChessCase.depth) * (4 - column)) - ChessCase.depth / 2);
+        // + 0.25 just to view case borders
+        chessCase.position.setZ(((ChessCase.depth) * (4 - column)) - (ChessCase.depth / 2));
         chessCase.position.setX((ChessCase.width) * (line - 4));
         chessCase.position.setY(1550);
     }

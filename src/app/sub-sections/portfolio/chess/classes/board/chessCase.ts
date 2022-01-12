@@ -10,8 +10,10 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     protected available = false;
     constructor(material: THREE.Material, position: ICaseBoardPosition)
     {
-        super(ChessCase.generateGeometry(), [material, new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x48b15d)//
-            , emissive: new THREE.Color(0, 0, 0), roughness: 0, metalness: 0.39, flatShading: false, wireframe: false, vertexColors: false, fog: false})]);
+        super(ChessCase.generateGeometry(), [material, new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xA8DDA8)//
+            , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false}),
+            new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xFFAB76)//
+                , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false})]);
         this.positionInBoard = position;
     }
     private static generateGeometry(): THREE.BoxGeometry
@@ -26,7 +28,11 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         this.available = isAvailable;
         // https://stackoverflow.com/questions/43694731/three-js-switch-between-lambert-and-phong
         // https://threejs.org/examples/#webgl_postprocessing_unreal_bloom_selective
-        if (this.available)
+        if (this.available && this.currentVisitor != null)
+        {
+            this.geometry.groups[0].materialIndex = 2;
+        }
+        else if (this.available)
         {
             this.geometry.groups[0].materialIndex = 1;
         }
@@ -55,6 +61,10 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     {
         return new Promise<void>(resolve =>
             {
+                if (this.currentVisitor != null)
+                {
+                    this.currentVisitor.quitCase();
+                }
                 this.currentVisitor = visitor;
                 this.currentVisitor.animatedVisit(this).then(() =>
                 {
