@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
 import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
+import { ChessPlayer } from '../player/chessplayer';
 import { IOutlinable } from '../sceneinteraction/chessinteractor';
 import { PieceModelLoader } from './piecemodelloader';
 export abstract class ChessPiece implements ICaseVisitor, IOutlinable
@@ -12,6 +13,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     protected color: PieceColor;
     protected currentCase: IVisitedCase;
     private possibleDestinations: ICaseBoardPosition[];
+    private owner: ChessPlayer;
     constructor(modelPath: string, color: PieceColor)
     {
         this.modelPath = modelPath;
@@ -136,6 +138,10 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         return this.color === piece.color;
     }
+    public hasColor(color: PieceColor): boolean
+    {
+        return this.color === color;
+    }
     public getModel(): THREE.Object3D
     {
         return this.mesh;
@@ -143,6 +149,14 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     protected isAValidPosition(position: ICaseBoardPosition)
     {
         return position.I >= 0 && position.I < 8 && position.J >= 0 && position.J < 8;
+    }
+    public setOwner(player: ChessPlayer): void
+    {
+        this.owner = player;
+    }
+    public getOwner(): ChessPlayer
+    {
+        return this.owner;
     }
 }
 export enum PieceColor

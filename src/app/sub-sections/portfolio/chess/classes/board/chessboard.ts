@@ -12,6 +12,10 @@ export class ChessBoard
 {
     private board: ChessCase[][] = [];
     private pieces: ChessPiece[] = [];
+    private whiteLeftRook: RookPiece;
+    private whiteRightRook: RookPiece;
+    private blackLeftRook: RookPiece;
+    private blackRightRook: RookPiece;
     // green: y up, red: x to me, z: blue left
     public init(): Promise<void>
     {
@@ -19,12 +23,36 @@ export class ChessBoard
             this.createCases();
             this.loadChessPieces().then(() =>
             {
+                this.copyRooksReferences();
                 resolve();
                 return;
             });
         });
     }
 
+    public getLeftBlackRook(): Readonly<RookPiece>
+    {
+        return this.blackLeftRook;
+    }
+    public getRightBlackRook(): Readonly<RookPiece>
+    {
+        return this.blackRightRook;
+    }
+    public getLeftWhiteRook(): Readonly<RookPiece>
+    {
+        return this.whiteLeftRook;
+    }
+    public getRightWhiteRook(): Readonly<RookPiece>
+    {
+        return this.whiteRightRook;
+    }
+    private copyRooksReferences()
+    {
+        this.whiteLeftRook = this.board[7][0].getVisitor() as RookPiece;
+        this.whiteRightRook = this.board[7][7].getVisitor() as RookPiece;
+        this.blackLeftRook = this.board[0][7].getVisitor() as RookPiece;
+        this.blackRightRook = this.board[0][0].getVisitor() as RookPiece;
+    }
     private createCases(): void
     {
         const firstCase = new WhiteChessCase({I: 0, J: 0});

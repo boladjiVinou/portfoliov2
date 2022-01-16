@@ -5,6 +5,7 @@ import { Color, Scene, SpotLightHelper, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import { ChessBoard } from '../board/chessboard';
 import { ChessNavigationManager } from '../board/chessmovesmanager';
+import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { LivingRoom } from '../room/livingroom';
 import { ChessInteractor } from '../sceneinteraction/chessinteractor';
 @Injectable()
@@ -48,7 +49,7 @@ export class ChessRenderingService implements OnDestroy {
                         this.parentNode.add(chessCase);
                     });
                 });
-                this.chessNavigator = new ChessNavigationManager(board);
+                this.chessNavigator = new ChessNavigationManager(chessBoard);
                 chessBoard.getPieces().forEach(piece =>
                     {
                         piece.setNavigationChecker(this.chessNavigator);
@@ -71,7 +72,7 @@ export class ChessRenderingService implements OnDestroy {
                 this.camera.add(new THREE.PointLight(0xffffff, 0.3));
                 this.renderer.setPixelRatio(window.devicePixelRatio);
                 this.camera.lookAt(0, -1000, 0);
-                this.chessInteractor = new ChessInteractor(chessBoard.getPieces(), [].concat(...board), this.renderer, this.scene, this.camera);
+                this.chessInteractor = new ChessInteractor(chessBoard.getPieces().filter(piece => piece.hasColor(PieceColor.WHITE)), [].concat(...board), this.renderer, this.scene, this.camera);
                 // this.initController();
                 this.initSound().then(() => {
                     resolve();

@@ -48,6 +48,10 @@ export class ChessInteractor
     }
     private onMouseClick(event: MouseEvent)
     {
+        const renderingZone = this.renderer.domElement.getBoundingClientRect();
+        this.mousePosition.x = ( ( event.clientX - renderingZone.left ) / renderingZone.width ) * 2 - 1;
+        this.mousePosition.y = - ( ( event.clientY - renderingZone.top ) / renderingZone.height ) * 2 + 1;
+        this.mousePosition.z = 1;
         this.searchPointedObject();
     }
     private onMouseMove(event: MouseEvent)
@@ -134,13 +138,13 @@ export class ChessInteractor
 
     public trackWindowEvents()
     {
-        window.addEventListener('mousemove', this.onMouseMove.bind(this));
+        // window.addEventListener('mousemove', this.onMouseMove.bind(this));
         window.addEventListener('click', this.onMouseClick.bind(this));
         window.addEventListener('resize', this.onResize.bind(this));
     }
     public removeWindowEvents()
     {
-        window.removeEventListener('mousemove', this.onMouseMove.bind(this));
+        // window.removeEventListener('mousemove', this.onMouseMove.bind(this));
         window.removeEventListener('click', this.onMouseClick.bind(this));
         window.removeEventListener('resize', this.onResize.bind(this));
     }
