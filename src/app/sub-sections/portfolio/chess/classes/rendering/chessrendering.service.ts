@@ -1,8 +1,9 @@
 import { noop } from '@angular/compiler/src/render3/view/util';
 import { Injectable, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
-import { Color, Scene, SpotLightHelper, WebGLRenderer } from 'three';
+import { Scene, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import { AudioPlayer } from '../audio/audioplayer';
 import { ChessBoard } from '../board/chessboard';
 import { ChessNavigationManager } from '../board/chessmovesmanager';
 import { ChessPiece, PieceColor } from '../pieces/chesspiece';
@@ -21,9 +22,9 @@ export class ChessRenderingService implements OnDestroy {
     private parentNodeInitialPosition: THREE.Vector3;
     private shouldAnimateParentNode = true;
     private parentNodeAnimationDelta = 5;
-    private ambientSound: THREE.Audio;
     private chessInteractor: ChessInteractor;
     private chessNavigator: ChessNavigationManager;
+    private ambientSoundPlayer: AudioPlayer;
 
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
@@ -74,9 +75,14 @@ export class ChessRenderingService implements OnDestroy {
                 this.camera.lookAt(0, -1000, 0);
                 this.chessInteractor = new ChessInteractor(chessBoard.getPieces().filter(piece => piece.hasColor(PieceColor.WHITE)), [].concat(...board), this.renderer, this.scene, this.camera);
                 // this.initController();
-                this.initSound().then(() => {
-                    resolve();
-                    return;
+                this.ambientSoundPlayer = new AudioPlayer();
+                this.ambientSoundPlayer.initSound(this.camera, this.scene, '../../../../../assets/chess/Juan-Sanchez-Now-The-Silence.mp3').then(() =>
+                {
+                    ChessPiece.AUDIO_MVT_PLAYER.initSound(this.camera, this.scene, ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
+                    {
+                        resolve();
+                        return;
+                    });
                 });
             });
         });
@@ -97,52 +103,15 @@ export class ChessRenderingService implements OnDestroy {
     {
         this.controls.enabled = isEnabled;
     }
-
-    private initSound(): Promise<void>
-    {
-        return new Promise<void>((resolve) => {
-            // instantiate a listener
-            const audioListener = new THREE.AudioListener();
-            // add the listener to the camera
-            this.camera.add( audioListener );
-            // instantiate audio object
-            this.ambientSound = new THREE.Audio( audioListener );
-            // add the audio object to the scene
-            this.scene.add( this.ambientSound  );
-            // instantiate a loader
-            const loader = new THREE.AudioLoader();
-            // load a resource
-            loader.load(
-                // resource URL
-                '../../../../../assets/chess/Juan-Sanchez-Now-The-Silence.mp3',
-                // onLoad callback
-                ( audioBuffer ) => {
-                    this.ambientSound.setBuffer(audioBuffer);
-                    this.ambientSound.setLoop(true);
-                    resolve();
-                    return;
-                },
-                // onProgress callback
-                ( xhr ) => {
-                    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-                },
-                // onError callback
-                ( err: any )  => {
-                    console.log( err);
-                }
-            );
-        });
+    public stopAmbientSound() {
+        this.ambientSoundPlayer.setEnable(false);
+        this.ambientSoundPlayer.stopSound();
+        ChessPiece.AUDIO_MVT_PLAYER.setEnable(false);
     }
-    public stopSound() {
-        if (this.ambientSound !== undefined && this.ambientSound.isPlaying) {
-            this.ambientSound.stop();
-        }
-    }
-    public playSound() {
-        if (this.ambientSound !== undefined) {
-            this.ambientSound.play();
-            this.ambientSound.setLoop(true);
-        }
+    public playAmbientSound(playWithLoop: boolean) {
+        this.ambientSoundPlayer.setEnable(true);
+        this.ambientSoundPlayer.playSound(playWithLoop);
+        ChessPiece.AUDIO_MVT_PLAYER.setEnable(true);
     }
 
     public moveCameraToIdealPosition(viewFromTop: boolean): Promise<void>
@@ -156,7 +125,7 @@ export class ChessRenderingService implements OnDestroy {
                 }
                 else if (this.camera.position.x > this.camreaFrontIdealPosiion.x && (this.camera.position.x - this.camreaFrontIdealPosiion.x >= increment))
                 {
-                this.camera.position.x -= increment;
+                    this.camera.position.x -= increment;
                 }
                 if (this.camera.position.z < this.camreaFrontIdealPosiion.z && this.camera.position.z < 0) {
                     this.camera.position.z += increment;
@@ -260,6 +229,16 @@ export class ChessRenderingService implements OnDestroy {
         {
             this.chessInteractor.onResize();
         }
+    }
+
+    public getScene(): THREE.Scene
+    {
+        return this.scene;
+    }
+
+    public getCamera(): THREE.Camera
+    {
+        return this.camera;
     }
 
     public animate() {

@@ -96,11 +96,11 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     {
         if (stopSound)
         {
-            this.chessRenderingService.stopSound();
+            this.chessRenderingService.stopAmbientSound();
         }
         else
         {
-            this.chessRenderingService.playSound();
+            this.chessRenderingService.playAmbientSound(true);
         }
     }
     public onSoundPrevChoice()

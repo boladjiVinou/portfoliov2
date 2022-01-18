@@ -21,7 +21,8 @@ export interface IKingSpecialRequestSupplier extends IPiecesRequestSupplier
 }
 export interface IPawnSpecialRequestSupplier extends IPiecesRequestSupplier
 {
-    canDoEnPassantMove(pawn: NonNullable<PawnPiece>, position: NonNullable<ICaseBoardPosition>): boolean;
+    canDoEnPassantCapture(pawn: NonNullable<PawnPiece>, position: NonNullable<ICaseBoardPosition>): boolean;
+    realizeEnPassantCapture(pawn: NonNullable<PawnPiece>, position: NonNullable<ICaseBoardPosition>): void;
 }
 export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier
 {
@@ -31,6 +32,14 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
         this.chessBoard = board.getBoard();
         this.fullBoard = board;
+    }
+    realizeEnPassantCapture(pawn: PawnPiece, position: ICaseBoardPosition): void
+    {
+        const prisonner = this.chessBoard[position.I][position.J].getVisitor();
+        if (prisonner !== null && prisonner !== undefined)
+        {
+            pawn.getOwner().capture(prisonner as ChessPiece);
+        }
     }
     realizeRookLeftCastling(color: PieceColor): void {
         if (color === PieceColor.BLACK)
@@ -78,7 +87,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
         this.chessBoard[position.I][position.J].setIsAvailable(isAvailable);
     }
-    canDoEnPassantMove(pawn: PawnPiece, position: ICaseBoardPosition): boolean
+    canDoEnPassantCapture(pawn: PawnPiece, position: ICaseBoardPosition): boolean
     {
         const visitor = this.chessBoard[position.I][position.J].getVisitor();
         if (visitor instanceof PawnPiece)

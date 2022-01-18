@@ -28,60 +28,50 @@ export class KingPiece extends ChessPiece
     {
         return new Promise<void>(resolve =>
             {
-                if (host.hasAccepted(this))
+                ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
+                this.hasMovedOnce = (this.currentCase != null);
+                this.captureHostVisitorIfNeeded(host);
+                this.quitCase();
+                this.currentCase = host;
+                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0))); // temporary
+                if (this.isDoingALeftCastling(host))
                 {
-                    this.hasMovedOnce = (this.currentCase != null);
-                    this.quitCase();
-                    this.currentCase = host;
-                    this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0))); // temporary
-                    if (this.isDoingALeftCastling(host))
-                    {
-                        this.specialRequestsSupplier.realizeAnimatedRookLeftCastling(this.color).then(() =>
-                        {
-                            resolve();
-                            return;
-                        });
-                    }
-                    else if (this.isDoingARightCastling(host))
-                    {
-                        this.specialRequestsSupplier.realizeAnimatedRookRightCastling(this.color).then(() =>
-                        {
-                            resolve();
-                            return;
-                        });
-                    }
-                    else
+                    this.specialRequestsSupplier.realizeAnimatedRookLeftCastling(this.color).then(() =>
                     {
                         resolve();
                         return;
-                    }
+                    });
+                }
+                else if (this.isDoingARightCastling(host))
+                {
+                    this.specialRequestsSupplier.realizeAnimatedRookRightCastling(this.color).then(() =>
+                    {
+                        resolve();
+                        return;
+                    });
                 }
                 else
                 {
-                    throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
+                    resolve();
+                    return;
                 }
             });
     }
     visit( host: IVisitedCase): void
     {
-        if (host.hasAccepted(this))
+        ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
+        this.hasMovedOnce = (this.currentCase != null);
+        this.captureHostVisitorIfNeeded(host);
+        this.quitCase();
+        this.currentCase = host;
+        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+        if (this.isDoingALeftCastling(host))
         {
-            this.hasMovedOnce = (this.currentCase != null);
-            this.quitCase();
-            this.currentCase = host;
-            this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
-            if (this.isDoingALeftCastling(host))
-            {
-                this.specialRequestsSupplier.realizeRookLeftCastling(this.color);
-            }
-            else if (this.isDoingARightCastling(host))
-            {
-                this.specialRequestsSupplier.realizeRookRightCastling(this.color);
-            }
+            this.specialRequestsSupplier.realizeRookLeftCastling(this.color);
         }
-        else
+        else if (this.isDoingARightCastling(host))
         {
-            throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
+            this.specialRequestsSupplier.realizeRookRightCastling(this.color);
         }
     }
     private isDoingALeftCastling(host: IVisitedCase): boolean

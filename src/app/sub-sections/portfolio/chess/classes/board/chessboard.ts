@@ -8,6 +8,7 @@ import { KnightPiece } from '../pieces/knightpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
 import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
+import { HumanChessPlayer } from '../player/chessplayer';
 export class ChessBoard
 {
     private board: ChessCase[][] = [];
@@ -24,6 +25,10 @@ export class ChessBoard
             this.loadChessPieces().then(() =>
             {
                 this.copyRooksReferences();
+                const human1 = new HumanChessPlayer(); // FOR TESTING  only TO REMOVE
+                const human2 = new HumanChessPlayer(); // FOR TESTING ONLY TO REMOVE
+                this.pieces.filter(piece => piece.hasColor(PieceColor.WHITE)).forEach(piece => piece.setOwner(human1));
+                this.pieces.filter(piece => piece.hasColor(PieceColor.BLACK)).forEach(piece => piece.setOwner(human2));
                 resolve();
                 return;
             });
@@ -290,7 +295,6 @@ export class ChessBoard
 
     private setCasePosition(chessCase: ChessCase, line: number, column: number): void
     {
-        // + 0.25 just to view case borders
         chessCase.position.setZ(((ChessCase.depth) * (4 - column)) - (ChessCase.depth / 2));
         chessCase.position.setX((ChessCase.width) * (line - 4));
         chessCase.position.setY(1550);

@@ -54,19 +54,12 @@ export class ChessInteractor
         this.mousePosition.z = 1;
         this.searchPointedObject();
     }
-    private onMouseMove(event: MouseEvent)
-    {
-        const renderingZone = this.renderer.domElement.getBoundingClientRect();
-        this.mousePosition.x = ( ( event.clientX - renderingZone.left ) / renderingZone.width ) * 2 - 1;
-        this.mousePosition.y = - ( ( event.clientY - renderingZone.top ) / renderingZone.height ) * 2 + 1;
-        this.mousePosition.z = 1;
-    }
     private searchPointedObject()
     {
         if (!this.isSelectingSomething)
         {
             this.raycaster.setFromCamera(this.mousePosition, this.camera);
-            let intersectedObjects = this.raycaster.intersectObjects(this.outlinables, true);
+            let intersectedObjects = this.raycaster.intersectObjects(this.outlinables.filter(outlinable => outlinable.visible), true);
             if (intersectedObjects.length > 0)
             {
                 if (this.previousOutlinableFound != null)
@@ -97,7 +90,7 @@ export class ChessInteractor
             }
             else if (this.previousOutlinableFound != null)
             {
-                intersectedObjects = this.raycaster.intersectObjects(this.selectables.filter(selectable => selectable.isAvailable()).map(selectable => selectable.getModel()), true);
+                intersectedObjects = this.raycaster.intersectObjects(this.selectables.filter(selectable => selectable.isAvailable() && selectable.getModel().visible).map(selectable => selectable.getModel()), true);
                 if (intersectedObjects.length > 0)
                 {
                     this.isSelectingSomething = true;

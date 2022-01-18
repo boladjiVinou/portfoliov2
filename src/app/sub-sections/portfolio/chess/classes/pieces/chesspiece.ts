@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { AudioPlayer } from '../audio/audioplayer';
 import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
 import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
 import { ChessPlayer } from '../player/chessplayer';
@@ -6,6 +7,8 @@ import { IOutlinable } from '../sceneinteraction/chessinteractor';
 import { PieceModelLoader } from './piecemodelloader';
 export abstract class ChessPiece implements ICaseVisitor, IOutlinable
 {
+    public static readonly AUDIO_MVT_PLAYER = new AudioPlayer();
+    public static readonly MOVEMENT_SOUND_PATH = '../../../../../../../assets/chess/piece-slide.mp3';
     private modelPath: string;
     private mesh: THREE.Object3D;
     protected positionAvailabilityChecker: IPiecesRequestSupplier;
@@ -43,34 +46,24 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         return new Promise<void>(resolve =>
             {
-                if (host.hasAccepted(this))
-                {
-                    this.hasMovedOnce = (this.currentCase != null);
-                    this.quitCase();
-                    this.currentCase = host;
-                    this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0))); // temporary
-                    resolve();
-                    return;
-                }
-                else
-                {
-                    throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
-                }
+                ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
+                this.hasMovedOnce = (this.currentCase != null);
+                this.captureHostVisitorIfNeeded(host);
+                this.quitCase();
+                this.currentCase = host;
+                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+                resolve();
+                return;
             });
     }
     visit( host: IVisitedCase): void
     {
-        if (host.hasAccepted(this))
-        {
-            this.hasMovedOnce = (this.currentCase != null);
-            this.quitCase();
-            this.currentCase = host;
-            this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
-        }
-        else
-        {
-            throw new Error(':( You have a logic problem here, it is up to the visited case to decide who can visit it by using the accept method');
-        }
+        ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
+        this.hasMovedOnce = (this.currentCase != null);
+        this.captureHostVisitorIfNeeded(host);
+        this.quitCase();
+        this.currentCase = host;
+        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
     }
     quitCase(): void
     {
@@ -78,6 +71,14 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
         {
             this.currentCase.removeVisitor();
             this.currentCase = null;
+        }
+    }
+    protected captureHostVisitorIfNeeded(host: IVisitedCase)
+    {
+        const prisonner = host.getVisitor();
+        if (prisonner !== null && prisonner !== undefined)
+        {
+            this.owner.capture(prisonner as ChessPiece);
         }
     }
     public init(): Promise<void>
@@ -98,13 +99,11 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                         material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x888888)//
                             , emissive: new THREE.Color(0x222222), roughness: 0, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
                     }
-                    this.getModel().name = this.getName();
                     this.mesh.traverse(child => {
                         if (child instanceof THREE.Mesh)
                         {
                             (child as THREE.Mesh).material = material.clone();
                         }
-                        child.name = this.getName();
                     });
                     resolve();
                     return;
@@ -116,12 +115,6 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
         this.positionAvailabilityChecker = mvtValidator;
     }
     abstract getPossibleDestinations(): ICaseBoardPosition[];
-    public getName(): string
-    {
-        const dateStr = Date.now().toString(36); // convert num to base 36 and stringif
-        const randomStr = Math.random().toString(36).substring(2, 8); // start at index 2 to skip decimal point
-        return `${dateStr}-${randomStr}`;
-    }
     public canJumpOverOtherPieces(): boolean
     {
         return false;

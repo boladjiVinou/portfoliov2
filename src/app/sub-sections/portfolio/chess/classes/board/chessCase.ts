@@ -8,13 +8,22 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     private positionInBoard: ICaseBoardPosition;
     private currentVisitor: ICaseVisitor = null;
     protected available = false;
+    private indicator: THREE.Mesh;
     constructor(material: THREE.Material, position: ICaseBoardPosition)
     {
-        super(ChessCase.generateGeometry(), [material, new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xA8DDA8)//
+        super(ChessCase.generateGeometry(), [material]);
+        const geometry = new THREE.CylinderGeometry( 65, 65, 2, 32 );
+        geometry.clearGroups();
+        geometry.addGroup(0, geometry.index.count, 0);
+        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xA8DDA8)//
             , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false}),
             new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xFFAB76)//
-                , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false})]);
+                , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false})] );
+        // this.indicator.rotateX(Math.PI / 2);
+        this.indicator.translateY(25);
+        this.add(this.indicator);
         this.positionInBoard = position;
+        this.indicator.visible = false;
     }
     private static generateGeometry(): THREE.BoxGeometry
     {
@@ -30,15 +39,17 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         // https://threejs.org/examples/#webgl_postprocessing_unreal_bloom_selective
         if (this.available && this.currentVisitor != null)
         {
-            this.geometry.groups[0].materialIndex = 2;
+            this.indicator.geometry.groups[0].materialIndex = 1;
+            this.indicator.visible = true;
         }
         else if (this.available)
         {
-            this.geometry.groups[0].materialIndex = 1;
+            this.indicator.geometry.groups[0].materialIndex = 0;
+            this.indicator.visible = true;
         }
         else
         {
-            this.geometry.groups[0].materialIndex = 0;
+            this.indicator.visible = false;
         }
     }
     isAvailable(): boolean
@@ -61,21 +72,13 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     {
         return new Promise<void>(resolve =>
             {
-                if (this.currentVisitor != null)
+                visitor.animatedVisit(this).then(() =>
                 {
-                    this.currentVisitor.quitCase();
-                }
-                this.currentVisitor = visitor;
-                this.currentVisitor.animatedVisit(this).then(() =>
-                {
+                    this.currentVisitor = visitor;
                     resolve();
                     return;
                 });
             });
-    }
-    public hasAccepted(visitor: ICaseVisitor): boolean
-    {
-        return this.currentVisitor === visitor;
     }
     public getCase3dPosition(): THREE.Vector3
     {
@@ -91,8 +94,8 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     }
     public acceptVisitor(visitor: ICaseVisitor): void
     {
+        visitor.visit(this);
         this.currentVisitor = visitor;
-        this.currentVisitor.visit(this);
     }
     public isEmpty(): boolean
     {
@@ -135,7 +138,6 @@ export interface IVisitedCase
     removeVisitor(): void;
     getCasePosition(): ICaseBoardPosition;
     getCase3dPosition(): THREE.Vector3;
-    hasAccepted(visitor: ICaseVisitor): boolean;
     getVisitor(): ICaseVisitor;
 }
 
