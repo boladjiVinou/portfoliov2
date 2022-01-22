@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
 import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../board/chessmovesmanager';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class PawnPiece extends ChessPiece
 {
@@ -12,7 +12,7 @@ export class PawnPiece extends ChessPiece
     {
         super('../../../../../../../assets/chess/low_poly_pawn/scene.gltf', color);
     }
-    visit(host: IVisitedCase): void
+    firstVisit(host: IVisitedCase): void
     {
         if (!this.hasMovedOnce)
         {
@@ -21,7 +21,7 @@ export class PawnPiece extends ChessPiece
                 this.mvtDirection = -1;
             }
         }
-        super.visit(host);
+        super.firstVisit(host);
     }
     public getHasMovedTwoSquares(): boolean
     {
@@ -118,5 +118,9 @@ export class PawnPiece extends ChessPiece
     private isMovingInDiagonal(host: IVisitedCase): boolean
     {
         return host.getCasePosition().J !== this.currentCase.getCasePosition().J;
+    }
+    public getType(): Readonly<PieceType>
+    {
+        return PieceType.PAWN;
     }
 }

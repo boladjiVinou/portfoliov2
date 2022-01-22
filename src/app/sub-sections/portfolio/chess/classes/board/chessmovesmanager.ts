@@ -1,8 +1,11 @@
-import { ChessCase, ICaseBoardPosition } from './chessCase';
+import { ChessCase, ICaseBoardPosition, ICaseVisitor } from './chessCase';
 import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { KingPiece } from '../pieces/kingpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
 import { ChessBoard } from './chessboard';
+import { Scene } from 'three';
+import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
+import { IPawnPromoter } from '../../chess.component';
 
 export interface IPiecesRequestSupplier
 {
@@ -24,7 +27,12 @@ export interface IPawnSpecialRequestSupplier extends IPiecesRequestSupplier
     canDoEnPassantCapture(pawn: NonNullable<PawnPiece>, position: NonNullable<ICaseBoardPosition>): boolean;
     realizeEnPassantCapture(pawn: NonNullable<PawnPiece>, position: NonNullable<ICaseBoardPosition>): void;
 }
-export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier
+export interface IGameRequestSupplier
+{
+    kingIsInCheck(kingColor: PieceColor): boolean;
+}
+
+export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier, IGameRequestSupplier
 {
     private chessBoard: Readonly<ChessCase[][]>;
     private fullBoard: Readonly<ChessBoard>;
@@ -32,6 +40,14 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
         this.chessBoard = board.getBoard();
         this.fullBoard = board;
+    }
+    kingIsInCheck(kingColor: PieceColor): boolean
+    {
+        const king = (kingColor === PieceColor.WHITE) ? this.fullBoard.getWhiteKing() : this.fullBoard.getBlackKing();
+        const opponentColor = (kingColor === PieceColor.WHITE) ? PieceColor.BLACK : PieceColor.WHITE;
+        const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(opponentColor) && piece.isVisible()).map(piece => piece.getPossibleDestinations()));
+        const kingPosition = king.getCurrentCase().getCasePosition();
+        return opponentDestinations.some( position => position.I === kingPosition.I && position.J === kingPosition.J);
     }
     realizeEnPassantCapture(pawn: PawnPiece, position: ICaseBoardPosition): void
     {
@@ -115,7 +131,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
             const rook = this.fullBoard.getRightBlackRook();
             if (!king.getHasMovedOnce() && !rook.getHasMovedOnce() && this.chessBoard[0][1].isEmpty() && this.chessBoard[0][2].isEmpty() && this.chessBoard[0][3].isEmpty())
             {
-                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.WHITE)).map(piece => piece.getPossibleDestinations()));
+                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.WHITE) && piece.isVisible()).map(piece => piece.getPossibleDestinations()));
                 return !opponentDestinations.some(destination => this.positionEquals(destination, {I: 0, J: 4})) && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 0, J: 3})) && //
                  !opponentDestinations.some(destination => this.positionEquals(destination , {I: 0, J: 2})) && !opponentDestinations.some(destination => this.positionEquals(destination ,  {I: 0, J: 1}));
             }
@@ -125,7 +141,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
             const rook = this.fullBoard.getRightWhiteRook();
             if (!king.getHasMovedOnce() && !rook.getHasMovedOnce() && this.chessBoard[7][6].isEmpty() && this.chessBoard[7][5].isEmpty())
             {
-                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.BLACK)).map(piece => piece.getPossibleDestinations()));
+                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.BLACK) && piece.isVisible()).map(piece => piece.getPossibleDestinations()));
                 return !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 4})) && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 5})) //
                 && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 6}));
             }
@@ -139,7 +155,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
             const rook = this.fullBoard.getLeftBlackRook();
             if (!king.getHasMovedOnce() && !rook.getHasMovedOnce() && this.chessBoard[0][6].isEmpty() && this.chessBoard[0][5].isEmpty())
             {
-                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.WHITE)).map(piece => piece.getPossibleDestinations()));
+                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.WHITE) && piece.isVisible()).map(piece => piece.getPossibleDestinations()));
                 return !opponentDestinations.some(destination => this.positionEquals(destination , {I: 0, J: 4})) && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 0, J: 5})) //
                 && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 0, J: 6}));
             }
@@ -149,13 +165,14 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
             const rook = this.fullBoard.getLeftWhiteRook();
             if (!king.getHasMovedOnce() && !rook.getHasMovedOnce() && this.chessBoard[7][1].isEmpty() && this.chessBoard[7][2].isEmpty() && this.chessBoard[7][3].isEmpty())
             {
-                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.BLACK)).map(piece => piece.getPossibleDestinations()));
+                const opponentDestinations: ICaseBoardPosition[] = [].concat(...this.fullBoard.getPieces().filter( piece => piece.hasColor(PieceColor.BLACK) && piece.isVisible()).map(piece => piece.getPossibleDestinations()));
                 return !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 4})) && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 3})) && //
                         !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 2}))  && !opponentDestinations.some(destination => this.positionEquals(destination , {I: 7, J: 1}));
             }
         }
         return false;
     }
+
     positionEquals(p1: ICaseBoardPosition, p2: ICaseBoardPosition): boolean
     {
         return p1.I === p2.I && p1.J === p2.J;

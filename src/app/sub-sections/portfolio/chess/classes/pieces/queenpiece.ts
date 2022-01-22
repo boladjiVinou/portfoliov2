@@ -1,6 +1,6 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class QueenPiece extends ChessPiece
 {
@@ -113,5 +113,9 @@ export class QueenPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I + 1, J: possiblePosition.J + 1};
         }
         return possiblesMoves;
+    }
+    public getType(): Readonly<PieceType>
+    {
+        return PieceType.QUEEN;
     }
 }

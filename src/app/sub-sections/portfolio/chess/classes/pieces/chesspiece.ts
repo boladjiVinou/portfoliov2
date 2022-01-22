@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { AudioPlayer } from '../audio/audioplayer';
-import { ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
+import { ChessCase, ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
 import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
 import { ChessPlayer } from '../player/chessplayer';
 import { IOutlinable } from '../sceneinteraction/chessinteractor';
@@ -56,7 +56,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                 return;
             });
     }
-    visit( host: IVisitedCase): void
+    firstVisit( host: IVisitedCase): void
     {
         ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
         this.hasMovedOnce = (this.currentCase != null);
@@ -78,7 +78,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
         const prisonner = host.getVisitor();
         if (prisonner !== null && prisonner !== undefined)
         {
-            this.owner.capture(prisonner as ChessPiece);
+            this.getOwner().capture(prisonner as ChessPiece);
         }
     }
     public init(): Promise<void>
@@ -121,7 +121,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     }
     protected set3DPosition(position: THREE.Vector3): void
     {
-        this.mesh.position.set(position.x, position.y, position.z);
+        this.getModel().position.set(position.x, position.y, position.z);
     }
     public getHasMovedOnce(): boolean
     {
@@ -151,10 +151,23 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         return this.owner;
     }
+    public getCurrentCase(): Readonly<ChessCase>
+    {
+        return this.currentCase as Readonly<ChessCase>;
+    }
+    public isVisible(): boolean
+    {
+        return this.getModel().visible;
+    }
+    public abstract getType(): Readonly<PieceType>;
 }
 export enum PieceColor
 {
     WHITE, BLACK
+}
+export enum PieceType
+{
+    KING, QUEEN, PAWN, ROOK, BISHOP, KNIGHT
 }
 
 

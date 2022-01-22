@@ -1,6 +1,6 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 import { KingPiece } from './kingpiece';
 
 export class RookPiece extends ChessPiece
@@ -62,8 +62,8 @@ export class RookPiece extends ChessPiece
         }
         return possiblesMoves;
     }
-    castleWith(king: KingPiece): void
+    public getType(): Readonly<PieceType>
     {
-        throw new Error('not yet implemented');
+        return PieceType.ROOK;
     }
 }

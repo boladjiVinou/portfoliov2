@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
 import { IKingSpecialRequestSupplier, IPiecesRequestSupplier} from '../board/chessmovesmanager';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class KingPiece extends ChessPiece
 {
@@ -57,7 +57,7 @@ export class KingPiece extends ChessPiece
                 }
             });
     }
-    visit( host: IVisitedCase): void
+    firstVisit( host: IVisitedCase): void
     {
         ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
         this.hasMovedOnce = (this.currentCase != null);
@@ -155,4 +155,8 @@ export class KingPiece extends ChessPiece
         return possiblesMoves;
     }
 
+    public getType(): Readonly<PieceType>
+    {
+        return PieceType.KING;
+    }
 }

@@ -15,11 +15,7 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         const geometry = new THREE.CylinderGeometry( 65, 65, 2, 32 );
         geometry.clearGroups();
         geometry.addGroup(0, geometry.index.count, 0);
-        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xA8DDA8)//
-            , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false}),
-            new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0xFFAB76)//
-                , emissive: new THREE.Color(0, 0, 0), roughness: 1, metalness: 0, flatShading: true, wireframe: false, vertexColors: false, fog: false})] );
-        // this.indicator.rotateX(Math.PI / 2);
+        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshStandardMaterial({color: new THREE.Color(0xA8DDA8)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xFFAB76)})]);
         this.indicator.translateY(25);
         this.add(this.indicator);
         this.positionInBoard = position;
@@ -94,7 +90,7 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
     }
     public acceptVisitor(visitor: ICaseVisitor): void
     {
-        visitor.visit(this);
+        visitor.firstVisit(this);
         this.currentVisitor = visitor;
     }
     public isEmpty(): boolean
@@ -127,7 +123,7 @@ export interface ICaseBoardPosition
 }
 export interface ICaseVisitor
 {
-    visit(host: IVisitedCase): void;
+    firstVisit(host: IVisitedCase): void;
     animatedVisit(host: IVisitedCase): Promise<void>;
     quitCase(): void;
 }

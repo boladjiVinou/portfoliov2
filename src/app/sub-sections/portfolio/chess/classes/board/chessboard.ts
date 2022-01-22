@@ -1,14 +1,13 @@
 import * as THREE from 'three';
-import { Color, Vector2, Vector3 } from 'three';
 import { BlackChessCase, ChessCase, WhiteChessCase } from './chessCase';
 import { BishopPiece } from '../pieces/bishoppiece';
 import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { KingPiece } from '../pieces/kingpiece';
 import { KnightPiece } from '../pieces/knightpiece';
-import { PawnPiece } from '../pieces/pawnpiece';
 import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
-import { HumanChessPlayer } from '../player/chessplayer';
+import { ChessPlayer, HumanChessPlayer } from '../player/chessplayer';
+import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
 export class ChessBoard
 {
     private board: ChessCase[][] = [];
@@ -17,6 +16,8 @@ export class ChessBoard
     private whiteRightRook: RookPiece;
     private blackLeftRook: RookPiece;
     private blackRightRook: RookPiece;
+    private blackKing: KingPiece;
+    private whiteKing: KingPiece;
     // green: y up, red: x to me, z: blue left
     public init(): Promise<void>
     {
@@ -25,14 +26,16 @@ export class ChessBoard
             this.loadChessPieces().then(() =>
             {
                 this.copyRooksReferences();
-                const human1 = new HumanChessPlayer(); // FOR TESTING  only TO REMOVE
-                const human2 = new HumanChessPlayer(); // FOR TESTING ONLY TO REMOVE
-                this.pieces.filter(piece => piece.hasColor(PieceColor.WHITE)).forEach(piece => piece.setOwner(human1));
-                this.pieces.filter(piece => piece.hasColor(PieceColor.BLACK)).forEach(piece => piece.setOwner(human2));
+                this.copyKingsReferences();
                 resolve();
                 return;
             });
         });
+    }
+
+    public setPieceOwner(color: PieceColor, player: ChessPlayer)
+    {
+        this.pieces.filter(piece => piece.hasColor(color)).forEach(piece => piece.setOwner(player));
     }
 
     public getLeftBlackRook(): Readonly<RookPiece>
@@ -51,12 +54,25 @@ export class ChessBoard
     {
         return this.whiteRightRook;
     }
+    public getWhiteKing(): Readonly<KingPiece>
+    {
+        return this.whiteKing;
+    }
+    public getBlackKing(): Readonly<KingPiece>
+    {
+        return this.blackKing;
+    }
     private copyRooksReferences()
     {
         this.whiteLeftRook = this.board[7][0].getVisitor() as RookPiece;
         this.whiteRightRook = this.board[7][7].getVisitor() as RookPiece;
         this.blackLeftRook = this.board[0][7].getVisitor() as RookPiece;
         this.blackRightRook = this.board[0][0].getVisitor() as RookPiece;
+    }
+    private copyKingsReferences()
+    {
+        this.blackKing = this.board[0][4].getVisitor() as KingPiece;
+        this.whiteKing = this.board[7][4].getVisitor() as KingPiece;
     }
     private createCases(): void
     {
@@ -239,7 +255,7 @@ export class ChessBoard
             let i = 0;
             const pawnIniter = () =>
             {
-                const pawn = new PawnPiece(color);
+                const pawn = new TransformablePawnPiece(color);
                 pawn.init().then(() =>
                 {
                     this.board[row][i].acceptVisitor(pawn);

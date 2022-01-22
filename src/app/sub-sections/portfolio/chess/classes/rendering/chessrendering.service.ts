@@ -3,12 +3,14 @@ import { Injectable, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import { Scene, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import { IPawnPromoter } from '../../chess.component';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessBoard } from '../board/chessboard';
 import { ChessNavigationManager } from '../board/chessmovesmanager';
 import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { LivingRoom } from '../room/livingroom';
 import { ChessInteractor } from '../sceneinteraction/chessinteractor';
+import { IRunnable } from './iRunnable';
 @Injectable()
 export class ChessRenderingService implements OnDestroy {
     private scene: Scene;
@@ -18,74 +20,99 @@ export class ChessRenderingService implements OnDestroy {
     private container: Element;
     private camreaFrontIdealPosiion = new THREE.Vector3(850, -400, 0);
     private cameraTopIdealPosition = new THREE.Vector3(0, 100, 0);
-    private parentNode: THREE.Object3D;
+    private parentNode: THREE.Object3D = new THREE.Object3D();
     private parentNodeInitialPosition: THREE.Vector3;
     private shouldAnimateParentNode = true;
     private parentNodeAnimationDelta = 5;
-    private chessInteractor: ChessInteractor;
+    private chessInteractor: Readonly<ChessInteractor>;
     private chessNavigator: ChessNavigationManager;
     private ambientSoundPlayer: AudioPlayer;
+    private chessboard: ChessBoard;
 
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(0x0c2b40);
-            this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true, depth: true , logarithmicDepthBuffer: true});
-            this.renderer.shadowMap.enabled = true;
-            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-            this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 50000);
-            this.camera.position.set(12898.264904688718, 13000, 14319.672926075744);
+            this.initRenderer();
+            this.initCamera();
+            this.initRoom();
 
-            const axisHelper = new THREE.AxesHelper(10);
-            // this.scene.add(axisHelper);
-            this.scene.add(this.camera);
+            this.parentNode.translateY(-3000);
+            this.parentNodeInitialPosition = this.parentNode.position.clone();
+            this.scene.add(this.parentNode);
 
-            this.parentNode = new THREE.Object3D();
-            const chessBoard = new ChessBoard();
-            chessBoard.init().then(() => {
-                const board = chessBoard.getBoard();
-                board.forEach((chessLine) => {
-                    chessLine.forEach((chessCase) => {
-                        this.parentNode.add(chessCase);
-                    });
-                });
-                this.chessNavigator = new ChessNavigationManager(chessBoard);
-                chessBoard.getPieces().forEach(piece =>
-                    {
-                        piece.setNavigationChecker(this.chessNavigator);
-                        this.parentNode.add(piece.getModel());
-                    });
-                const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
-                const room = new LivingRoom();
-                room.init();
-                room.getChildren().forEach(piece => {
-                    this.parentNode.add(piece);
-                });
-                this.parentNode.translateY(-3000);
-                this.parentNodeInitialPosition = this.parentNode.position.clone();
-                this.scene.add(this.parentNode);
+            this.initLiight();
 
-                const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
-                spotLight.position.set(0, 3000, 0);
-                this.scene.add(spotLight);
-                this.scene.add(ambientLight);
-                this.camera.add(new THREE.PointLight(0xffffff, 0.3));
-                this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.camera.lookAt(0, -1000, 0);
-                this.chessInteractor = new ChessInteractor(chessBoard.getPieces().filter(piece => piece.hasColor(PieceColor.WHITE)), [].concat(...board), this.renderer, this.scene, this.camera);
-                // this.initController();
-                this.ambientSoundPlayer = new AudioPlayer();
-                this.ambientSoundPlayer.initSound(this.camera, this.scene, '../../../../../assets/chess/Juan-Sanchez-Now-The-Silence.mp3').then(() =>
-                {
-                    ChessPiece.AUDIO_MVT_PLAYER.initSound(this.camera, this.scene, ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
-                    {
-                        resolve();
-                        return;
-                    });
+            this.initChessBoard().then(() =>
+            {
+               this.initAmbientSound().then(() => {
+                   resolve();
+                   return;
+               });
+            });
+
+        });
+    }
+
+    private initRenderer()
+    {
+        this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true, depth: true , logarithmicDepthBuffer: true});
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
+
+    private initRoom()
+    {
+        const room = new LivingRoom();
+        room.init();
+        room.getChildren().forEach(piece => {
+            this.parentNode.add(piece);
+        });
+    }
+
+    private initCamera()
+    {
+        this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 50000);
+        this.camera.position.set(12898.264904688718, 13000, 14319.672926075744);
+        this.camera.lookAt(0, -1000, 0);
+        this.camera.add(new THREE.PointLight(0xffffff, 0.3));
+        this.scene.add(this.camera);
+    }
+
+    private initLiight()
+    {
+        const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
+        spotLight.position.set(0, 3000, 0);
+        this.scene.add(spotLight);
+        const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
+        this.scene.add(ambientLight);
+    }
+
+    private initChessBoard(): Promise<void>
+    {
+        this.chessboard = new ChessBoard();
+        return this.chessboard.init().then(() => {
+            const board = this.chessboard.getBoard();
+            board.forEach((chessLine) => {
+                chessLine.forEach((chessCase) => {
+                    this.parentNode.add(chessCase);
                 });
             });
+            this.chessNavigator = new ChessNavigationManager(this.chessboard);
+            this.chessboard.getPieces().forEach(piece =>
+                {
+                    piece.setNavigationChecker(this.chessNavigator);
+                    this.parentNode.add(piece.getModel());
+                });
         });
+    }
+
+    private initAmbientSound(): Promise<void>
+    {
+        this.ambientSoundPlayer = new AudioPlayer();
+        return this.ambientSoundPlayer.initSound(this.camera, this.scene, '../../../../../assets/chess/Juan-Sanchez-Now-The-Silence.mp3');
     }
 
     private animateParentNode()
@@ -99,6 +126,15 @@ export class ChessRenderingService implements OnDestroy {
             this.parentNode.position.y += this.parentNodeAnimationDelta;
         }
     }
+    public getChessboard(): Readonly<ChessBoard>
+    {
+        return this.chessboard;
+    }
+    public getRenderer(): Readonly<THREE.WebGLRenderer>
+    {
+        return this.renderer;
+    }
+
     public setCameraControl(isEnabled: boolean)
     {
         this.controls.enabled = isEnabled;
@@ -156,7 +192,6 @@ export class ChessRenderingService implements OnDestroy {
                         this.camera.lookAt(-1500, -3000, 0);
                     }
                     this.camera.updateProjectionMatrix();
-                    this.chessInteractor.setEnable(true);
                     clearInterval(cameraPositionUpdater);
                     resolve();
                     return;
@@ -192,7 +227,7 @@ export class ChessRenderingService implements OnDestroy {
         });
         if (this.chessInteractor != null)
         {
-            this.chessInteractor.removeWindowEvents();
+            this.chessInteractor.removeMouseClickListener();
         }
         window.removeEventListener('resize', this.resizeListener.bind(this));
         this.scene.children = [];
@@ -217,7 +252,6 @@ export class ChessRenderingService implements OnDestroy {
         window.addEventListener('resize', this.resizeListener.bind(this));
         if (this.chessInteractor != null)
         {
-            this.chessInteractor.trackWindowEvents();
             this.chessInteractor.onResize();
         }
     }
@@ -239,6 +273,11 @@ export class ChessRenderingService implements OnDestroy {
     public getCamera(): THREE.Camera
     {
         return this.camera;
+    }
+
+    public setChessInteractor(interactor: Readonly<ChessInteractor>)
+    {
+        this.chessInteractor = interactor;
     }
 
     public animate() {

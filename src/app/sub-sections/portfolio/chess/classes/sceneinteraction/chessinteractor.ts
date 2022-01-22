@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
+import { BehaviorSubject, Observable } from 'rxjs';
 export class ChessInteractor
 {
     private outlinables: THREE.Object3D[];
@@ -18,6 +19,8 @@ export class ChessInteractor
     private isSelectingSomething = false;
     private  scene: THREE.Scene;
     private isEnabled = false;
+    private choiceMadeSubject: BehaviorSubject<boolean>;
+    private choiceMadeObservable: Observable<boolean>;
     constructor(outlinables: Readonly<IOutlinable[]>, selectables: Readonly<ISelectable[]>, renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera)
     {
         this.outlinables = outlinables.map(piece => piece.getModel());
@@ -37,6 +40,8 @@ export class ChessInteractor
         this.raycaster = new THREE.Raycaster();
         this.camera = camera;
         this.scene = scene;
+        this.choiceMadeSubject = new BehaviorSubject(false);
+        this.choiceMadeObservable = this.choiceMadeSubject.asObservable();
     }
     public setEnable(isEnabled: boolean): void
     {
@@ -114,6 +119,7 @@ export class ChessInteractor
                         this.outlinePass.selectedObjects = [];
                         this.isSelectingSomething = false;
                         this.outlinePass.renderToScreen = false;
+                        this.choiceMadeSubject.next(true);
                     });
                 }
                 else
@@ -129,17 +135,21 @@ export class ChessInteractor
 
     }
 
-    public trackWindowEvents()
+    public trackMouseClickEvents()
     {
-        // window.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.choiceMadeSubject.next(false);
         window.addEventListener('click', this.onMouseClick.bind(this));
-        window.addEventListener('resize', this.onResize.bind(this));
     }
-    public removeWindowEvents()
+
+    public removeMouseClickListener()
     {
-        // window.removeEventListener('mousemove', this.onMouseMove.bind(this));
         window.removeEventListener('click', this.onMouseClick.bind(this));
-        window.removeEventListener('resize', this.onResize.bind(this));
+    }
+
+
+    public getChoiceMadeObservable(): Readonly<Observable<boolean>>
+    {
+        return this.choiceMadeObservable;
     }
 
     public animate(): void

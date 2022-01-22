@@ -1,5 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class KnightPiece extends ChessPiece
 {
@@ -41,5 +41,9 @@ export class KnightPiece extends ChessPiece
                     return;
                 });
             });
+    }
+    public getType(): Readonly<PieceType>
+    {
+        return PieceType.KNIGHT;
     }
 }

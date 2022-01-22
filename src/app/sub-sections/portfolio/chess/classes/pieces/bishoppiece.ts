@@ -1,5 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
-import { ChessPiece, PieceColor } from './chesspiece';
+import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class BishopPiece extends ChessPiece
 {
@@ -63,5 +63,9 @@ export class BishopPiece extends ChessPiece
             possiblePosition = {I: possiblePosition.I + 1, J: possiblePosition.J + 1};
         }
         return possiblesMoves;
+    }
+    public getType(): Readonly<PieceType>
+    {
+        return PieceType.BISHOP;
     }
 }

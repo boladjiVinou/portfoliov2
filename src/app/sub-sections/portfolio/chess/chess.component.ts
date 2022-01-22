@@ -4,13 +4,20 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
 import { ChessRenderingService } from './classes/rendering/chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
+import { ChessPiece, PieceColor, PieceType } from './classes/pieces/chesspiece';
+import { AIChessPlayer, ChessPlayer, HumanChessPlayer } from './classes/player/chessplayer';
 
+export interface IPawnPromoter
+{
+    askTypeToPromoteTo(): Promise<PieceType>;
+}
 @Component({
     selector: 'app-chess',
     templateUrl: './chess.component.html',
-    styleUrls: ['./chess.component.scss']
+    styleUrls: ['./chess.component.scss'],
+    providers: [ChessRenderingService]
 })
-export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPromoter {
     private langageSubscription: Subscription;
     public displayWarning = false;
     public menuOpened = false;
@@ -26,7 +33,12 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     public soundLabel: string;
     public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
     public playLabel: string;
+    private p1: ChessPlayer;
+    private p2: ChessPlayer;
     constructor(private chessRenderingService: ChessRenderingService, private languageService: LanguageService , private zone: NgZone){
+    }
+    askTypeToPromoteTo(): Promise<PieceType> {
+        throw new Error('Method not implemented.');
     }
     ngOnInit(): void {
         this.langageSubscription = this.languageService.getEnglishLangageState().subscribe((value) => {
@@ -41,12 +53,19 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
         else
         {
             this.chessRenderingService.init().then(() => {
-                // this.chessRenderingService.setCameraControl(false);
                 const container = document.querySelector('#render-container');
                 container.removeChild(document.getElementById('progress-bar'));
                 this.chessRenderingService.setupHtmlContainer(container);
-                this.chessRenderingService.animate();
-                this.showMenuButton = true;
+                this.p1 = new HumanChessPlayer(this, this.chessRenderingService);
+                this.p2 = new AIChessPlayer();
+                this.chessRenderingService.getChessboard().setPieceOwner(PieceColor.WHITE, this.p1);
+                this.chessRenderingService.getChessboard().setPieceOwner(PieceColor.BLACK, this.p2);
+                ChessPiece.AUDIO_MVT_PLAYER.initSound(this.chessRenderingService.getCamera(), this.chessRenderingService.getScene(), ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
+                {
+                    this.chessRenderingService.animate();
+                    this.showMenuButton = true;
+                });
+
             });
         }
     }
@@ -117,7 +136,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit {
     {
         this.menuOpened = false;
         this.chessRenderingService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
-
+            this.p1.play();
         });
     }
     public onMenuClick()
