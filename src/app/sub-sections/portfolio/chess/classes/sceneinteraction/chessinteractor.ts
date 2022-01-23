@@ -22,10 +22,6 @@ export class ChessInteractor
     private isEnabled = false;
     private choiceMadeSubject: BehaviorSubject<boolean>;
     private choiceMadeObservable: Observable<boolean>;
-    private promotionValidationButton: THREE.Mesh;
-    private promotionPreviousButton: THREE.Mesh;
-    private promotionNextButton: THREE.Mesh;
-    private buttonSize: number;
     private mouseClickCallback = (ev: MouseEvent) => {
         this.onMouseClick(ev);
     }
@@ -49,22 +45,6 @@ export class ChessInteractor
         this.camera = camera;
         this.choiceMadeSubject = new BehaviorSubject(false);
         this.choiceMadeObservable = this.choiceMadeSubject.asObservable();
-        this.buttonSize = ChessCase.width / 5;
-        const validationImg =  new THREE.TextureLoader().load( '../../../../../../assets/chess/correct.png' );
-        this.promotionValidationButton = new THREE.Mesh(new THREE.PlaneGeometry(this.buttonSize, this.buttonSize), new THREE.MeshBasicMaterial({map: validationImg, transparent: true}));
-        const previousImg =  new THREE.TextureLoader().load( '../../../../../../assets/chess/previous-button.png' );
-        this.promotionPreviousButton = new THREE.Mesh(new THREE.PlaneGeometry(this.buttonSize, this.buttonSize), new THREE.MeshBasicMaterial({map: previousImg, transparent: true}));
-        const nextImg =  new THREE.TextureLoader().load( '../../../../../../assets/chess/next-button.png' );
-        /*this.promotionNextButton = new THREE.Mesh(new THREE.PlaneGeometry(this.buttonSize, this.buttonSize), new THREE.MeshBasicMaterial({map: nextImg, transparent: true}));
-        this.promotionValidationButton.position.set(0, -1100, 0);
-        this.promotionPreviousButton.position.set(0, -1100, this.buttonSize);
-        this.promotionNextButton.position.set(0, -1100, -this.buttonSize);
-        this.promotionValidationButton.rotateY(Math.PI / 2);
-        this.promotionPreviousButton.rotateY(Math.PI / 2);
-        this.promotionNextButton.rotateY(Math.PI / 2);
-        scene.add(this.promotionValidationButton);
-        scene.add(this.promotionNextButton);
-        scene.add(this.promotionPreviousButton);*/
     }
     public setEnable(isEnabled: boolean): void
     {
@@ -114,11 +94,6 @@ export class ChessInteractor
                     this.previousOutlinableFound = this.outlinablesMap.get(node.uuid);
                     this.outlinePass.selectedObjects = [node];
                     this.outlinePass.renderToScreen = true;
-                    /*const pieceModel = (this.previousOutlinableFound as ChessPiece);
-                    const piecePosition = pieceModel.getModel().position.clone();
-                    this.promotionValidationButton.position.set(piecePosition.x, -1100, piecePosition.z);
-                    this.promotionPreviousButton.position.set(piecePosition.x, -1100, piecePosition.z + this.buttonSize);
-                    this.promotionNextButton.position.set(piecePosition.x, -1100, piecePosition.z - this.buttonSize);*/
                 }
             }
             else if (this.previousOutlinableFound != null)
