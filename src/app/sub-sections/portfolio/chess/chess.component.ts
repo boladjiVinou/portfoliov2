@@ -4,13 +4,16 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
 import { ChessRenderingService } from './classes/rendering/chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
-import { ChessPiece, PieceColor, PieceType } from './classes/pieces/chesspiece';
-import { AIChessPlayer, ChessPlayer, HumanChessPlayer } from './classes/player/chessplayer';
+import { PieceType } from './classes/pieces/chesspiece';
+import { ChessGame } from './classes/game/chessgame';
+import { AIType } from './classes/player/aichessplayer';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface IPawnPromoter
 {
     askTypeToPromoteTo(): Promise<PieceType>;
 }
+
 @Component({
     selector: 'app-chess',
     templateUrl: './chess.component.html',
@@ -22,8 +25,15 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public displayWarning = false;
     public menuOpened = false;
     public showMenuButton = false;
+    public showPawnPromotionDialog = false;
+    public pawnPromotionQuestion: string;
+    public pawnPromotionChoice: PieceType;
     public warningMsg: string;
     public aiTypeLabel: string;
+    public queen: string;
+    public bishop: string;
+    public rook: string;
+    public knight: string;
     // ['Depth First Search', 'Reinforcement Learning', 'Baysian networks'], ['Recherche en largeur', 'Apprentissage par reenforcement', 'Reseaux Bayesien']
     public aiChoices = new ChoiceContainer(['A star'], ['A étoile']);
     public difficultyLabel: string;
@@ -33,12 +43,29 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public soundLabel: string;
     public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
     public playLabel: string;
-    private p1: ChessPlayer;
-    private p2: ChessPlayer;
+    private chessGame: ChessGame;
+    private pieceTypeSubject: BehaviorSubject<PieceType> = new BehaviorSubject(PieceType.PAWN);
+    private pieceTypeObservable: Observable<PieceType>;
     constructor(private chessRenderingService: ChessRenderingService, private languageService: LanguageService , private zone: NgZone){
     }
     askTypeToPromoteTo(): Promise<PieceType> {
-        throw new Error('Method not implemented.');
+        return new Promise<PieceType> (resolve =>
+            {
+                this.showPawnPromotionDialog = true;
+                let choiceSubscription: Subscription;
+                choiceSubscription = this.pieceTypeObservable.subscribe(chosenType =>
+                    {
+                        choiceSubscription.unsubscribe();
+                        this.showPawnPromotionDialog = false;
+                        this.pieceTypeSubject.next(PieceType.PAWN);
+                        resolve(chosenType);
+                        return;
+                    });
+            });
+    }
+    submitPromotionChoice()
+    {
+        this.pieceTypeSubject.next(this.pawnPromotionChoice);
     }
     ngOnInit(): void {
         this.langageSubscription = this.languageService.getEnglishLangageState().subscribe((value) => {
@@ -56,17 +83,14 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
                 const container = document.querySelector('#render-container');
                 container.removeChild(document.getElementById('progress-bar'));
                 this.chessRenderingService.setupHtmlContainer(container);
-                this.p1 = new HumanChessPlayer(this, this.chessRenderingService);
-                this.p2 = new AIChessPlayer();
-                this.chessRenderingService.getChessboard().setPieceOwner(PieceColor.WHITE, this.p1);
-                this.chessRenderingService.getChessboard().setPieceOwner(PieceColor.BLACK, this.p2);
-                ChessPiece.AUDIO_MVT_PLAYER.initSound(this.chessRenderingService.getCamera(), this.chessRenderingService.getScene(), ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
+                this.chessGame = new ChessGame();
+                this.chessGame.init(this.chessRenderingService, this, AIType.DFS).then(() =>
                 {
                     this.chessRenderingService.animate();
                     this.showMenuButton = true;
                 });
-
             });
+            this.pieceTypeObservable = this.pieceTypeSubject.asObservable();
         }
     }
 
@@ -96,6 +120,11 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.viewLabel = 'View';
             this.soundLabel = 'Sound';
             this.playLabel = 'Play';
+            this.pawnPromotionQuestion = 'Your pawn need to be promoted, choose a type';
+            this.queen = 'Queen';
+            this.bishop = 'Bishop';
+            this.rook = 'Rook';
+            this.knight = 'Knight';
         }
         else
         {
@@ -105,6 +134,11 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.viewLabel = 'Vue';
             this.soundLabel = 'Son';
             this.playLabel = 'Jouer';
+            this.pawnPromotionQuestion = 'Votre pion doit etre promu, veuillez selectionner un nouveau type';
+            this.queen = 'Reine';
+            this.bishop = 'Fou';
+            this.rook = 'Tour';
+            this.knight = 'Cavalier';
         }
         this.aiChoices.setLangage(isEnglish);
         this.difficultyChoices.setLangage(isEnglish);
@@ -136,7 +170,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     {
         this.menuOpened = false;
         this.chessRenderingService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
-            this.p1.play();
+            this.chessGame.start();
         });
     }
     public onMenuClick()

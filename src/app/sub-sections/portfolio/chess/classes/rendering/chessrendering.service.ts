@@ -1,16 +1,12 @@
-import { noop } from '@angular/compiler/src/render3/view/util';
 import { Injectable, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
-import { Scene, WebGLRenderer } from 'three';
+import { Scene, SpotLight, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
-import { IPawnPromoter } from '../../chess.component';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessBoard } from '../board/chessboard';
-import { ChessNavigationManager } from '../board/chessmovesmanager';
-import { ChessPiece, PieceColor } from '../pieces/chesspiece';
+import { ChessPiece } from '../pieces/chesspiece';
 import { LivingRoom } from '../room/livingroom';
 import { ChessInteractor } from '../sceneinteraction/chessinteractor';
-import { IRunnable } from './iRunnable';
 @Injectable()
 export class ChessRenderingService implements OnDestroy {
     private scene: Scene;
@@ -25,7 +21,6 @@ export class ChessRenderingService implements OnDestroy {
     private shouldAnimateParentNode = true;
     private parentNodeAnimationDelta = 5;
     private chessInteractor: Readonly<ChessInteractor>;
-    private chessNavigator: ChessNavigationManager;
     private ambientSoundPlayer: AudioPlayer;
     private chessboard: ChessBoard;
 
@@ -36,13 +31,14 @@ export class ChessRenderingService implements OnDestroy {
 
             this.initRenderer();
             this.initCamera();
+            // this.initController();
             this.initRoom();
 
             this.parentNode.translateY(-3000);
             this.parentNodeInitialPosition = this.parentNode.position.clone();
             this.scene.add(this.parentNode);
 
-            this.initLiight();
+            this.initLight();
 
             this.initChessBoard().then(() =>
             {
@@ -77,19 +73,37 @@ export class ChessRenderingService implements OnDestroy {
         this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 50000);
         this.camera.position.set(12898.264904688718, 13000, 14319.672926075744);
         this.camera.lookAt(0, -1000, 0);
-        this.camera.add(new THREE.PointLight(0xffffff, 0.3));
+        this.camera.add(new THREE.PointLight(0x404040, 0.3));
         this.scene.add(this.camera);
     }
 
-    private initLiight()
+    private initLight()
     {
-        const spotLight = new THREE.SpotLight(0xffffff, 1, 1000, Math.PI / 2, 0.1);
-        spotLight.position.set(0, 3000, 0);
-        this.scene.add(spotLight);
+        const directionalLight = new THREE.DirectionalLight(0x505050, 1);
+        directionalLight.position.set(0, 1, 1);
+        this.scene.add(directionalLight);
         const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
         this.scene.add(ambientLight);
     }
 
+    private initNightLight()
+    {
+        const directionalLight = new THREE.DirectionalLight(0x404040, 1);
+        directionalLight.position.set(0, 1, 1);
+        this.scene.add(directionalLight);
+        // const spotLight = new THREE.SpotLight(0xffffff, 1, 3000, Math.PI / 2, 0.1);
+        // spotLight.position.set(0, 3000, 0);
+        // this.scene.add(spotLight);
+        const bulbLight = new SpotLight(LivingRoom.LampBulbColor, 1, 6000, Math.PI / 2);
+        bulbLight.position.set(-4000, 1200, -4000);
+        bulbLight.castShadow = true;
+        const sphereSize = 100;
+        const pointLightHelper = new THREE.SpotLightHelper( bulbLight, sphereSize );
+        this.scene.add( pointLightHelper );
+        this.scene.add(bulbLight);
+        const ambientLight = new THREE.AmbientLight( 0x404040, 0.5);
+        this.scene.add(ambientLight);
+    }
     private initChessBoard(): Promise<void>
     {
         this.chessboard = new ChessBoard();
@@ -100,10 +114,8 @@ export class ChessRenderingService implements OnDestroy {
                     this.parentNode.add(chessCase);
                 });
             });
-            this.chessNavigator = new ChessNavigationManager(this.chessboard);
             this.chessboard.getPieces().forEach(piece =>
                 {
-                    piece.setNavigationChecker(this.chessNavigator);
                     this.parentNode.add(piece.getModel());
                 });
         });

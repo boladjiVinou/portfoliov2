@@ -1,3 +1,4 @@
+import { BrowserStack } from 'protractor/built/driverProviders';
 import * as THREE from 'three';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessCase, ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';

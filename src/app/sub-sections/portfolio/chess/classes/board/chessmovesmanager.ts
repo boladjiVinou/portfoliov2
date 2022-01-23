@@ -3,9 +3,6 @@ import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { KingPiece } from '../pieces/kingpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
 import { ChessBoard } from './chessboard';
-import { Scene } from 'three';
-import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
-import { IPawnPromoter } from '../../chess.component';
 
 export interface IPiecesRequestSupplier
 {

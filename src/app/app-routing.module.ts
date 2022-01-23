@@ -54,6 +54,10 @@ const routes: Routes = [{
 {
   path: 'portfolio/Chess',
   component: ChessComponent
+},
+{
+  path: 'portfolio/Échecs',
+  component: ChessComponent
 }
 ];
 

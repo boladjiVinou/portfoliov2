@@ -6,8 +6,9 @@ import { KingPiece } from '../pieces/kingpiece';
 import { KnightPiece } from '../pieces/knightpiece';
 import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
-import { ChessPlayer, HumanChessPlayer } from '../player/chessplayer';
+import { ChessPlayer} from '../player/chessplayer';
 import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
+import { ChessNavigationManager, IGameRequestSupplier } from './chessmovesmanager';
 export class ChessBoard
 {
     private board: ChessCase[][] = [];
@@ -18,6 +19,7 @@ export class ChessBoard
     private blackRightRook: RookPiece;
     private blackKing: KingPiece;
     private whiteKing: KingPiece;
+    private chessNavigator: ChessNavigationManager;
     // green: y up, red: x to me, z: blue left
     public init(): Promise<void>
     {
@@ -27,10 +29,17 @@ export class ChessBoard
             {
                 this.copyRooksReferences();
                 this.copyKingsReferences();
+                this.chessNavigator = new ChessNavigationManager(this);
+                this.pieces.forEach(piece => piece.setNavigationChecker(this.chessNavigator));
                 resolve();
                 return;
             });
         });
+    }
+
+    public getGameRequestsSupplier(): Readonly<IGameRequestSupplier>
+    {
+        return this.chessNavigator;
     }
 
     public setPieceOwner(color: PieceColor, player: ChessPlayer)

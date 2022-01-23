@@ -1,6 +1,6 @@
 import { ChessCase, ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
 import { IPawnSpecialRequestSupplier } from '../board/chessmovesmanager';
-import { ChessPlayer, HumanChessPlayer } from '../player/chessplayer';
+import { ChessPlayer} from '../player/chessplayer';
 import { BishopPiece } from './bishoppiece';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 import { KingPiece } from './kingpiece';

@@ -41,4 +41,34 @@
         </div>
         <button id="play-button" type="button" class="btn btn-success" (click)="startGame()">{{playLabel}}</button>
     </div>
+    <div class="pawn-promotion-container" *ngIf="showPawnPromotionDialog">
+        <strong>{{pawnPromotionQuestion}}</strong>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="promotion-choice" id="queen-radio" [value]="1" [(ngModel)]="pawnPromotionChoice" checked>
+           <label class="form-check-label" for="queen-radio">
+           {{queen}}
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="promotion-choice" id="bishop-radio" [value]="4" [(ngModel)]="pawnPromotionChoice">
+           <label class="form-check-label" for="bishop-radio">
+            {{bishop}}
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="promotion-choice" id="rook-radio" [value]="3" [(ngModel)]="pawnPromotionChoice">
+           <label class="form-check-label" for="rook-radio">
+            {{rook}}
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="promotion-choice" id="knight-radio" [value]="5" [(ngModel)]="pawnPromotionChoice">
+           <label class="form-check-label" for="knight-radio">
+            {{knight}}
+           </label>
+        </div>
+        <div class="button-container">
+            <button id="promotion-button" type="button" class="btn btn-success" (click)="submitPromotionChoice()">OK</button>
+        </div>
+    </div>
 </div>

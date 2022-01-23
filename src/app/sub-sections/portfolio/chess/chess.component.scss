@@ -72,6 +72,30 @@
             margin: 0 auto;
         }
     }
+
+    .pawn-promotion-container
+    {
+        width: 25%;
+        position: absolute;
+        border-radius: 25px;
+        opacity: 0.8;
+        padding: 5px;
+        top: 40px;
+        right:10px;
+        font-family: Brush Script MT,cursive; 
+        background-color: whitesmoke;
+
+        .button-container
+        {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            #promotion-button
+            {
+                border-radius: 25px;
+            }
+        }
+    }
     
 }
 
