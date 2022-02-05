@@ -1,9 +1,8 @@
 import { ChessCase, ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
-import { IPawnSpecialRequestSupplier } from '../board/chessmovesmanager';
+import { IPawnSpecialRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPlayer} from '../player/chessplayer';
 import { BishopPiece } from './bishoppiece';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
-import { KingPiece } from './kingpiece';
 import { KnightPiece } from './knightpiece';
 import { PawnPiece } from './pawnpiece';
 import { QueenPiece } from './queenpiece';
@@ -13,7 +12,6 @@ export class TransformablePawnPiece extends ChessPiece
 {
     private innerPiece: ChessPiece;
     private bishop: BishopPiece;
-    private king: KingPiece;
     private queen: QueenPiece;
     private rook: RookPiece;
     private knight: KnightPiece;
@@ -24,7 +22,6 @@ export class TransformablePawnPiece extends ChessPiece
         this.rook = new RookPiece(color);
         this.queen = new QueenPiece(color);
         this.bishop = new BishopPiece(color);
-        this.king = new KingPiece(color);
         this.innerPiece = new PawnPiece(color);
         this.knight = new KnightPiece(color);
     }
@@ -51,6 +48,8 @@ export class TransformablePawnPiece extends ChessPiece
         }
         currentCase.acceptVisitor(this.innerPiece);
         this.innerPiece.setOwner(owner);
+        this.innerPiece.getModel().visible = true;
+        (this.positionAvailabilityChecker as IPawnSpecialRequestSupplier).notifyPromotion(this, type);
     }
     public onDeselect(): void
     {
@@ -110,13 +109,16 @@ export class TransformablePawnPiece extends ChessPiece
             const promises: Promise<void>[] = [];
             promises.push(this.innerPiece.init());
             promises.push(this.knight.init());
-            promises.push(this.king.init());
             promises.push(this.queen.init());
             promises.push(this.rook.init());
             promises.push(this.bishop.init());
             Promise.all(promises).then(() =>
             {
                 this.knight.getModel().rotateY(Math.PI);
+                this.knight.getModel().visible = false;
+                this.queen.getModel().visible = false;
+                this.rook.getModel().visible = false;
+                this.bishop.getModel().visible = false;
                 resolve();
                 return;
             });
@@ -146,6 +148,10 @@ export class TransformablePawnPiece extends ChessPiece
     {
         return this.innerPiece.getModel();
     }
+    public getAdditionalPieces(): ChessPiece[]
+    {
+        return [this.knight, this.queen, this.rook, this.bishop];
+    }
     public setOwner(player: ChessPlayer): void
     {
         this.innerPiece.setOwner(player);
@@ -165,6 +171,10 @@ export class TransformablePawnPiece extends ChessPiece
     public getType(): Readonly<PieceType>
     {
         return this.innerPiece.getType();
+    }
+    public getHasMovedTwoSquares(): boolean
+    {
+        return (this.innerPiece instanceof PawnPiece) && (this.innerPiece as PawnPiece).getHasMovedTwoSquares();
     }
     private shouldBePromoted(): boolean
     {

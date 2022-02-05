@@ -8,7 +8,7 @@ import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
 import { ChessPlayer} from '../player/chessplayer';
 import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
-import { ChessNavigationManager, IGameRequestSupplier } from './chessmovesmanager';
+import { ChessNavigationManager, IGameRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 export class ChessBoard
 {
     private board: ChessCase[][] = [];
@@ -269,6 +269,9 @@ export class ChessBoard
                 {
                     this.board[row][i].acceptVisitor(pawn);
                     this.pieces.push(pawn);
+                    pawn.getAdditionalPieces().forEach( piece => {
+                        this.pieces.push(piece);
+                    });
                     ++i;
                     if (i < 8)
                     {

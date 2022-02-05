@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
 import { ChessRenderingService } from './classes/rendering/chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
-import { PieceType } from './classes/pieces/chesspiece';
+import { ChessPiece, PieceType } from './classes/pieces/chesspiece';
 import { ChessGame } from './classes/game/chessgame';
 import { AIType } from './classes/player/aichessplayer';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -42,6 +42,8 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public viewChoices = new ChoiceContainer(['From Front', 'From Top'], ['De face', 'De Haut']);
     public soundLabel: string;
     public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
+    public soundEffectLabel: string;
+    public soundEffectChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
     public playLabel: string;
     private chessGame: ChessGame;
     private pieceTypeSubject: BehaviorSubject<PieceType> = new BehaviorSubject(PieceType.PAWN);
@@ -118,7 +120,8 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.aiTypeLabel = 'AI Type';
             this.difficultyLabel = 'Difficulty';
             this.viewLabel = 'View';
-            this.soundLabel = 'Sound';
+            this.soundLabel = 'Music';
+            this.soundEffectLabel = 'Sound Effect';
             this.playLabel = 'Play';
             this.pawnPromotionQuestion = 'Your pawn need to be promoted, choose a type';
             this.queen = 'Queen';
@@ -132,7 +135,8 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.aiTypeLabel = `Type d' IA`;
             this.difficultyLabel = 'Difficulté';
             this.viewLabel = 'Vue';
-            this.soundLabel = 'Son';
+            this.soundLabel = 'Musique';
+            this.soundEffectLabel = 'Bruitage';
             this.playLabel = 'Jouer';
             this.pawnPromotionQuestion = 'Votre pion doit etre promu, veuillez selectionner un nouveau type';
             this.queen = 'Reine';
@@ -165,6 +169,16 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     {
         this.soundChoices.nextChoice();
         this.updateSound(this.soundChoices.getChoiceIndex() === 0);
+    }
+    public onSoundEffectPrevChoice()
+    {
+        this.soundEffectChoices.previousChoice();
+        ChessPiece.AUDIO_MVT_PLAYER.setEnable(this.soundEffectChoices.getChoiceIndex() === 1);
+    }
+    public onSoundEffectNextChoice()
+    {
+        this.soundEffectChoices.nextChoice();
+        ChessPiece.AUDIO_MVT_PLAYER.setEnable(this.soundEffectChoices.getChoiceIndex() === 1);
     }
     public startGame()
     {

@@ -1,8 +1,7 @@
-import { BrowserStack } from 'protractor/built/driverProviders';
 import * as THREE from 'three';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessCase, ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
-import { IPiecesRequestSupplier } from '../board/chessmovesmanager';
+import { IPiecesRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPlayer } from '../player/chessplayer';
 import { IOutlinable } from '../sceneinteraction/chessinteractor';
 import { PieceModelLoader } from './piecemodelloader';
@@ -15,7 +14,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     protected positionAvailabilityChecker: IPiecesRequestSupplier;
     protected hasMovedOnce = false;
     protected color: PieceColor;
-    protected currentCase: IVisitedCase;
+    protected currentCase: IVisitedCase = null;
     private possibleDestinations: ICaseBoardPosition[];
     private owner: ChessPlayer;
     constructor(modelPath: string, color: PieceColor)
@@ -50,6 +49,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
                 this.captureHostVisitorIfNeeded(host);
+                this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
                 this.quitCase();
                 this.currentCase = host;
                 this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
@@ -59,9 +59,8 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     }
     firstVisit( host: IVisitedCase): void
     {
-        ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
         this.hasMovedOnce = (this.currentCase != null);
-        this.captureHostVisitorIfNeeded(host);
+        // this.captureHostVisitorIfNeeded(host);
         this.quitCase();
         this.currentCase = host;
         this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
@@ -76,11 +75,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     }
     protected captureHostVisitorIfNeeded(host: IVisitedCase)
     {
-        const prisonner = host.getVisitor();
-        if (prisonner !== null && prisonner !== undefined)
-        {
-            this.getOwner().capture(prisonner as ChessPiece);
-        }
+        this.positionAvailabilityChecker.realizeCapture(this, host.getCasePosition());
     }
     public init(): Promise<void>
     {
@@ -115,7 +110,10 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         this.positionAvailabilityChecker = mvtValidator;
     }
-    abstract getPossibleDestinations(): ICaseBoardPosition[];
+    getPossibleDestinations(): ICaseBoardPosition[]
+    {
+        return this.positionAvailabilityChecker.getPossibleDestinations(this.currentCase.getCasePosition());
+    }
     public canJumpOverOtherPieces(): boolean
     {
         return false;
@@ -135,6 +133,10 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     public hasColor(color: PieceColor): boolean
     {
         return this.color === color;
+    }
+    public getColor(): PieceColor
+    {
+        return this.color;
     }
     public getModel(): THREE.Object3D
     {

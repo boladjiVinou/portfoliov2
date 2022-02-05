@@ -1,5 +1,5 @@
 import { IPawnPromoter } from '../../chess.component';
-import { IGameRequestSupplier } from '../board/chessmovesmanager';
+import { IGameRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPiece, PieceColor } from '../pieces/chesspiece';
 import { AIChessPlayer, AIType } from '../player/aichessplayer';
 import { ChessPlayer } from '../player/chessplayer';
@@ -29,6 +29,8 @@ export class ChessGame
     }
     public start(): void
     {
+        // let whiteInCheck = this.gameRequestsSupplier.kingIsInCheck(PieceColor.WHITE);
+        // let blackInCheck = this.gameRequestsSupplier.kingIsInCheck(PieceColor.BLACK);
         this.humanPlayer.play();
     }
 }

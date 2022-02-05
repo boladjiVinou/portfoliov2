@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
-import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../board/chessmovesmanager';
+import { IVisitedCase } from '../board/chessCase';
+import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessnavigation/chessnavigationmanager';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class PawnPiece extends ChessPiece
@@ -39,6 +39,7 @@ export class PawnPiece extends ChessPiece
                 this.hasMovedTwoSquare = (Math.abs(host.getCasePosition().I - this.currentCase.getCasePosition().I) === 2);
                 this.doEnpassantCaptureIfPossible(host);
                 this.captureHostVisitorIfNeeded(host);
+                this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
                 this.quitCase();
@@ -56,63 +57,9 @@ export class PawnPiece extends ChessPiece
             potentialEnPassantPosition.I -= (this.mvtDirection);
             if (this.isAValidPosition(potentialEnPassantPosition) && this.specialMovementValidator.canDoEnPassantCapture(this, potentialEnPassantPosition))
             {
-                this.specialMovementValidator.realizeEnPassantCapture(this, potentialEnPassantPosition);
+                this.specialMovementValidator.realizeCapture(this, potentialEnPassantPosition);
             }
         }
-    }
-    getPossibleDestinations(): ICaseBoardPosition[]
-    {
-        const possiblesMoves: ICaseBoardPosition[] = [];
-        // front moves
-        let possiblePosition = this.currentCase.getCasePosition();
-        if (!this.hasMovedOnce)
-        {
-            possiblePosition.I += (2 * this.mvtDirection);
-            if (this.positionAvailabilityChecker.caseIsEmpty(possiblePosition))
-            {
-                possiblesMoves.push(possiblePosition);
-            }
-        }
-
-        possiblePosition = this.currentCase.getCasePosition();
-        possiblePosition.I += (1 * this.mvtDirection);
-        if (this.isAValidPosition(possiblePosition) && (this.positionAvailabilityChecker.caseIsEmpty(possiblePosition)))
-        {
-            possiblesMoves.push(possiblePosition);
-        }
-
-        // diagonal moves
-        possiblePosition = this.currentCase.getCasePosition();
-        possiblePosition.I += (1 * this.mvtDirection);
-        possiblePosition.J += 1;
-        if (this.isAValidPosition(possiblePosition) && this.positionAvailabilityChecker.positionOccupiedByOpponent(this, possiblePosition))
-        {
-            possiblesMoves.push(possiblePosition);
-        }
-
-        const potentialEnPassantPosition = {I: possiblePosition.I, J: possiblePosition.J};
-        potentialEnPassantPosition.I -= (this.mvtDirection);
-        if (this.isAValidPosition(potentialEnPassantPosition) && this.specialMovementValidator.canDoEnPassantCapture(this, potentialEnPassantPosition))
-        {
-            possiblesMoves.push(possiblePosition);
-        }
-
-        possiblePosition = this.currentCase.getCasePosition();
-        possiblePosition.I += (1 * this.mvtDirection);
-        possiblePosition.J -= 1;
-        if (this.isAValidPosition(possiblePosition) && this.positionAvailabilityChecker.positionOccupiedByOpponent(this, possiblePosition))
-        {
-            possiblesMoves.push(possiblePosition);
-        }
-
-        const potentialEnPassantPosition2 = {I: possiblePosition.I, J: possiblePosition.J};
-        potentialEnPassantPosition2.I -= (this.mvtDirection);
-        if (this.isAValidPosition(potentialEnPassantPosition2) && this.specialMovementValidator.canDoEnPassantCapture(this, potentialEnPassantPosition2))
-        {
-            possiblesMoves.push(possiblePosition);
-        }
-
-        return possiblesMoves;
     }
 
     private isMovingInDiagonal(host: IVisitedCase): boolean

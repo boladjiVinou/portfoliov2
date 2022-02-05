@@ -4,7 +4,6 @@ import { Scene, SpotLight, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessBoard } from '../board/chessboard';
-import { ChessPiece } from '../pieces/chesspiece';
 import { LivingRoom } from '../room/livingroom';
 import { ChessInteractor } from '../sceneinteraction/chessinteractor';
 @Injectable()
@@ -111,7 +110,7 @@ export class ChessRenderingService implements OnDestroy {
             const board = this.chessboard.getBoard();
             board.forEach((chessLine) => {
                 chessLine.forEach((chessCase) => {
-                    this.parentNode.add(chessCase);
+                    this.parentNode.add(chessCase.getModel());
                 });
             });
             this.chessboard.getPieces().forEach(piece =>
@@ -154,12 +153,10 @@ export class ChessRenderingService implements OnDestroy {
     public stopAmbientSound() {
         this.ambientSoundPlayer.setEnable(false);
         this.ambientSoundPlayer.stopSound();
-        ChessPiece.AUDIO_MVT_PLAYER.setEnable(false);
     }
     public playAmbientSound(playWithLoop: boolean) {
         this.ambientSoundPlayer.setEnable(true);
         this.ambientSoundPlayer.playSound(playWithLoop);
-        ChessPiece.AUDIO_MVT_PLAYER.setEnable(true);
     }
 
     public moveCameraToIdealPosition(viewFromTop: boolean): Promise<void>

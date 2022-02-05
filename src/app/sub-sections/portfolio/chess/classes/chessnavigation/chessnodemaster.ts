@@ -1,0 +1,328 @@
+import { ICaseBoardPosition } from '../board/chessCase';
+import { PieceColor, PieceType } from '../pieces/chesspiece';
+import { BishopNodeMaster } from './bishopnodemaster';
+import { ChessNode } from './chessnode';
+import { ChessNodeProvider } from './chessnodeprovider';
+import { KnightNodeMaster } from './knightNodeMaster';
+import { PawnNodeMaster } from './pawnnodemaster';
+import { QueenNodeMaster } from './queennodemaster';
+import { RookNodeMaster } from './rooknodemaster';
+
+export abstract class ChessNodeMaster
+{
+    protected color: PieceColor;
+    protected nodeProvider: ChessNodeProvider;
+    protected originalPosition: ICaseBoardPosition;
+    protected hasMovedOnce = false;
+    protected chessType: Readonly<PieceType>;
+    constructor(color: PieceColor)
+    {
+        this.color = color;
+    }
+    public abstract getPositions(): ICaseBoardPosition[];
+    public getColor(): PieceColor
+    {
+        return this.color;
+    }
+    public setHasMoved(hasMoved: boolean): void
+    {
+        this.hasMovedOnce = hasMoved;
+    }
+    public setNodeProvider(provider: ChessNodeProvider)
+    {
+        this.nodeProvider = provider;
+    }
+    public setOriginalPosition(position: ICaseBoardPosition)
+    {
+        this.originalPosition = position;
+    }
+    public getOriginalPosition(): ICaseBoardPosition
+    {
+        return {I: this.originalPosition.I, J: this.originalPosition.J};
+    }
+    public getType(): Readonly<PieceType>
+    {
+        return this.chessType;
+    }
+    public hasMoved(): boolean
+    {
+        if (this.hasMovedOnce)
+        {
+            return true;
+        }
+        else
+        {
+            const currentPosition = this.nodeProvider.getNodeOf(this).getPosition();
+            this.hasMovedOnce = ( currentPosition.I !== this.originalPosition.I || currentPosition.J !== this.originalPosition.J);
+            return this.hasMovedOnce;
+        }
+    }
+
+    protected isAValidPosition(position: ICaseBoardPosition)
+    {
+        return position.I >= 0 && position.I < 8 && position.J >= 0 && position.J < 8;
+    }
+
+    public positionIsSafeForTheKing(position: ICaseBoardPosition): boolean
+    {
+        const currentPosition = this.nodeProvider.getNodeOf(this).getPosition();
+        const king = this.nodeProvider.getKing(this.color);
+        const kingPosition = this.nodeProvider.getNodeOf(king).getPosition();
+        const nodeIsFree = (node: ChessNode) => {
+            const tmpPos = node.getPosition();
+            if (tmpPos.I === position.I && tmpPos.J === position.J)
+            {
+                return false;
+            }
+            if (tmpPos.I === currentPosition.I && tmpPos.J === currentPosition.J)
+            {
+                return true;
+            }
+            return node.isFree();
+        };
+        const nodeIsOccupiedByOpponent = (node: ChessNode) =>
+        {
+            const tmpPos = node.getPosition();
+            if (tmpPos.I === position.I && tmpPos.J === position.J)
+            {
+                return false;
+            }
+            return node.isOccupiedByOpponent(this.color);
+        };
+        // verticals
+        for (let i = kingPosition.I + 1; i < 8; i++)
+        {
+            const node = this.nodeProvider.getNode({I: i, J: kingPosition.J});
+            if (this.opponentQueenOrRookIsThere({I: i, J: kingPosition.J}, nodeIsFree, nodeIsOccupiedByOpponent))
+            {
+                return false;
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+        }
+        for (let i = kingPosition.I - 1; i >= 0; i--)
+        {
+            const node = this.nodeProvider.getNode({I: i, J: kingPosition.J});
+            if (this.opponentQueenOrRookIsThere({I: i, J: kingPosition.J}, nodeIsFree, nodeIsOccupiedByOpponent))
+            {
+                return false;
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+        }
+        // horizontals
+        for (let j = kingPosition.J + 1; j < 8; j++)
+        {
+            const node = this.nodeProvider.getNode({I: kingPosition.I, J: j});
+            if (this.opponentQueenOrRookIsThere({I: kingPosition.I, J: j}, nodeIsFree, nodeIsOccupiedByOpponent))
+            {
+                return false;
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+        }
+        for (let j = kingPosition.J - 1; j >= 0; j--)
+        {
+            const node = this.nodeProvider.getNode({I: kingPosition.I, J: j});
+            if (this.opponentQueenOrRookIsThere({I: kingPosition.I, J: j}, nodeIsFree, nodeIsOccupiedByOpponent))
+            {
+                return false;
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+        }
+        // diagonals
+        let x = kingPosition.I - 1;
+        let y = kingPosition.J - 1;
+        let distance = 0;
+        while (x >= 0 && x < 8 && y >= 0 && y < 8)
+        {
+            ++distance;
+            const node = this.nodeProvider.getNode({I: x , J: y});
+            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.BISHOP)
+                {
+                    return false;
+                }
+                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
+                {
+                    return false;
+                }
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+            x -= 1;
+            y -= 1;
+        }
+        x = kingPosition.I - 1;
+        y = kingPosition.J + 1;
+        distance = 0;
+        while (x >= 0 && x < 8 && y >= 0 && y < 8)
+        {
+            ++distance;
+            const node = this.nodeProvider.getNode({I: x , J: y});
+            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.BISHOP)
+                {
+                    return false;
+                }
+                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
+                {
+                    return false;
+                }
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+            x -= 1;
+            y += 1;
+        }
+        x = kingPosition.I + 1;
+        y = kingPosition.J + 1;
+        while (x >= 0 && x < 8 && y >= 0 && y < 8)
+        {
+            ++distance;
+            const node = this.nodeProvider.getNode({I: x , J: y});
+            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.BISHOP)
+                {
+                    return false;
+                }
+                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
+                {
+                    return false;
+                }
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+            x += 1;
+            y += 1;
+        }
+        x = kingPosition.I + 1;
+        y = kingPosition.J - 1;
+        while (x >= 0 && x < 8 && y >= 0 && y < 8)
+        {
+            ++distance;
+            const node = this.nodeProvider.getNode({I: x , J: y});
+            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.BISHOP)
+                {
+                    return false;
+                }
+                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
+                {
+                    return false;
+                }
+            }
+            else if (!nodeIsFree(node))
+            {
+                break;
+            }
+            x += 1;
+            y -= 1;
+        }
+
+        x = kingPosition.I - 2;
+        y = kingPosition.J - 1;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I - 2;
+        y = kingPosition.J + 1;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I + 2;
+        y = kingPosition.J - 1;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I + 2;
+        y = kingPosition.J + 1;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I - 1;
+        y = kingPosition.J - 2;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I - 1;
+        y = kingPosition.J + 2;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I + 1;
+        y = kingPosition.J - 2;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        x = kingPosition.I + 1;
+        y = kingPosition.J + 2;
+        if (this.opponentKnightIsThere({I: x, J: y}, nodeIsFree, nodeIsOccupiedByOpponent))
+        {
+            return false;
+        }
+        return true;
+    }
+    private opponentKnightIsThere(positionToInspect: ICaseBoardPosition, nodeIsFreeFct: (node: ChessNode) => boolean  , nodeIsOccupiedByOpponentFct: (node: ChessNode) => boolean): boolean
+    {
+        if (positionToInspect.I >= 0 && positionToInspect.I < 8 && positionToInspect.J >= 0 && positionToInspect.J < 8)
+        {
+            const node = this.nodeProvider.getNode({I: positionToInspect.I , J: positionToInspect.J});
+            if (!nodeIsFreeFct(node) && nodeIsOccupiedByOpponentFct(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.KNIGHT)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private opponentQueenOrRookIsThere(positionToInspect: ICaseBoardPosition, nodeIsFreeFct: (node: ChessNode) => boolean  , nodeIsOccupiedByOpponentFct: (node: ChessNode) => boolean): boolean
+    {
+        if (positionToInspect.I >= 0 && positionToInspect.I < 8 && positionToInspect.J >= 0 && positionToInspect.J < 8)
+        {
+            const node = this.nodeProvider.getNode({I: positionToInspect.I , J: positionToInspect.J});
+            if (!nodeIsFreeFct(node) && nodeIsOccupiedByOpponentFct(node))
+            {
+                const nodeOwner = node.getOwner();
+                if (nodeOwner.getType() === PieceType.ROOK || nodeOwner.getType() === PieceType.QUEEN)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
