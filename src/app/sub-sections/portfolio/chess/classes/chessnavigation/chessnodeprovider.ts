@@ -33,23 +33,7 @@ export class ChessNodeProvider
         this.createAnndInitMasters(pieces);
         this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
-            this.nodes[position.I][position.J].setMasterUnsafely(key);
-
-        });
-        this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
-        {
-            if (key instanceof PawnNodeMaster)
-            {
-                this.nodes[position.I][position.J].initNeighborhoodUnsafely();
-            }
-
-        });
-        this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
-        {
-            if (!(key instanceof PawnNodeMaster))
-            {
-                this.nodes[position.I][position.J].initNeighborhoodUnsafely();
-            }
+            this.nodes[position.I][position.J].setOwner(key);
         });
     }
 
@@ -110,10 +94,6 @@ export class ChessNodeProvider
                     master.setNodeProvider(this);
                     this.positionByPiece.set(master , {I: position.I, J: position.J});
                     master.setHasMoved(piece.getHasMovedOnce());
-                    if (master.hasMoved())
-                    {
-                        console.log('Uh Oh');
-                    }
                 }
             }
         });
@@ -159,6 +139,11 @@ export class ChessNodeProvider
     }
     setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
     {
+        if (master !== null)
+        {
+            const previousPosition = this.positionByPiece.get(master);
+            this.setMasterAndUpdateBoard(previousPosition, null);
+        }
         const oldMaster = this.nodes[position.I][position.J].getOwner();
         if (oldMaster != null && master !== oldMaster)
         {
@@ -170,7 +155,7 @@ export class ChessNodeProvider
         }
         this.nodes[position.I][position.J].setOwner(master);
         // update neighborhood
-        /*const positions: ICaseBoardPosition[] = [];
+        const positions: ICaseBoardPosition[] = [];
         positions.push({I: position.I - 1, J: position.J});
         positions.push({I: position.I + 1, J: position.J});
         positions.push({I: position.I , J: position.J - 1});
@@ -179,15 +164,10 @@ export class ChessNodeProvider
         positions.push({I: position.I - 1, J: position.J + 1});
         positions.push({I: position.I + 1, J: position.J - 1});
         positions.push({I: position.I + 1, J: position.J + 1});
-        positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]).forEach( node => node.updateNeighborhood());
-        this.knights.forEach(knight =>
-            {
-                const knightPosition = this.positionByPiece.get(knight);
-                if (!positions.some(pos => pos.I === knightPosition.I && pos.J === knightPosition.J))
-                {
-                    this.nodes[knightPosition.I][knightPosition.J].updateNeighborhood();
-                }
-            });*/
+        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
+        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
+        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
+        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
     }
     isValid(position: ICaseBoardPosition): boolean
     {

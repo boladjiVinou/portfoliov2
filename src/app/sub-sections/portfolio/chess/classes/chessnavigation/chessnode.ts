@@ -8,6 +8,7 @@ export class ChessNode
 {
     private outNodes: Set<ChessNode> = new Set<ChessNode>();
     private inNodes: Set<ChessNode> = new Set<ChessNode>();
+    private rejectedInNodes: Set<ChessNode> = new Set<ChessNode>();
     private nodeProvider: ChessNodeProvider;
     private nodePosition: ICaseBoardPosition;
     private master: ChessNodeMaster = null;
@@ -41,6 +42,7 @@ export class ChessNode
             this.updateInNodes();
         }
     }
+
     setMasterUnsafely(master: ChessNodeMaster): void
     {
         this.master = master;
@@ -116,6 +118,12 @@ export class ChessNode
             return this.master.getColor() !== color;
         }
         return false;
+    }
+    getOutnodePosition(): ICaseBoardPosition[]
+    {
+        const positions: ICaseBoardPosition[] = [];
+        this.outNodes.forEach(node => positions.push({I: node.nodePosition.I, J: node.nodePosition.J}));
+        return positions;
     }
     public getProvider(): ChessNodeProvider
     {

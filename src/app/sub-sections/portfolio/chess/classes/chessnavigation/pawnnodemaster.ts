@@ -1,5 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor } from '../pieces/chesspiece';
+import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNodeMaster } from './chessnodemaster';
 
 export class PawnNodeMaster extends ChessNodeMaster
@@ -10,6 +10,7 @@ export class PawnNodeMaster extends ChessNodeMaster
     {
         super(color);
         this.mvtDirection = (color === PieceColor.WHITE) ? -1 : 1;
+        this.chessType = PieceType.PAWN;
     }
     public getMvtDirection()
     {
@@ -24,7 +25,8 @@ export class PawnNodeMaster extends ChessNodeMaster
         if (!this.hasMoved())
         {
             possiblePosition.I += (2 * this.mvtDirection);
-            if (this.nodeProvider.getNode(possiblePosition).isFree())
+            const tmpPos = {I: currentPosition.I + this.mvtDirection , J: currentPosition.J};
+            if (this.nodeProvider.getNode(possiblePosition).isFree() && this.nodeProvider.getNode(tmpPos).isFree())
             {
                 possiblesMoves.push(possiblePosition);
             }
@@ -67,8 +69,6 @@ export class PawnNodeMaster extends ChessNodeMaster
         {
             possiblesMoves.push(possiblePosition);
         }
-
-        console.log('get position called', possiblesMoves);
         return possiblesMoves.filter(position => this.positionIsSafeForTheKing(position));
     }
 

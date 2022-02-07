@@ -1,4 +1,3 @@
-import { KnightNodeMaster } from '../chessnavigation/knightNodeMaster';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
 export class KnightPiece extends ChessPiece

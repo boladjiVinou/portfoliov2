@@ -77,13 +77,13 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
        const quittingNode = this.chessNodeProvider.getNode(piece.getCurrentCase().getCasePosition());
        const master = quittingNode.getOwner();
-       this.chessNodeProvider.setMasterAndUpdateBoard(quittingNode.getPosition(), null);
+       // this.chessNodeProvider.setMasterAndUpdateBoard(quittingNode.getPosition(), null);
        const receivingNode = this.chessNodeProvider.getNode(newPosition);
        this.chessNodeProvider.setMasterAndUpdateBoard(receivingNode.getPosition(), master);
     }
     getPossibleDestinations(position: ICaseBoardPosition): ICaseBoardPosition[]
     {
-        return this.chessNodeProvider.getNode(position).getOwner().getPositions();
+        return this.chessNodeProvider.getNode(position).getOutnodePosition();
     }
 
     kingIsInCheck(kingColor: PieceColor): boolean

@@ -29,8 +29,25 @@ export class ChessGame
     }
     public start(): void
     {
-        // let whiteInCheck = this.gameRequestsSupplier.kingIsInCheck(PieceColor.WHITE);
-        // let blackInCheck = this.gameRequestsSupplier.kingIsInCheck(PieceColor.BLACK);
-        this.humanPlayer.play();
+        this.playerRoutine(this.humanPlayer, this.botPlayer, PieceColor.WHITE);
+    }
+    private playerRoutine(player: ChessPlayer, nextPlayer: ChessPlayer, color: PieceColor): void
+    {
+        let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
+        player.play().then(() =>
+            {
+                if (isInCheck)
+                {
+                    isInCheck = isInCheck && this.gameRequestsSupplier.kingIsInCheck(color);
+                }
+                if (!isInCheck)
+                {
+                    this.playerRoutine(nextPlayer, player, (color === PieceColor.BLACK ) ? PieceColor.WHITE : PieceColor.BLACK);
+                }
+                else
+                {
+                    alert(' end of game ');
+                }
+            });
     }
 }

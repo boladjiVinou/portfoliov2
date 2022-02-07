@@ -1,8 +1,14 @@
 import { ICaseBoardPosition } from '../board/chessCase';
+import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNodeMaster } from './chessnodemaster';
 
 export class KnightNodeMaster extends ChessNodeMaster
 {
+    constructor(color: PieceColor)
+    {
+        super(color);
+        this.chessType = PieceType.KNIGHT;
+    }
     public getPositions(): ICaseBoardPosition[]
     {
         const possiblesMoves: ICaseBoardPosition[] = [];

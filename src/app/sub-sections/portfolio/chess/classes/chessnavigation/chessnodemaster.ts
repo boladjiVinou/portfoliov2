@@ -1,12 +1,8 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
-import { BishopNodeMaster } from './bishopnodemaster';
 import { ChessNode } from './chessnode';
 import { ChessNodeProvider } from './chessnodeprovider';
-import { KnightNodeMaster } from './knightNodeMaster';
 import { PawnNodeMaster } from './pawnnodemaster';
-import { QueenNodeMaster } from './queennodemaster';
-import { RookNodeMaster } from './rooknodemaster';
 
 export abstract class ChessNodeMaster
 {
@@ -67,7 +63,15 @@ export abstract class ChessNodeMaster
     {
         const currentPosition = this.nodeProvider.getNodeOf(this).getPosition();
         const king = this.nodeProvider.getKing(this.color);
-        const kingPosition = this.nodeProvider.getNodeOf(king).getPosition();
+        let kingPosition: ICaseBoardPosition;
+        try
+        {
+            kingPosition = this.nodeProvider.getNodeOf(king).getPosition();
+        }
+        catch (error)
+        {
+            return true;
+        }
         const nodeIsFree = (node: ChessNode) => {
             const tmpPos = node.getPosition();
             if (tmpPos.I === position.I && tmpPos.J === position.J)

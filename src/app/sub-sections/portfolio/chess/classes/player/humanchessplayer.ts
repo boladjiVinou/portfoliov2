@@ -33,7 +33,6 @@ export class HumanChessPlayer extends ChessPlayer
                 {
                     if (choiceMade)
                     {
-                        console.log('choice made event received');
                         // this.chessInteractor.removeMouseClickListener();
                         // this.chessInteractor.setEnable(false);
                         choiceSubscription.unsubscribe();

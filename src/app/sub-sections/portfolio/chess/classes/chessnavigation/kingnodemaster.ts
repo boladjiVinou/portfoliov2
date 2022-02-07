@@ -1,5 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor } from '../pieces/chesspiece';
+import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNodeMaster } from './chessnodemaster';
 
 export class KingNodeMaster extends ChessNodeMaster
@@ -22,6 +22,7 @@ export class KingNodeMaster extends ChessNodeMaster
             this.leftCastlingPosition = {I: 7, J: 2};
             this.rightCastlingPosition = {I: 7, J: 6};
         }
+        this.chessType = PieceType.KING;
     }
     public getPositions(): ICaseBoardPosition[]
     {
