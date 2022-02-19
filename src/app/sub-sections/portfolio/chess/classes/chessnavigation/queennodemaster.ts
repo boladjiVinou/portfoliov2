@@ -8,6 +8,14 @@ export class QueenNodeMaster extends ChessNodeMaster
     {
         super(color);
         this.chessType = PieceType.QUEEN;
+        this.value *= 90;
+    }
+    public clone(): QueenNodeMaster
+    {
+        const queen = new QueenNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        queen.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        queen.hasMovedOnce = this.hasMovedOnce;
+        return queen;
     }
     public getPositions(): ICaseBoardPosition[]
     {

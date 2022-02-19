@@ -8,7 +8,6 @@ export class ChessNode
 {
     private outNodes: Set<ChessNode> = new Set<ChessNode>();
     private inNodes: Set<ChessNode> = new Set<ChessNode>();
-    private rejectedInNodes: Set<ChessNode> = new Set<ChessNode>();
     private nodeProvider: ChessNodeProvider;
     private nodePosition: ICaseBoardPosition;
     private master: ChessNodeMaster = null;

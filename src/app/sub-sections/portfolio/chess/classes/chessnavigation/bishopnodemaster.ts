@@ -8,6 +8,14 @@ export class BishopNodeMaster extends ChessNodeMaster
     {
         super(color);
         this.chessType = PieceType.BISHOP;
+        this.value *= 30;
+    }
+    public clone(): BishopNodeMaster
+    {
+        const bishop = new BishopNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        bishop.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        bishop.hasMovedOnce = this.hasMovedOnce;
+        return bishop;
     }
     public getPositions(): ICaseBoardPosition[]
     {

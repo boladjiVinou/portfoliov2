@@ -11,10 +11,19 @@ export class PawnNodeMaster extends ChessNodeMaster
         super(color);
         this.mvtDirection = (color === PieceColor.WHITE) ? -1 : 1;
         this.chessType = PieceType.PAWN;
+        this.value *= 10;
     }
     public getMvtDirection()
     {
         return this.mvtDirection;
+    }
+    public clone(): PawnNodeMaster
+    {
+        const pawn = new PawnNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        pawn.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        pawn.hasMovedOnce = this.hasMovedOnce;
+        pawn.hasMovedTwoSquares = this.hasMovedTwoSquares;
+        return pawn;
     }
     public getPositions(): ICaseBoardPosition[]
     {

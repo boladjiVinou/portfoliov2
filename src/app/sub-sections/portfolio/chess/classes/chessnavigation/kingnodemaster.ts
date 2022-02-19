@@ -23,6 +23,26 @@ export class KingNodeMaster extends ChessNodeMaster
             this.rightCastlingPosition = {I: 7, J: 6};
         }
         this.chessType = PieceType.KING;
+        this.value *= 900;
+    }
+
+    public isDoingALeftCastling(targetPosition: ICaseBoardPosition): boolean
+    {
+        return (targetPosition.I === this.leftCastlingPosition.I) && (targetPosition.J === this.leftCastlingPosition.J);
+    }
+    public isDoingARightCastling(targetPosition: ICaseBoardPosition): boolean
+    {
+        return (targetPosition.I === this.rightCastlingPosition.I) && (targetPosition.J === this.rightCastlingPosition.J);
+    }
+
+    public clone(): KingNodeMaster
+    {
+        const king = new KingNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        king.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        king.hasMovedOnce = this.hasMovedOnce;
+        king.canDoARightCastling = this.canDoARightCastling;
+        king.canDoAleftCastling = this.canDoAleftCastling;
+        return king;
     }
     public getPositions(): ICaseBoardPosition[]
     {

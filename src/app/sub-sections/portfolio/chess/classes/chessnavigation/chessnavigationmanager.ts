@@ -37,6 +37,8 @@ export interface IPawnSpecialRequestSupplier extends IPiecesRequestSupplier
 export interface IGameRequestSupplier
 {
     kingIsInCheck(kingColor: PieceColor): boolean;
+    getProvider(): Readonly<ChessNodeProvider>;
+    realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>;
 }
 
 export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier, IGameRequestSupplier
@@ -48,7 +50,16 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
         this.chessBoard = board.getBoard();
         this.fullBoard = board;
-        this.chessNodeProvider = new ChessNodeProvider(this.fullBoard.getPieces());
+        this.chessNodeProvider = new ChessNodeProvider();
+        this.chessNodeProvider.initFromPieces(this.fullBoard.getPieces());
+    }
+    realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>
+    {
+        return this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor() as ChessPiece);
+    }
+    getProvider(): Readonly<ChessNodeProvider>
+    {
+        return this.chessNodeProvider;
     }
     notifyPromotion(pawn: NonNullable<TransformablePawnPiece>, newType: PieceType): void
     {

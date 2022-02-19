@@ -33,8 +33,8 @@ export class HumanChessPlayer extends ChessPlayer
                 {
                     if (choiceMade)
                     {
-                        // this.chessInteractor.removeMouseClickListener();
-                        // this.chessInteractor.setEnable(false);
+                        this.chessInteractor.removeMouseClickListener();
+                        this.chessInteractor.setEnable(false);
                         choiceSubscription.unsubscribe();
                         resolveMethod();
                         return;

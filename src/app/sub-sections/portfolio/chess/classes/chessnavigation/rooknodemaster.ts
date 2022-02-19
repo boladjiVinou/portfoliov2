@@ -8,6 +8,14 @@ export class RookNodeMaster extends ChessNodeMaster
     {
         super(color);
         this.chessType = PieceType.ROOK;
+        this.value *= 50;
+    }
+    public clone(): RookNodeMaster
+    {
+        const rook = new RookNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        rook.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        rook.hasMovedOnce = this.hasMovedOnce;
+        return rook;
     }
     public getPositions(): ICaseBoardPosition[]
     {

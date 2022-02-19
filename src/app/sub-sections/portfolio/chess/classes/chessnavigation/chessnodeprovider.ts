@@ -26,17 +26,45 @@ export class ChessNodeProvider
     private rightWhiteRook: ChessNodeMaster = null;
     private leftWhiteRook: ChessNodeMaster = null;
     private positionByPiece: Map<ChessNodeMaster, ICaseBoardPosition> = new Map<ChessNodeMaster, ICaseBoardPosition>();
-
-    constructor(pieces: Readonly<ChessPiece[]>)
+    private movesHistory: SimulationMove[] = [];
+    constructor()
     {
         this.initNodes();
+    }
+
+    public initFromPieces(pieces: Readonly<ChessPiece[]>)
+    {
         this.createAnndInitMasters(pieces);
         this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
             this.nodes[position.I][position.J].setOwner(key);
         });
     }
-
+    public clone(): ChessNodeProvider
+    {
+        const provider = new ChessNodeProvider();
+        const rooks: RookNodeMaster[] = [];
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
+        {
+            const master = key.clone();
+            provider.positionByPiece.set(key.clone() , {I: value.I, J: value.J});
+            if ( master instanceof KingNodeMaster)
+            {
+                provider.kings.push(master);
+            }
+            else if (master instanceof KnightNodeMaster)
+            {
+                provider.knights.push(master);
+            }
+            else if (master instanceof RookNodeMaster)
+            {
+                rooks.push(master);
+            }
+            provider.nodes[value.I][value.J].setOwner(master);
+        });
+        provider.initRooks(rooks);
+        return provider;
+    }
     private initNodes(): void
     {
         this.nodes = [];
@@ -97,6 +125,10 @@ export class ChessNodeProvider
                 }
             }
         });
+        this.initRooks(rooks);
+    }
+    private initRooks(rooks: RookNodeMaster[] )
+    {
         rooks.forEach(rook =>
             {
                 const rookPosition = rook.getOriginalPosition();
@@ -137,7 +169,7 @@ export class ChessNodeProvider
     {
         return this.knights.filter(knight => this.positionByPiece.has(knight) && knight.getColor() === color).map(knight => knight as KnightNodeMaster);
     }
-    setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
+    public setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
     {
         if (master !== null)
         {
@@ -169,6 +201,32 @@ export class ChessNodeProvider
         nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
         this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
     }
+
+    public restoreState(position: ICaseBoardPosition, master: ChessNodeMaster)
+    {
+        // console.log('restoring', position, master);
+        if (master != null)
+        {
+            this.positionByPiece.set(master,  position);
+        }
+        this.nodes[position.I][position.J].setOwner(master);
+        // update neighborhood
+        const positions: ICaseBoardPosition[] = [];
+        positions.push({I: position.I - 1, J: position.J});
+        positions.push({I: position.I + 1, J: position.J});
+        positions.push({I: position.I , J: position.J - 1});
+        positions.push({I: position.I , J: position.J + 1});
+        positions.push({I: position.I - 1, J: position.J - 1});
+        positions.push({I: position.I - 1, J: position.J + 1});
+        positions.push({I: position.I + 1, J: position.J - 1});
+        positions.push({I: position.I + 1, J: position.J + 1});
+        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
+        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
+        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
+        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
+        // console.log('restoring end');
+    }
+
     isValid(position: ICaseBoardPosition): boolean
     {
         return position.I >= 0 && position.I < 8 && position.J >= 0 && position.J < 8;
@@ -189,7 +247,7 @@ export class ChessNodeProvider
         if (king.getColor() === PieceColor.BLACK)
         {
             rook = this.rightBlackRook;
-            return (rook !== null) && !king.hasMoved() && !rook.hasMoved() && !this.getNodeOf(king).ownerIsInDanger() && this.nodes[0][1].isFree()
+            return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && !this.getNodeOf(king).ownerIsInDanger() && this.nodes[0][1].isFree()
             && this.nodes[0][2].isFree() && this.nodes[0][3].isFree()
             && !this.nodes[0][1].nextMasterWillBeInDanger(PieceColor.BLACK) && !this.nodes[0][2].nextMasterWillBeInDanger(PieceColor.BLACK) &&
             !this.nodes[0][3].nextMasterWillBeInDanger(PieceColor.BLACK) && !this.nodes[0][4].nextMasterWillBeInDanger(PieceColor.BLACK)
@@ -198,9 +256,9 @@ export class ChessNodeProvider
         else
         {
             rook = this.rightWhiteRook;
-            return (rook !== null) && !king.hasMoved() && !rook.hasMoved() && !this.getNodeOf(king).ownerIsInDanger() && !this.getNodeOf(king).ownerIsInDanger()
+            return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && !this.getNodeOf(king).ownerIsInDanger() && !this.getNodeOf(king).ownerIsInDanger()
             && this.nodes[7][6].isFree() && this.nodes[7][5].isFree() && !this.nodes[7][4].nextMasterWillBeInDanger(PieceColor.WHITE)
-            && this.nodes[7][5].nextMasterWillBeInDanger(PieceColor.WHITE) && this.nodes[7][6].nextMasterWillBeInDanger(PieceColor.WHITE)
+            && !this.nodes[7][5].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][6].nextMasterWillBeInDanger(PieceColor.WHITE)
             && this.rightWhiteRook.positionIsSafeForTheKing({I: 7, J: 5});
         }
 
@@ -211,17 +269,129 @@ export class ChessNodeProvider
         if (king.getColor() === PieceColor.BLACK)
         {
             rook = this.leftBlackRook;
-            return (rook !== null) && !king.hasMoved() && !rook.hasMoved() && this.nodes[0][6].isFree() && this.nodes[0][5].isFree()
+            return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && this.nodes[0][6].isFree() && this.nodes[0][5].isFree()
             && !this.nodes[0][4].nextMasterWillBeInDanger(PieceColor.BLACK) && !this.nodes[0][5].nextMasterWillBeInDanger(PieceColor.BLACK)
-            && this.nodes[0][6].nextMasterWillBeInDanger(PieceColor.BLACK) && this.leftBlackRook.positionIsSafeForTheKing({I: 0, J: 5});
+            && !this.nodes[0][6].nextMasterWillBeInDanger(PieceColor.BLACK) && this.leftBlackRook.positionIsSafeForTheKing({I: 0, J: 5});
         }
         else
         {
             rook = this.leftWhiteRook;
-            return (rook !== null) && !king.hasMoved() && !rook.hasMoved() && this.nodes[7][1].isFree() && this.nodes[7][2].isFree() && this.nodes[7][3].isFree()
+            return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && this.nodes[7][1].isFree() && this.nodes[7][2].isFree() && this.nodes[7][3].isFree()
             && !this.nodes[7][4].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][3].nextMasterWillBeInDanger(PieceColor.WHITE) &&
             !this.nodes[7][2].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][1].nextMasterWillBeInDanger(PieceColor.WHITE)
             && this.rightWhiteRook.positionIsSafeForTheKing({I: 7, J: 0});
         }
+    }
+
+    public getPossibleMoves(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][]
+    {
+        const moves: [ICaseBoardPosition, ChessNodeMaster][] = [];
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
+            if (key.getColor() === color)
+            {
+                this.getNode(value).getOutnodePosition().forEach( position => {
+                    moves.push([position, key]);
+                });
+            }
+        });
+        return moves;
+    }
+
+    public getTotal(): number
+    {
+        let score = 0;
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
+            score += key.getValue();
+        });
+        return score;
+    }
+    public setMasterAndUpdateBoardForSimulation(position: ICaseBoardPosition, master: ChessNodeMaster)
+    {
+        console.log('simulating', position, master);
+        let previousPosition: ICaseBoardPosition;
+        if (master !== null)
+        {
+            console.log('simulating previous');
+            previousPosition = this.positionByPiece.get(master);
+            this.setMasterAndUpdateBoardForSimulation(previousPosition, null);
+        }
+        const oldMaster = this.nodes[position.I][position.J].getOwner();
+        if (oldMaster != null && master !== oldMaster)
+        {
+            this.positionByPiece.delete(oldMaster);
+        }
+        if (master != null)
+        {
+            this.positionByPiece.set(master, position);
+        }
+        this.movesHistory.push(new SimulationMove(master, previousPosition, position, oldMaster));
+        this.nodes[position.I][position.J].setOwner(master);
+        // update neighborhood
+        const positions: ICaseBoardPosition[] = [];
+        positions.push({I: position.I - 1, J: position.J});
+        positions.push({I: position.I + 1, J: position.J});
+        positions.push({I: position.I , J: position.J - 1});
+        positions.push({I: position.I , J: position.J + 1});
+        positions.push({I: position.I - 1, J: position.J - 1});
+        positions.push({I: position.I - 1, J: position.J + 1});
+        positions.push({I: position.I + 1, J: position.J - 1});
+        positions.push({I: position.I + 1, J: position.J + 1});
+        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
+        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
+        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
+        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
+        console.log('end simulating');
+    }
+
+    public cancelPreviousSimulation(): boolean
+    {
+        if (this.movesHistory.length > 0)
+        {
+            const move = this.movesHistory[this.movesHistory.length - 1];
+            // console.log('canceling', move);
+            if (move.getPreviousPosition() !== null && move.getPreviousPosition() !== undefined)
+            {
+                this.restoreState( move.getPreviousPosition(), move.getPrincipalMaster());
+            }
+            this.restoreState(move.getPosition(), move.getReplacedMaster());
+            this.movesHistory.pop();
+            return true;
+        }
+        return false;
+    }
+}
+
+class SimulationMove
+{
+    private principalMaster: ChessNodeMaster = null;
+    private previousPrincipalMasterPosition: ICaseBoardPosition;
+    private newPosition: ICaseBoardPosition;
+    private replacedMaster: ChessNodeMaster = null;
+    constructor(principalMaster: ChessNodeMaster, previousPrincipalMasterPosition: ICaseBoardPosition, newPosition: ICaseBoardPosition, replacedMaster: ChessNodeMaster)
+    {
+        this.principalMaster = principalMaster;
+        this.previousPrincipalMasterPosition = previousPrincipalMasterPosition;
+        this.newPosition = newPosition;
+        this.replacedMaster = replacedMaster;
+    }
+
+    public getPrincipalMaster(): ChessNodeMaster
+    {
+        return this.principalMaster;
+    }
+
+    public getPreviousPosition(): ICaseBoardPosition
+    {
+        return this.previousPrincipalMasterPosition;
+    }
+
+    public getPosition(): ICaseBoardPosition
+    {
+        return this.newPosition;
+    }
+
+    public getReplacedMaster(): ChessNodeMaster
+    {
+        return this.replacedMaster;
     }
 }

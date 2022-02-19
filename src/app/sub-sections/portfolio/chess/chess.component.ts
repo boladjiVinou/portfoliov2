@@ -34,8 +34,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public bishop: string;
     public rook: string;
     public knight: string;
-    // ['Depth First Search', 'Reinforcement Learning', 'Baysian networks'], ['Recherche en largeur', 'Apprentissage par reenforcement', 'Reseaux Bayesien']
-    public aiChoices = new ChoiceContainer(['A star'], ['A étoile']);
+    public aiChoices = new ChoiceContainer(['Minimax'], ['Minimax']);
     public difficultyLabel: string;
     public difficultyChoices = new ChoiceContainer(['Easy', 'Medium', 'Hard'], ['Facile', 'Normal', 'Difficile']);
     public viewLabel: string;
@@ -86,7 +85,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
                 container.removeChild(document.getElementById('progress-bar'));
                 this.chessRenderingService.setupHtmlContainer(container);
                 this.chessGame = new ChessGame();
-                this.chessGame.init(this.chessRenderingService, this, AIType.DFS).then(() =>
+                this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX).then(() =>
                 {
                     this.chessRenderingService.animate();
                     this.showMenuButton = true;

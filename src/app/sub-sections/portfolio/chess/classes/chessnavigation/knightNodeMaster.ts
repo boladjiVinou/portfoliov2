@@ -8,6 +8,14 @@ export class KnightNodeMaster extends ChessNodeMaster
     {
         super(color);
         this.chessType = PieceType.KNIGHT;
+        this.value *= 30;
+    }
+    public clone(): KnightNodeMaster
+    {
+        const knight = new KnightNodeMaster((this.color === PieceColor.BLACK) ? PieceColor.BLACK : PieceColor.WHITE);
+        knight.originalPosition = {I: this.originalPosition.I, J: this.originalPosition.J};
+        knight.hasMovedOnce = this.hasMovedOnce;
+        return knight;
     }
     public getPositions(): ICaseBoardPosition[]
     {

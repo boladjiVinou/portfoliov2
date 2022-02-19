@@ -16,10 +16,10 @@ export class ChessGame
         return new Promise<void>(resolve =>
             {
                 this.humanPlayer = new HumanChessPlayer(pawnPromoter, renderingService);
-                this.botPlayer = new AIChessPlayer(aiType);
+                this.gameRequestsSupplier = renderingService.getChessboard().getGameRequestsSupplier();
+                this.botPlayer = new AIChessPlayer(aiType, this.gameRequestsSupplier.getProvider(), this.gameRequestsSupplier.realizeMove.bind(this.gameRequestsSupplier), PieceColor.BLACK);
                 renderingService.getChessboard().setPieceOwner(PieceColor.WHITE, this.humanPlayer);
                 renderingService.getChessboard().setPieceOwner(PieceColor.BLACK, this.botPlayer);
-                this.gameRequestsSupplier = renderingService.getChessboard().getGameRequestsSupplier();
                 ChessPiece.AUDIO_MVT_PLAYER.initSound(renderingService.getCamera(), renderingService.getScene(), ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
                 {
                     resolve();

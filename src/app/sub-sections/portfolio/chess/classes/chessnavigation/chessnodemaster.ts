@@ -11,11 +11,14 @@ export abstract class ChessNodeMaster
     protected originalPosition: ICaseBoardPosition;
     protected hasMovedOnce = false;
     protected chessType: Readonly<PieceType>;
+    protected value: number;
     constructor(color: PieceColor)
     {
         this.color = color;
+        this.value = (this.color === PieceColor.WHITE) ? 1 : -1;
     }
     public abstract getPositions(): ICaseBoardPosition[];
+    public abstract clone(): ChessNodeMaster;
     public getColor(): PieceColor
     {
         return this.color;
@@ -328,5 +331,9 @@ export abstract class ChessNodeMaster
             }
         }
         return false;
+    }
+    public getValue(): number
+    {
+        return this.value;
     }
 }
