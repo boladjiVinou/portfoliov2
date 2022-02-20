@@ -1,4 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
+import { ChessNodeState } from '../chessnavigation/chessnode';
 import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
 import { PieceColor } from '../pieces/chesspiece';
 
@@ -6,8 +7,10 @@ export interface Simulator
 {
     movesGenerator(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][];
     moveSimulator(position: ICaseBoardPosition, master: ChessNodeMaster): void;
-    previousMoveCanceller(): void;
     scoreGetter(): number;
+    gameIsNotOver(): boolean;
+    restoreGameState(nodeStates: ChessNodeState[]): void;
+    saveGameState(): ChessNodeState[];
 }
 export class MinimaxTreeNode
 {
@@ -18,11 +21,13 @@ export class MinimaxTreeNode
     constructor(currentMove: [ICaseBoardPosition, ChessNodeMaster], simulator: Simulator, color: PieceColor, step: number, isMax: boolean)
     {
         this.move = currentMove;
+        let gameState: ChessNodeState[] = [];
         if (this.move !== null)
         {
+            gameState = simulator.saveGameState();
             simulator.moveSimulator(this.move[0], this.move[1]);
         }
-        if (step > 0)
+        if (simulator.gameIsNotOver() && step > 0)
         {
             const nextColor = this.getOpponentColor(color);
             simulator.movesGenerator(color).forEach((value: [ICaseBoardPosition, ChessNodeMaster]) =>
@@ -57,9 +62,9 @@ export class MinimaxTreeNode
         {
             this.score = simulator.scoreGetter();
         }
-        if (this.move !== null)
+        if (gameState.length > 0)
         {
-            simulator.previousMoveCanceller();
+            simulator.restoreGameState(gameState);
         }
     }
     private getOpponentColor(color: PieceColor): PieceColor
@@ -76,6 +81,7 @@ export class MinimaxTreeNode
     }
     public getElectedMove(): [ICaseBoardPosition, ChessNodeMaster]
     {
+        console.log('score ', this.score);
         return this.electedChild.move;
     }
 }

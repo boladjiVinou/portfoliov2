@@ -1,6 +1,6 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor } from '../pieces/chesspiece';
-import { ChessNodeMaster } from './chessnodemaster';
+import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 import { ChessNodeProvider } from './chessnodeprovider';
 import { PawnNodeMaster } from './pawnnodemaster';
 
@@ -124,8 +124,80 @@ export class ChessNode
         this.outNodes.forEach(node => positions.push({I: node.nodePosition.I, J: node.nodePosition.J}));
         return positions;
     }
+    getInnodePosition(): ICaseBoardPosition[]
+    {
+        const positions: ICaseBoardPosition[] = [];
+        this.inNodes.forEach(node => positions.push({I: node.nodePosition.I, J: node.nodePosition.J}));
+        return positions;
+    }
     public getProvider(): ChessNodeProvider
     {
         return this.nodeProvider;
+    }
+
+    public getState(): ChessNodeState
+    {
+        return new ChessNodeState(this);
+    }
+
+    public restoreState(state: ChessNodeState): void
+    {
+        this.outNodes = new Set<ChessNode>();
+        this.inNodes = new Set<ChessNode>();
+        state.getInNodesPositions().forEach(position =>
+        {
+            this.inNodes.add(this.nodeProvider.getNode(position));
+        });
+        state.getOutNodesPositions().forEach(position =>
+        {
+            this.outNodes.add(this.nodeProvider.getNode(position));
+        });
+        if (state.hasMasterState())
+        {
+            this.master = this.nodeProvider.getMasterFromId(state.getMasterState().getMasterId());
+            this.master.restoreState(state.getMasterState());
+        }
+        else
+        {
+            this.master = null;
+        }
+    }
+}
+
+export class ChessNodeState
+{
+    private position: ICaseBoardPosition;
+    private outNodes: ICaseBoardPosition[] = [];
+    private inNodes: ICaseBoardPosition[] = [];
+    private readonly masterState: ChessNodeMasterState = null;
+    constructor(node: ChessNode)
+    {
+       this.position = node.getPosition();
+       this.outNodes = node.getOutnodePosition();
+       this.inNodes = node.getInnodePosition();
+       if (!node.isFree())
+       {
+            this.masterState = node.getOwner().getState();
+       }
+    }
+    public getOutNodesPositions(): ICaseBoardPosition[]
+    {
+        return this.outNodes;
+    }
+    public getInNodesPositions(): ICaseBoardPosition[]
+    {
+        return this.inNodes;
+    }
+    public getMasterState(): ChessNodeMasterState
+    {
+        return this.masterState;
+    }
+    public hasMasterState(): boolean
+    {
+        return this.masterState !== null;
+    }
+    public getPosition(): ICaseBoardPosition
+    {
+        return this.position;
     }
 }

@@ -8,7 +8,7 @@ import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
 import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
 import { BishopNodeMaster } from './bishopnodemaster';
-import { ChessNode } from './chessnode';
+import { ChessNode, ChessNodeState } from './chessnode';
 import { ChessNodeMaster } from './chessnodemaster';
 import { KingNodeMaster } from './kingnodemaster';
 import { KnightNodeMaster } from './knightNodeMaster';
@@ -26,7 +26,7 @@ export class ChessNodeProvider
     private rightWhiteRook: ChessNodeMaster = null;
     private leftWhiteRook: ChessNodeMaster = null;
     private positionByPiece: Map<ChessNodeMaster, ICaseBoardPosition> = new Map<ChessNodeMaster, ICaseBoardPosition>();
-    private movesHistory: SimulationMove[] = [];
+    private masterById: Map<number, ChessNodeMaster> = new Map<number, ChessNodeMaster>();
     constructor()
     {
         this.initNodes();
@@ -38,7 +38,16 @@ export class ChessNodeProvider
         this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
             this.nodes[position.I][position.J].setOwner(key);
+            this.masterById.set(key.getId(), key);
         });
+    }
+    public getMasterFromId(id: number): ChessNodeMaster
+    {
+        if (this.masterById.has(id))
+        {
+            return this.masterById.get(id);
+        }
+        return null;
     }
     public clone(): ChessNodeProvider
     {
@@ -161,6 +170,10 @@ export class ChessNodeProvider
         const node = this.nodes[position.I][position.J];
         return node;
     }
+    public hasKing(color: PieceColor): boolean
+    {
+        return this.positionByPiece.has(this.getKing(color));
+    }
     public getKing(color: PieceColor): KingNodeMaster
     {
         return this.kings.filter(king => king.getColor() === color)[0] as KingNodeMaster;
@@ -200,31 +213,6 @@ export class ChessNodeProvider
         nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
         nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
         this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
-    }
-
-    public restoreState(position: ICaseBoardPosition, master: ChessNodeMaster)
-    {
-        // console.log('restoring', position, master);
-        if (master != null)
-        {
-            this.positionByPiece.set(master,  position);
-        }
-        this.nodes[position.I][position.J].setOwner(master);
-        // update neighborhood
-        const positions: ICaseBoardPosition[] = [];
-        positions.push({I: position.I - 1, J: position.J});
-        positions.push({I: position.I + 1, J: position.J});
-        positions.push({I: position.I , J: position.J - 1});
-        positions.push({I: position.I , J: position.J + 1});
-        positions.push({I: position.I - 1, J: position.J - 1});
-        positions.push({I: position.I - 1, J: position.J + 1});
-        positions.push({I: position.I + 1, J: position.J - 1});
-        positions.push({I: position.I + 1, J: position.J + 1});
-        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
-        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
-        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
-        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
-        // console.log('restoring end');
     }
 
     isValid(position: ICaseBoardPosition): boolean
@@ -305,59 +293,29 @@ export class ChessNodeProvider
         });
         return score;
     }
-    public setMasterAndUpdateBoardForSimulation(position: ICaseBoardPosition, master: ChessNodeMaster)
+
+    public restoreGameState(nodeStates: ChessNodeState[]): void
     {
-        console.log('simulating', position, master);
-        let previousPosition: ICaseBoardPosition;
-        if (master !== null)
-        {
-            console.log('simulating previous');
-            previousPosition = this.positionByPiece.get(master);
-            this.setMasterAndUpdateBoardForSimulation(previousPosition, null);
-        }
-        const oldMaster = this.nodes[position.I][position.J].getOwner();
-        if (oldMaster != null && master !== oldMaster)
-        {
-            this.positionByPiece.delete(oldMaster);
-        }
-        if (master != null)
-        {
-            this.positionByPiece.set(master, position);
-        }
-        this.movesHistory.push(new SimulationMove(master, previousPosition, position, oldMaster));
-        this.nodes[position.I][position.J].setOwner(master);
-        // update neighborhood
-        const positions: ICaseBoardPosition[] = [];
-        positions.push({I: position.I - 1, J: position.J});
-        positions.push({I: position.I + 1, J: position.J});
-        positions.push({I: position.I , J: position.J - 1});
-        positions.push({I: position.I , J: position.J + 1});
-        positions.push({I: position.I - 1, J: position.J - 1});
-        positions.push({I: position.I - 1, J: position.J + 1});
-        positions.push({I: position.I + 1, J: position.J - 1});
-        positions.push({I: position.I + 1, J: position.J + 1});
-        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
-        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
-        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
-        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
-        console.log('end simulating');
+        this.positionByPiece = new Map<ChessNodeMaster, ICaseBoardPosition>();
+        nodeStates.forEach(state => {
+            const position = state.getPosition();
+            this.nodes[position.I][position.J].restoreState(state);
+            if (!this.nodes[position.I][position.J].isFree())
+            {
+                this.positionByPiece.set(this.nodes[position.I][position.J].getOwner(), {I: position.I, J: position.J});
+            }
+        });
     }
 
-    public cancelPreviousSimulation(): boolean
+    public saveGameState(): ChessNodeState[]
     {
-        if (this.movesHistory.length > 0)
-        {
-            const move = this.movesHistory[this.movesHistory.length - 1];
-            // console.log('canceling', move);
-            if (move.getPreviousPosition() !== null && move.getPreviousPosition() !== undefined)
-            {
-                this.restoreState( move.getPreviousPosition(), move.getPrincipalMaster());
-            }
-            this.restoreState(move.getPosition(), move.getReplacedMaster());
-            this.movesHistory.pop();
-            return true;
-        }
-        return false;
+        const states: ChessNodeState[] = [];
+        this.nodes.forEach(row => {
+            row.forEach(node => {
+                states.push(node.getState());
+            });
+        });
+        return states;
     }
 }
 

@@ -1,6 +1,6 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
-import { ChessNodeMaster } from './chessnodemaster';
+import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 
 export class KingNodeMaster extends ChessNodeMaster
 {
@@ -111,4 +111,34 @@ export class KingNodeMaster extends ChessNodeMaster
         return possiblesMoves.filter(pos => this.positionIsSafeForTheKing(pos));
     }
 
+    public getState(): ChessNodeMasterState
+    {
+        return new KingNodeMasterState(this);
+    }
+    public restoreState(state: KingNodeMasterState): void
+    {
+        super.restoreState(state);
+        this.canDoARightCastling = state.getCanDoARightCastling();
+        this.canDoAleftCastling = state.getCandDoALeftCastling();
+    }
+}
+
+export class KingNodeMasterState extends ChessNodeMasterState
+{
+    private readonly canDoARightCastling: boolean;
+    private readonly canDoAleftCastling: boolean;
+    constructor(master: KingNodeMaster)
+    {
+        super(master);
+        this.canDoARightCastling = master.canDoARightCastling;
+        this.canDoAleftCastling = master.canDoAleftCastling;
+    }
+    public getCanDoARightCastling(): boolean
+    {
+        return this.canDoARightCastling;
+    }
+    public getCandDoALeftCastling(): boolean
+    {
+        return this.canDoAleftCastling;
+    }
 }

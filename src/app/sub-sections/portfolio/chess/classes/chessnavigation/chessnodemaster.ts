@@ -6,19 +6,26 @@ import { PawnNodeMaster } from './pawnnodemaster';
 
 export abstract class ChessNodeMaster
 {
+    private static idCounter = 0;
     protected color: PieceColor;
     protected nodeProvider: ChessNodeProvider;
     protected originalPosition: ICaseBoardPosition;
     protected hasMovedOnce = false;
     protected chessType: Readonly<PieceType>;
     protected value: number;
+    private readonly id: number;
     constructor(color: PieceColor)
     {
         this.color = color;
         this.value = (this.color === PieceColor.WHITE) ? 1 : -1;
+        this.id = ++ChessNodeMaster.idCounter;
     }
     public abstract getPositions(): ICaseBoardPosition[];
     public abstract clone(): ChessNodeMaster;
+    public getId(): number
+    {
+        return this.id;
+    }
     public getColor(): PieceColor
     {
         return this.color;
@@ -335,5 +342,32 @@ export abstract class ChessNodeMaster
     public getValue(): number
     {
         return this.value;
+    }
+    public getState(): ChessNodeMasterState
+    {
+        return new ChessNodeMasterState(this);
+    }
+    public restoreState(state: ChessNodeMasterState): void
+    {
+        this.hasMovedOnce = state.getHasMoved();
+    }
+}
+
+export class ChessNodeMasterState
+{
+    private readonly hasMovedOnce: boolean;
+    private readonly masterId: number;
+    constructor(master: ChessNodeMaster)
+    {
+        this.hasMovedOnce = master.hasMoved();
+        this.masterId = master.getId();
+    }
+    public getHasMoved(): boolean
+    {
+        return this.hasMovedOnce;
+    }
+    public getMasterId(): number
+    {
+        return this.masterId;
     }
 }

@@ -1,10 +1,10 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
-import { ChessNodeMaster } from './chessnodemaster';
+import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 
 export class PawnNodeMaster extends ChessNodeMaster
 {
-    private mvtDirection;
+    private mvtDirection: number;
     private hasMovedTwoSquares = false;
     constructor(color: PieceColor)
     {
@@ -103,4 +103,37 @@ export class PawnNodeMaster extends ChessNodeMaster
             return false;
         }
     }
+
+    public getState(): ChessNodeMasterState
+    {
+        return new PawnNodeMasterState(this);
+    }
+
+    public restoreState(state: PawnNodeMasterState): void
+    {
+        super.restoreState(state);
+        this.mvtDirection = state.getMvtDirection();
+        this.hasMovedTwoSquares = state.getHasMovedTwoSquares();
+    }
 }
+
+export class PawnNodeMasterState extends ChessNodeMasterState
+{
+    private readonly mvtDirection: number;
+    private readonly hasMovedTwoSquares: boolean;
+    constructor(master: PawnNodeMaster)
+    {
+        super(master);
+        this.mvtDirection = master.getMvtDirection();
+        this.hasMovedTwoSquares = master.getHasMovedTwoSquares();
+    }
+    public getMvtDirection()
+    {
+        return this.mvtDirection;
+    }
+    public getHasMovedTwoSquares(): boolean
+    {
+        return this.hasMovedTwoSquares;
+    }
+}
+

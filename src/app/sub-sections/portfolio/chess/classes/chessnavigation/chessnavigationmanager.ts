@@ -55,6 +55,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     }
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>
     {
+        console.log(this.chessBoard);
         return this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor() as ChessPiece);
     }
     getProvider(): Readonly<ChessNodeProvider>

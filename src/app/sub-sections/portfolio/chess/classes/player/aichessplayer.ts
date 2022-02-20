@@ -1,4 +1,5 @@
 import { ICaseBoardPosition } from '../board/chessCase';
+import { ChessNodeState } from '../chessnavigation/chessnode';
 import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
 import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
@@ -21,14 +22,20 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         this.color = color;
         this.moveSubmiter = moveSubmiter;
     }
+    restoreGameState(nodeStates: ChessNodeState[]): void {
+        this.gameProvider.restoreGameState(nodeStates);
+    }
+    saveGameState(): ChessNodeState[] {
+        return this.gameProvider.saveGameState();
+    }
+    gameIsNotOver(): boolean {
+        return this.gameProvider.hasKing(PieceColor.BLACK) && this.gameProvider.hasKing(PieceColor.WHITE);
+    }
     movesGenerator(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][] {
         return this.gameProvider.getPossibleMoves(color);
     }
     moveSimulator(position: ICaseBoardPosition, master: ChessNodeMaster): void {
-        this.gameProvider.setMasterAndUpdateBoardForSimulation(position, master);
-    }
-    previousMoveCanceller(): void {
-        this.gameProvider.cancelPreviousSimulation();
+        this.gameProvider.setMasterAndUpdateBoard(position, master);
     }
     scoreGetter(): number {
         return this.gameProvider.getTotal();
@@ -40,10 +47,6 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
             const level = this.minimaxLevel;
             const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, false);
             const choosenMove = minimaxRoot.getElectedMove();
-            while (this.gameProvider.cancelPreviousSimulation())
-            {
-                this.gameProvider.cancelPreviousSimulation();
-            }
             const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
             this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
             {
