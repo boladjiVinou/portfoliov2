@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone, OnDestroy , AfterViewInit} from '@angular/core';
 import { LanguageService } from '../../../services/languageService';
 import { Subscription } from 'rxjs';
-import { SudokuService } from './sudoke.service';
+import { SudokuService } from './sudoku.service';
 export interface GridPair {
   grid: number[];
   solution: number[];

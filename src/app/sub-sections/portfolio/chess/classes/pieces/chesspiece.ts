@@ -46,6 +46,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         return new Promise<void>(resolve =>
             {
+                ChessPiece.AUDIO_MVT_PLAYER.stopSound();
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
                 this.captureHostVisitorIfNeeded(host);

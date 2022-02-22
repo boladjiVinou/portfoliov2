@@ -3,8 +3,6 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ChessCase } from '../board/chessCase';
-import { ChessPiece } from '../pieces/chesspiece';
 export class ChessInteractor
 {
     private outlinables: THREE.Object3D[];

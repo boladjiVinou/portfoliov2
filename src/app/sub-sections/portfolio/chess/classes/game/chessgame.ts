@@ -34,7 +34,6 @@ export class ChessGame
     private playerRoutine(player: ChessPlayer, nextPlayer: ChessPlayer, color: PieceColor): void
     {
         let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
-        console.log('new turn');
         player.play().then(() =>
             {
                 if (isInCheck)

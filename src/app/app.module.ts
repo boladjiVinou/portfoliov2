@@ -16,7 +16,7 @@ import {ChessComponent} from './sub-sections/portfolio/chess/chess.component';
 
 import {LanguageService} from './services/languageService';
 import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/project-one-renderer.service';
-import {SudokuService} from './sub-sections/portfolio/sudoku/sudoke.service';
+import {SudokuService} from './sub-sections/portfolio/sudoku/sudoku.service';
 import {CurlingService} from './sub-sections/portfolio/curling/curling.service';
 import { ChessRenderingService } from './sub-sections/portfolio/chess/classes/rendering/chessrendering.service';
 

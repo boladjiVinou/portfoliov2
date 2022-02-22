@@ -4,7 +4,8 @@ import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
 import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessPlayer } from './chessplayer';
-import { MinimaxTreeNode, Simulator } from './MinimaxTree';
+import { MinimaxNodeRequirement, MinimaxTreeNode, Simulator } from './MinimaxTreeNode';
+import * as WorkerPoolLib from 'workerpool'; // https://github.com/josdejong/workerpool
 
 export class AIChessPlayer extends ChessPlayer implements Simulator
 {
@@ -12,7 +13,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     private aiType: AIType;
     private gameProvider: Readonly<ChessNodeProvider>;
     private color: PieceColor;
-    private minimaxLevel = 4;
+    private minimaxLevel = 3;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
     constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
     {
@@ -45,13 +46,31 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         return new Promise<void>((resolve) =>
         {
             const level = this.minimaxLevel;
-            const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, false);
-            const choosenMove = minimaxRoot.getElectedMove();
-            const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
-            this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
+            const pool = WorkerPoolLib.pool();
+            /*const researchFct = () => {
+                const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, false, Number.MAX_SAFE_INTEGER);
+                const choosenMove = minimaxRoot.getElectedMove();
+                const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
+                this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
+                    {
+                        resolve();
+                        return;
+                    });
+            };
+            pool.exec(researchFct, []).then(() => {
+                pool.terminate();
+            });*/
+            window.requestIdleCallback(() =>
             {
-                resolve();
-            });
+                const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);
+                const choosenMove = minimaxRoot.getElectedMove();
+                const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
+                this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
+                    {
+                        resolve();
+                        return;
+                    });
+            }, { timeout: 250 });
         });
     }
 

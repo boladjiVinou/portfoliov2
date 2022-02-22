@@ -18,6 +18,7 @@ export class SudokuGenerator {
     }
 
     public generateAGrid(nbOfVoid: number = 18): Promise<GridPair> {
+        // tslint:disable-next-line:ban-types
         return new Promise<GridPair>((resolve: (Function)) => {
             this.generateSudokuLogically(nbOfVoid).then((grid) => {
                 resolve(grid);
