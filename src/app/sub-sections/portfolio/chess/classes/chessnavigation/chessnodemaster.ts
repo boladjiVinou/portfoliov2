@@ -172,7 +172,7 @@ export abstract class ChessNodeMaster
             if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
             {
                 const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP)
+                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
                 {
                     return false;
                 }
@@ -198,7 +198,7 @@ export abstract class ChessNodeMaster
             if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
             {
                 const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP)
+                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
                 {
                     return false;
                 }
@@ -223,7 +223,7 @@ export abstract class ChessNodeMaster
             if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
             {
                 const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP)
+                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
                 {
                     return false;
                 }
@@ -248,7 +248,7 @@ export abstract class ChessNodeMaster
             if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
             {
                 const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP)
+                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
                 {
                     return false;
                 }

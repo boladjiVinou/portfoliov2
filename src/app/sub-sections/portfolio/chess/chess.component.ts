@@ -8,6 +8,7 @@ import { ChessPiece, PieceType } from './classes/pieces/chesspiece';
 import { ChessGame } from './classes/game/chessgame';
 import { AIType } from './classes/player/aichessplayer';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 export interface IPawnPromoter
 {
@@ -53,19 +54,23 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
         return new Promise<PieceType> (resolve =>
             {
                 this.showPawnPromotionDialog = true;
-                let choiceSubscription: Subscription;
+                let choiceSubscription: Subscription = null;
                 choiceSubscription = this.pieceTypeObservable.subscribe(chosenType =>
                     {
-                        choiceSubscription.unsubscribe();
-                        this.showPawnPromotionDialog = false;
-                        this.pieceTypeSubject.next(PieceType.PAWN);
-                        resolve(chosenType);
-                        return;
+                        if (choiceSubscription !== null)
+                        {
+                            choiceSubscription.unsubscribe();
+                            this.showPawnPromotionDialog = false;
+                            this.pieceTypeSubject.next(PieceType.PAWN);
+                            resolve(chosenType);
+                            return;
+                        }
                     });
             });
     }
     submitPromotionChoice()
     {
+        console.log('submiting choice');
         this.pieceTypeSubject.next(this.pawnPromotionChoice);
     }
     ngOnInit(): void {
@@ -96,6 +101,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     }
 
     ngOnDestroy(): void {
+        this.chessRenderingService.stopAmbientSound();
         this.langageSubscription.unsubscribe();
         const childrenContainer = document.querySelector('.children-container') as HTMLElement;
         childrenContainer.style.opacity = '0.8';

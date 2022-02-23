@@ -10,6 +10,7 @@ import { BishopNodeMaster } from './bishopnodemaster';
 import { ChessNodeMaster } from './chessnodemaster';
 import { QueenNodeMaster } from './queennodemaster';
 import { RookNodeMaster } from './rooknodemaster';
+import { KnightNodeMaster } from './knightNodeMaster';
 
 export interface IPiecesRequestSupplier
 {
@@ -64,7 +65,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     notifyPromotion(pawn: NonNullable<TransformablePawnPiece>, newType: PieceType): void
     {
         const position = pawn.getCurrentCase().getCasePosition();
-        this.chessNodeProvider.setMasterAndUpdateBoard(position, null);
+        const oldMaster = this.chessNodeProvider.getNode(position).getOwner();
         let master: ChessNodeMaster;
         switch (newType)
         {
@@ -78,10 +79,13 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
                 master = new RookNodeMaster(pawn.getColor());
                 break;
             case PieceType.KNIGHT:
-                master = new KingNodeMaster(pawn.getColor());
+                master = new KnightNodeMaster(pawn.getColor());
                 break;
         }
         master.setHasMoved(true);
+        master.setOriginalPosition(oldMaster.getOriginalPosition());
+        master.setNodeProvider(this.chessNodeProvider);
+        this.chessNodeProvider.insertNewMaster(master);
         this.chessNodeProvider.setMasterAndUpdateBoard(position, master);
     }
     notifyMove(piece: ChessPiece, newPosition: ICaseBoardPosition): void

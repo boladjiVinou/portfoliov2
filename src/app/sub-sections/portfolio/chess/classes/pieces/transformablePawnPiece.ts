@@ -1,6 +1,7 @@
 import { ChessCase, ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
 import { IPawnSpecialRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPlayer} from '../player/chessplayer';
+import { HumanChessPlayer } from '../player/humanchessplayer';
 import { BishopPiece } from './bishoppiece';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 import { KnightPiece } from './knightpiece';
@@ -29,6 +30,10 @@ export class TransformablePawnPiece extends ChessPiece
     {
         const previousModel = this.innerPiece.getModel();
         previousModel.visible = false;
+        if (this.getOwner() instanceof HumanChessPlayer)
+        {
+            this.innerPiece.onDeselect();
+        }
         const currentCase = this.innerPiece.getCurrentCase();
         const owner = this.innerPiece.getOwner();
         switch (type)
@@ -50,6 +55,10 @@ export class TransformablePawnPiece extends ChessPiece
         this.innerPiece.setOwner(owner);
         this.innerPiece.getModel().visible = true;
         (this.positionAvailabilityChecker as IPawnSpecialRequestSupplier).notifyPromotion(this, type);
+        if (this.getOwner() instanceof HumanChessPlayer)
+        {
+            this.innerPiece.onOutline();
+        }
     }
     public onDeselect(): void
     {
@@ -127,6 +136,11 @@ export class TransformablePawnPiece extends ChessPiece
     public setNavigationChecker(mvtValidator: IPawnSpecialRequestSupplier): void
     {
         this.innerPiece.setNavigationChecker(mvtValidator);
+        this.bishop.setNavigationChecker(mvtValidator);
+        this.queen.setNavigationChecker(mvtValidator);
+        this.knight.setNavigationChecker(mvtValidator);
+        this.rook.setNavigationChecker(mvtValidator);
+        this.positionAvailabilityChecker = mvtValidator;
     }
     public canJumpOverOtherPieces(): boolean
     {

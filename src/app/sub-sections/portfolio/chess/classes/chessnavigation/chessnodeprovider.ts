@@ -41,6 +41,13 @@ export class ChessNodeProvider
             this.masterById.set(key.getId(), key);
         });
     }
+    public insertNewMaster(master: ChessNodeMaster): void
+    {
+        if (!this.masterById.has(master.getId()))
+        {
+            this.masterById.set(master.getId(), master);
+        }
+    }
     public getMasterFromId(id: number): ChessNodeMaster
     {
         if (this.masterById.has(id))
@@ -184,7 +191,7 @@ export class ChessNodeProvider
     }
     public setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
     {
-        if (master !== null)
+        if (master !== null && this.positionByPiece.has(master))
         {
             const previousPosition = this.positionByPiece.get(master);
             this.setMasterAndUpdateBoard(previousPosition, null);
