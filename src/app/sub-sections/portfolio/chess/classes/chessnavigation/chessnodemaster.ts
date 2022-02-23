@@ -2,6 +2,7 @@ import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNode } from './chessnode';
 import { ChessNodeProvider } from './chessnodeprovider';
+import { KingNodeMaster } from './kingnodemaster';
 import { PawnNodeMaster } from './pawnnodemaster';
 
 export abstract class ChessNodeMaster
@@ -76,7 +77,14 @@ export abstract class ChessNodeMaster
         let kingPosition: ICaseBoardPosition;
         try
         {
-            kingPosition = this.nodeProvider.getNodeOf(king).getPosition();
+            if (this.chessType !== PieceType.KING)
+            {
+                kingPosition = this.nodeProvider.getNodeOf(king).getPosition();
+            }
+            else
+            {
+                kingPosition = position;
+            }
         }
         catch (error)
         {

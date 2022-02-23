@@ -49,6 +49,10 @@ export class AudioPlayer
     }
     public playSound(playWithLoop: boolean) {
         if (this.sound !== undefined && this.isEnabled) {
+            if (this.sound.isPlaying)
+            {
+                this.sound.stop();
+            }
             this.sound.play();
             this.sound.setLoop(playWithLoop);
         }

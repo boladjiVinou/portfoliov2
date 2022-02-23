@@ -47,19 +47,6 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         {
             const level = this.minimaxLevel;
             const pool = WorkerPoolLib.pool();
-            /*const researchFct = () => {
-                const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, false, Number.MAX_SAFE_INTEGER);
-                const choosenMove = minimaxRoot.getElectedMove();
-                const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
-                this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
-                    {
-                        resolve();
-                        return;
-                    });
-            };
-            pool.exec(researchFct, []).then(() => {
-                pool.terminate();
-            });*/
             window.requestIdleCallback(() =>
             {
                 const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);

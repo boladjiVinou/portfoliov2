@@ -200,7 +200,7 @@ export class ChessNodeProvider
         }
         this.nodes[position.I][position.J].setOwner(master);
         // update neighborhood
-        const positions: ICaseBoardPosition[] = [];
+        /*const positions: ICaseBoardPosition[] = [];
         positions.push({I: position.I - 1, J: position.J});
         positions.push({I: position.I + 1, J: position.J});
         positions.push({I: position.I , J: position.J - 1});
@@ -212,7 +212,14 @@ export class ChessNodeProvider
         const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
         nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
         nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
-        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());
+        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());*/
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
+        {
+            if (value.I !== position.I || value.J !== position.J)
+            {
+                this.nodes[value.I][value.J].initNeighborhoodUnsafely();
+            }
+        });
     }
 
     isValid(position: ICaseBoardPosition): boolean
@@ -267,7 +274,7 @@ export class ChessNodeProvider
             return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && this.nodes[7][1].isFree() && this.nodes[7][2].isFree() && this.nodes[7][3].isFree()
             && !this.nodes[7][4].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][3].nextMasterWillBeInDanger(PieceColor.WHITE) &&
             !this.nodes[7][2].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][1].nextMasterWillBeInDanger(PieceColor.WHITE)
-            && this.rightWhiteRook.positionIsSafeForTheKing({I: 7, J: 0});
+            && this.leftWhiteRook.positionIsSafeForTheKing({I: 7, J: 0});
         }
     }
 
