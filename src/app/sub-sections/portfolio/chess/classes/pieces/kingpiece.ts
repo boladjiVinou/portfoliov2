@@ -29,11 +29,17 @@ export class KingPiece extends ChessPiece
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
                 this.captureHostVisitorIfNeeded(host);
+                const isDoingLeftCastling = this.isDoingALeftCastling(host);
+                let isDoingRightCastling = false;
+                if (!isDoingLeftCastling)
+                {
+                    isDoingRightCastling = this.isDoingARightCastling(host);
+                }
                 this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
                 this.quitCase();
                 this.currentCase = host;
                 this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0))); // temporary
-                if (this.isDoingALeftCastling(host))
+                if (isDoingLeftCastling)
                 {
                     this.specialRequestsSupplier.realizeAnimatedRookLeftCastling(this.color).then(() =>
                     {
@@ -41,7 +47,7 @@ export class KingPiece extends ChessPiece
                         return;
                     });
                 }
-                else if (this.isDoingARightCastling(host))
+                else if (isDoingRightCastling)
                 {
                     this.specialRequestsSupplier.realizeAnimatedRookRightCastling(this.color).then(() =>
                     {
@@ -75,12 +81,12 @@ export class KingPiece extends ChessPiece
     private isDoingALeftCastling(host: IVisitedCase): boolean
     {
         const hostPosition = host.getCasePosition();
-        return (hostPosition.I === this.leftCastlingPosition.I) && (hostPosition.J === this.leftCastlingPosition.J);
+        return this.specialRequestsSupplier.canMakeALeftCastling(this) && (hostPosition.I === this.leftCastlingPosition.I) && (hostPosition.J === this.leftCastlingPosition.J);
     }
     private isDoingARightCastling(host: IVisitedCase): boolean
     {
         const hostPosition = host.getCasePosition();
-        return (hostPosition.I === this.rightCastlingPosition.I) && (hostPosition.J === this.rightCastlingPosition.J);
+        return this.specialRequestsSupplier.canMakeARightCastling(this) && (hostPosition.I === this.rightCastlingPosition.I) && (hostPosition.J === this.rightCastlingPosition.J);
     }
     public setNavigationChecker( mvtValidator: IPiecesRequestSupplier): void
     {

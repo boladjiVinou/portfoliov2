@@ -88,7 +88,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                     let material: THREE.Material;
                     if (this.color === PieceColor.BLACK)
                     {
-                        material = new THREE.MeshPhongMaterial({color: 0x222222 });
+                        material = new THREE.MeshPhongMaterial({color: 0x393232 });
                     }
                     else
                     {

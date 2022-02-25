@@ -178,6 +178,7 @@ export class ChessRenderingService implements OnDestroy {
                         this.camera.lookAt(-1500, -3000, 0);
                     }
                     this.camera.updateProjectionMatrix();
+                    this.renderer.setPixelRatio(window.devicePixelRatio);
                     clearInterval(cameraPositionUpdater);
                     resolve();
                     return;
