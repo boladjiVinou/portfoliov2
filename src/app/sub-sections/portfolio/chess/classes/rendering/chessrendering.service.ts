@@ -30,7 +30,6 @@ export class ChessRenderingService implements OnDestroy {
 
             this.initRenderer();
             this.initCamera();
-            // this.initController();
             this.initRoom();
 
             this.parentNode.translateY(-3000);
@@ -72,7 +71,7 @@ export class ChessRenderingService implements OnDestroy {
         this.camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 50000);
         this.camera.position.set(12898.264904688718, 13000, 14319.672926075744);
         this.camera.lookAt(0, -1000, 0);
-        this.camera.add(new THREE.PointLight(0x404040, 0.3));
+        // this.camera.add(new THREE.PointLight(0x404040, 0.3));
         this.scene.add(this.camera);
     }
 
@@ -85,24 +84,6 @@ export class ChessRenderingService implements OnDestroy {
         this.scene.add(ambientLight);
     }
 
-    private initNightLight()
-    {
-        const directionalLight = new THREE.DirectionalLight(0x404040, 1);
-        directionalLight.position.set(0, 1, 1);
-        this.scene.add(directionalLight);
-        // const spotLight = new THREE.SpotLight(0xffffff, 1, 3000, Math.PI / 2, 0.1);
-        // spotLight.position.set(0, 3000, 0);
-        // this.scene.add(spotLight);
-        const bulbLight = new SpotLight(LivingRoom.LampBulbColor, 1, 6000, Math.PI / 2);
-        bulbLight.position.set(-4000, 1200, -4000);
-        bulbLight.castShadow = true;
-        const sphereSize = 100;
-        const pointLightHelper = new THREE.SpotLightHelper( bulbLight, sphereSize );
-        this.scene.add( pointLightHelper );
-        this.scene.add(bulbLight);
-        const ambientLight = new THREE.AmbientLight( 0x404040, 0.5);
-        this.scene.add(ambientLight);
-    }
     private initChessBoard(): Promise<void>
     {
         this.chessboard = new ChessBoard();

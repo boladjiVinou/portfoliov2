@@ -89,11 +89,13 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                     if (this.color === PieceColor.BLACK)
                     {
                         material = new THREE.MeshPhongMaterial({color: 0x393232 });
+                        material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x393232)//
+                            , emissive: new THREE.Color(0x000000), roughness: 0.3, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: true});
                     }
                     else
                     {
                         material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x888888)//
-                            , emissive: new THREE.Color(0x222222), roughness: 0, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+                            , emissive: new THREE.Color(0x222222), roughness: 0.3, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
                     }
                     this.mesh.traverse(child => {
                         if (child instanceof THREE.Mesh)

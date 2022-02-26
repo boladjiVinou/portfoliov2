@@ -206,20 +206,6 @@ export class ChessNodeProvider
             this.positionByPiece.set(master, position);
         }
         this.nodes[position.I][position.J].setOwner(master);
-        // update neighborhood
-        /*const positions: ICaseBoardPosition[] = [];
-        positions.push({I: position.I - 1, J: position.J});
-        positions.push({I: position.I + 1, J: position.J});
-        positions.push({I: position.I , J: position.J - 1});
-        positions.push({I: position.I , J: position.J + 1});
-        positions.push({I: position.I - 1, J: position.J - 1});
-        positions.push({I: position.I - 1, J: position.J + 1});
-        positions.push({I: position.I + 1, J: position.J - 1});
-        positions.push({I: position.I + 1, J: position.J + 1});
-        const nodesToKeep = positions.filter(pos => this.isValid(pos)).map(pos => this.nodes[pos.I][pos.J]);
-        nodesToKeep.filter(node => !node.isFree()).forEach( node => node.initNeighborhoodUnsafely());
-        nodesToKeep.filter(node => node.isFree()).forEach( node => node.updateInNodes());
-        this.knights.filter(knight => this.positionByPiece.has(knight)).forEach(knight => this.getNodeOf(knight).initNeighborhoodUnsafely());*/
         this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
             if (value.I !== position.I || value.J !== position.J)
@@ -229,9 +215,62 @@ export class ChessNodeProvider
         });
     }
 
+    public simulateMove(position: ICaseBoardPosition, master: ChessNodeMaster)
+    {
+        if (master instanceof PawnNodeMaster && master.isDoingEnPassantCapture(this.getNodeOf(master).getPosition(), position))
+        {
+            const targetPosition = {I: position.I, J: position.J};
+            targetPosition.I -= master.getMvtDirection();
+            this.setMasterAndUpdateBoard(targetPosition, null);
+        }
+        else if ( master instanceof KingNodeMaster)
+        {
+            const previousPosition = this.getNodeOf(master).getPosition();
+            const deltaJ = position.J - previousPosition.J;
+            // if abs(deltaJ) != 1 it means we are doing a castling
+            if (deltaJ > 1)
+            {
+                if (master.getColor() === PieceColor.BLACK) // black left castling
+                {
+                    this.setMasterAndUpdateBoard({I: 0, J: 5}, this.leftBlackRook);
+                }
+                else if (master.getColor() === PieceColor.WHITE) // white right castling
+                {
+                    this.setMasterAndUpdateBoard({I: 7, J: 5}, this.rightWhiteRook);
+                }
+            }
+            else if (deltaJ < -1)
+            {
+                if (master.getColor() === PieceColor.BLACK) // black  right castling
+                {
+                    this.setMasterAndUpdateBoard({I: 0, J: 3}, this.rightBlackRook);
+                }
+                else if (master.getColor() === PieceColor.WHITE)// white left castling
+                {
+                    this.setMasterAndUpdateBoard({I: 7, J: 5}, this.leftWhiteRook);
+                }
+            }
+        }
+        this.setMasterAndUpdateBoard(position, master);
+    }
+
     isValid(position: ICaseBoardPosition): boolean
     {
         return position.I >= 0 && position.I < 8 && position.J >= 0 && position.J < 8;
+    }
+    playerHasAMoveToDo(color: PieceColor): boolean
+    {
+        for (const pair of this.positionByPiece)
+        {
+            if  (pair[0].getColor() === color)
+            {
+                if (this.nodes[pair[1].I][pair[1].J].getOutnodePosition().length > 0)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     masterIsInDanger(master: ChessNodeMaster): boolean
     {
@@ -283,6 +322,16 @@ export class ChessNodeProvider
             !this.nodes[7][2].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][1].nextMasterWillBeInDanger(PieceColor.WHITE)
             && this.leftWhiteRook.positionIsSafeForTheKing({I: 7, J: 0});
         }
+    }
+
+    public canDoEnpassantCapture(masterposition: ICaseBoardPosition, targetPosition: ICaseBoardPosition): boolean
+    {
+        const hunterNode = this.getNode(masterposition);
+        if (!hunterNode.isFree())
+        {
+            return (hunterNode.getOwner() instanceof PawnNodeMaster) && (hunterNode.getOwner() as PawnNodeMaster).canDoEnPassantCapture( {I: masterposition.I, J: masterposition.J} , {I: targetPosition.I, J: targetPosition.J});
+        }
+        return false;
     }
 
     public getPossibleMoves(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][]

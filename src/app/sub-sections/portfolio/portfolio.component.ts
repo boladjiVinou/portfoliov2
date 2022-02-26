@@ -23,11 +23,11 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     this.projects.push({ key: 'Projet I', value: `Projet initial de système embarqué à l'université`});
     this.projects.push({ key: 'Sudoku', value: `Sudoku` });
     this.projects.push({ key: 'Curling', value: `Curling` });
-    this.projects.push({ key: 'Échecs', value: `Échecs` });
+    this.projects.push({ key: 'Échecs(beta)', value: `Échecs(beta)` });
     this.projectsImgs.push({key: 'Projet I', value: '../../../assets/circuit.png'});
     this.projectsImgs.push({key: 'Sudoku', value: '../../../assets/sudoku.png'});
     this.projectsImgs.push({key: 'Curling', value: '../../../assets/curling.png'});
-    this.projectsImgs.push({key: 'Chess', value: '../../../assets/chess.png'});
+    this.projectsImgs.push({key: 'Chess(beta)', value: '../../../assets/chess.png'});
     this.principalService.getEnglishLangageState().subscribe((isEnglish: boolean) => {
       this.zone.run(() => this.translateProjects(isEnglish));
     });
@@ -65,12 +65,12 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projects.push({ key: 'Project I', value: `1st Project` });
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
       this.projects.push({ key: 'Curling', value: `Curling` });
-      this.projects.push({ key: 'Chess', value: `Chess` });
+      this.projects.push({ key: 'Chess(beta)', value: `Chess(beta)` });
     } else {
       this.projects.push({ key: 'Projet I', value: `Projet 1`});
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
       this.projects.push({ key: 'Curling', value: `Curling` });
-      this.projects.push({ key: 'Échecs', value: `Échecs` });
+      this.projects.push({ key: 'Échecs(beta)', value: `Échecs(beta)` });
     }
   }
 

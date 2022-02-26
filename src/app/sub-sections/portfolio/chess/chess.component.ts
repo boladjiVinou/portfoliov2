@@ -8,7 +8,6 @@ import { ChessPiece, PieceType } from './classes/pieces/chesspiece';
 import { ChessGame } from './classes/game/chessgame';
 import { AIType } from './classes/player/aichessplayer';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 export interface IPawnPromoter
 {
@@ -92,6 +91,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
                 this.chessGame = new ChessGame();
                 this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX).then(() =>
                 {
+                    console.log('started animation');
                     this.chessRenderingService.animate();
                     this.showMenuButton = true;
                 });

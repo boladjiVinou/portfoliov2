@@ -33,8 +33,10 @@ export class ChessGame
     }
     private playerRoutine(player: ChessPlayer, nextPlayer: ChessPlayer, color: PieceColor): void
     {
-        let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
-        player.play().then(() =>
+        if (this.gameRequestsSupplier.playerHasSomethingToDo(color))
+        {
+            let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
+            player.play().then(() =>
             {
                 if (isInCheck)
                 {
@@ -49,5 +51,10 @@ export class ChessGame
                     alert(' end of game ');
                 }
             });
+        }
+        else
+        {
+            alert(' end of game ');
+        }
     }
 }

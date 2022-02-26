@@ -27,8 +27,6 @@ export interface IKingSpecialRequestSupplier extends IPiecesRequestSupplier
     canMakeARightCastling(king: NonNullable<KingPiece>): boolean;
     realizeAnimatedRookLeftCastling(color: PieceColor): Promise<void>;
     realizeAnimatedRookRightCastling(color: PieceColor): Promise<void>;
-    /*realizeRookLeftCastling(color: PieceColor): void;
-    realizeRookRightCastling(color: PieceColor): void;*/
 }
 export interface IPawnSpecialRequestSupplier extends IPiecesRequestSupplier
 {
@@ -40,6 +38,7 @@ export interface IGameRequestSupplier
     kingIsInCheck(kingColor: PieceColor): boolean;
     getProvider(): Readonly<ChessNodeProvider>;
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>;
+    playerHasSomethingToDo(color: PieceColor): boolean;
 }
 
 export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier, IGameRequestSupplier
@@ -53,6 +52,9 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
         this.fullBoard = board;
         this.chessNodeProvider = new ChessNodeProvider();
         this.chessNodeProvider.initFromPieces(this.fullBoard.getPieces());
+    }
+    playerHasSomethingToDo(color: PieceColor): boolean {
+        return this.chessNodeProvider.playerHasAMoveToDo(color);
     }
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>
     {
@@ -92,7 +94,6 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
        const quittingNode = this.chessNodeProvider.getNode(piece.getCurrentCase().getCasePosition());
        const master = quittingNode.getOwner();
-       // this.chessNodeProvider.setMasterAndUpdateBoard(quittingNode.getPosition(), null);
        const receivingNode = this.chessNodeProvider.getNode(newPosition);
        this.chessNodeProvider.setMasterAndUpdateBoard(receivingNode.getPosition(), master);
     }
@@ -114,38 +115,6 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
             this.chessNodeProvider.setMasterAndUpdateBoard(position, null);
         }
     }
-    /*realizeRookLeftCastling(color: PieceColor): void {
-        if (color === PieceColor.BLACK)
-        {
-            this.chessBoard[0][5].acceptVisitor(this.chessBoard[0][7].getVisitor());
-            const master = this.chessNodeProvider.getNode({I: 0, J: 7}).getOwner();
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 0, J: 7}, null);
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 0, J: 5}, master);
-        }
-        else
-        {
-            this.chessBoard[7][3].acceptVisitor(this.chessBoard[7][0].getVisitor());
-            const master = this.chessNodeProvider.getNode({I: 7, J: 0}).getOwner();
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 7, J: 0}, null);
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 7, J: 3}, master);
-        }
-    }
-    realizeRookRightCastling(color: PieceColor): void {
-        if (color === PieceColor.BLACK)
-        {
-            this.chessBoard[0][3].acceptVisitor(this.chessBoard[0][0].getVisitor());
-            const master = this.chessNodeProvider.getNode({I: 0, J: 0}).getOwner();
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 0, J: 0}, null);
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 0, J: 3}, master);
-        }
-        else
-        {
-            this.chessBoard[7][5].acceptVisitor(this.chessBoard[7][7].getVisitor());
-            const master = this.chessNodeProvider.getNode({I: 7, J: 7}).getOwner();
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 7, J: 7}, null);
-            this.chessNodeProvider.setMasterAndUpdateBoard({I: 7, J: 5}, master);
-        }
-    }*/
     realizeAnimatedRookLeftCastling(color: PieceColor): Promise<void>
     {
         if (color === PieceColor.BLACK)
@@ -174,15 +143,7 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     }
     canDoEnPassantCapture(pawn: PawnPiece, position: ICaseBoardPosition): boolean
     {
-        const visitor = this.chessBoard[position.I][position.J].getVisitor();
-        if (visitor instanceof PawnPiece)
-        {
-            return !(visitor as PawnPiece).isFriendWith(pawn) && (visitor as PawnPiece).getHasMovedTwoSquares();
-        }
-        else
-        {
-            return false;
-        }
+        return this.chessNodeProvider.canDoEnpassantCapture(pawn.getCurrentCase().getCasePosition(), position);
     }
     /*
      * castling rules

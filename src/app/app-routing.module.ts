@@ -52,11 +52,11 @@ const routes: Routes = [{
   component: CurlingComponent
 },
 {
-  path: 'portfolio/Chess',
+  path: 'portfolio/Chess(beta)',
   component: ChessComponent
 },
 {
-  path: 'portfolio/Échecs',
+  path: 'portfolio/Échecs(beta)',
   component: ChessComponent
 }
 ];

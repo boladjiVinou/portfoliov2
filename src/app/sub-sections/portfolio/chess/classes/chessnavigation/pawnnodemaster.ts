@@ -59,7 +59,7 @@ export class PawnNodeMaster extends ChessNodeMaster
 
         const potentialEnPassantPosition = {I: possiblePosition.I, J: possiblePosition.J};
         potentialEnPassantPosition.I -= (this.mvtDirection);
-        if (this.isAValidPosition(potentialEnPassantPosition) && this.canDoEnPassantCapture(potentialEnPassantPosition))
+        if (this.isAValidPosition(potentialEnPassantPosition) && this.canDoEnPassantCapture({I: currentPosition.I, J: currentPosition.J}, potentialEnPassantPosition))
         {
             possiblesMoves.push(possiblePosition);
         }
@@ -74,7 +74,7 @@ export class PawnNodeMaster extends ChessNodeMaster
 
         const potentialEnPassantPosition2 = {I: possiblePosition.I, J: possiblePosition.J};
         potentialEnPassantPosition2.I -= (this.mvtDirection);
-        if (this.isAValidPosition(potentialEnPassantPosition2) && this.canDoEnPassantCapture(potentialEnPassantPosition2))
+        if (this.isAValidPosition(potentialEnPassantPosition2) && this.canDoEnPassantCapture({I: currentPosition.I, J: currentPosition.J}, potentialEnPassantPosition2))
         {
             possiblesMoves.push(possiblePosition);
         }
@@ -91,17 +91,30 @@ export class PawnNodeMaster extends ChessNodeMaster
         this.hasMovedTwoSquares = hasMoved;
     }
 
-    public canDoEnPassantCapture(position: ICaseBoardPosition): boolean
+    public canDoEnPassantCapture(currentPosition: ICaseBoardPosition, targetPosition: ICaseBoardPosition): boolean
     {
-        if (!this.nodeProvider.getNode(position).isFree())
+        const isOnRightRow = (this.color === PieceColor.BLACK) ? currentPosition.I === 4 : currentPosition.I === 3;
+        if (!this.nodeProvider.getNode(targetPosition).isFree() && isOnRightRow )
         {
-            const positionOwner = this.nodeProvider.getNode(position).getOwner();
-            return positionOwner.getColor() !== this.getColor() && (this instanceof PawnNodeMaster) && (this as PawnNodeMaster).getHasMovedTwoSquares();
+            const positionOwner = this.nodeProvider.getNode(targetPosition).getOwner();
+            return positionOwner.getColor() !== this.getColor() && (positionOwner instanceof PawnNodeMaster)
+                    && (positionOwner as PawnNodeMaster).getHasMovedTwoSquares() && Math.abs(currentPosition.J - targetPosition.J) === 1;
         }
         else
         {
             return false;
         }
+    }
+
+    public isDoingEnPassantCapture(currentPosition: ICaseBoardPosition, nextPosition: ICaseBoardPosition): boolean
+    {
+        if (currentPosition.J !== nextPosition.J)
+        {
+            const potentialEnPassantPosition = {I: nextPosition.I, J: nextPosition.J};
+            potentialEnPassantPosition.I -= (this.mvtDirection);
+            return this.canDoEnPassantCapture(currentPosition, potentialEnPassantPosition);
+        }
+        return false;
     }
 
     public getState(): ChessNodeMasterState

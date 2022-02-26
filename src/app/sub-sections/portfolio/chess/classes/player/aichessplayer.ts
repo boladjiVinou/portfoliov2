@@ -36,7 +36,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         return this.gameProvider.getPossibleMoves(color);
     }
     moveSimulator(position: ICaseBoardPosition, master: ChessNodeMaster): void {
-        this.gameProvider.setMasterAndUpdateBoard(position, master);
+        this.gameProvider.simulateMove(position, master);
     }
     scoreGetter(): number {
         return this.gameProvider.getTotal();
@@ -47,7 +47,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         {
             const level = this.minimaxLevel;
             const pool = WorkerPoolLib.pool();
-            window.requestIdleCallback(() =>
+            (window as any).requestIdleCallback(() =>
             {
                 const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);
                 const choosenMove = minimaxRoot.getElectedMove();
