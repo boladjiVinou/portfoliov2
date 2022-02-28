@@ -4,8 +4,8 @@ import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
 import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessPlayer } from './chessplayer';
-import { MinimaxNodeRequirement, MinimaxTreeNode, Simulator } from './MinimaxTreeNode';
-import * as WorkerPoolLib from 'workerpool'; // https://github.com/josdejong/workerpool
+import { MinimaxTreeNode, Simulator } from './MinimaxTreeNode';
+// https://github.com/josdejong/workerpool
 
 export class AIChessPlayer extends ChessPlayer implements Simulator
 {
@@ -14,6 +14,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     private gameProvider: Readonly<ChessNodeProvider>;
     private color: PieceColor;
     private minimaxLevel = 3;
+    private readonly delayBetweenActions: 2000;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
     constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
     {
@@ -46,18 +47,32 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         return new Promise<void>((resolve) =>
         {
             const level = this.minimaxLevel;
-            const pool = WorkerPoolLib.pool();
-            (window as any).requestIdleCallback(() =>
-            {
+            const search = () => {
+                const start = performance.now();
                 const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);
+                const end = performance.now();
                 const choosenMove = minimaxRoot.getElectedMove();
                 const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
-                this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
-                    {
-                        resolve();
-                        return;
-                    });
-            }, { timeout: 250 });
+                const waitingTime = Math.max(this.delayBetweenActions - (end - start), 1);
+                setTimeout(() => {
+                    this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
+                        {
+                            resolve();
+                            return;
+                        });
+                }, waitingTime);
+            };
+            if ('requestIdleCallback' in window)
+            {
+                (window as any).requestIdleCallback(() =>
+                {
+                    search();
+                }, { timeout: 250 });
+            }
+            else
+            {
+                search();
+            }
         });
     }
 

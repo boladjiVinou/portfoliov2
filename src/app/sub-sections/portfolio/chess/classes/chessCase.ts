@@ -41,8 +41,8 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase
 export class WhiteChessCase extends ChessCase {
     constructor(position: ICaseBoardPosition)
     {
-        const tmpMat = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(1, 1, 1)//
-            , emissive: new THREE.Color(0, 0, 0), roughness: 0.25, metalness: 0.3, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+        const tmpMat = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0.738, 0.644, 0.539)//
+            , emissive: new THREE.Color(0, 0, 0), roughness: 0.5, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
         super(tmpMat, position);
     }
 }
@@ -50,7 +50,7 @@ export class BlackChessCase extends ChessCase {
     constructor(position: ICaseBoardPosition)
     {
         const material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0, 0, 0)//
-                    , emissive: new THREE.Color(0, 0, 0), roughness: 0.25, metalness: 0.3, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+                    , emissive: new THREE.Color(0, 0, 0), roughness: 0.50, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
         super(material, position);
     }
 }

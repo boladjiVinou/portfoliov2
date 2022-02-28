@@ -9,7 +9,7 @@ export class LivingRoom {
         floorTexture.wrapS = THREE.RepeatWrapping;
         floorTexture.wrapT = THREE.RepeatWrapping;
         const floor = new THREE.Mesh(new THREE.BoxGeometry(10000, 300, 10000), new THREE.MeshLambertMaterial({map: floorTexture}));
-        floor.receiveShadow = true;
+        floor.receiveShadow = false;
         floor.position.set(0, -1000, 0);
         this.children.push(floor);
 
@@ -19,7 +19,6 @@ export class LivingRoom {
         frontWall.translateY(4180);
         frontWall.translateZ(150);
         frontWall.rotateZ(Math.PI / 2);
-        frontWall.castShadow = true;
         this.children.push(frontWall);
 
         const sideWallBase = new THREE.Mesh(new THREE.BoxGeometry(10000, 300, 10000), frontWall.material.clone());

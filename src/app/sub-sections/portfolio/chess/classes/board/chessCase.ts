@@ -3,7 +3,7 @@ import { IOutlinable, ISelectable } from '../sceneinteraction/chessinteractor';
 export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISelectable
 {
     public static width = 150;
-    public static height = 50;
+    public static height = 120;
     public static depth = 150;
     private positionInBoard: ICaseBoardPosition;
     private currentVisitor: ICaseVisitor = null;
@@ -15,11 +15,14 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         const geometry = new THREE.CylinderGeometry( 65, 65, 2, 32 );
         geometry.clearGroups();
         geometry.addGroup(0, geometry.index.count, 0);
-        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshStandardMaterial({color: new THREE.Color(0xA8DDA8)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xFFAB76)})]);
-        this.indicator.translateY(25);
+        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshBasicMaterial({color: new THREE.Color(0xA8DDA8)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xFFAB76)}), //
+              new THREE.MeshBasicMaterial({color: new THREE.Color(0xFF0000)})]);
+        this.indicator.translateY(65);
         this.add(this.indicator);
         this.positionInBoard = position;
         this.indicator.visible = false;
+        this.receiveShadow = true;
+        this.castShadow = false;
     }
     private static generateGeometry(): THREE.BoxGeometry
     {
@@ -41,6 +44,18 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         else if (this.available)
         {
             this.indicator.geometry.groups[0].materialIndex = 0;
+            this.indicator.visible = true;
+        }
+        else
+        {
+            this.indicator.visible = false;
+        }
+    }
+    public showIsInDanger(isInDanger: boolean): void
+    {
+        if (isInDanger)
+        {
+            this.indicator.geometry.groups[0].materialIndex = 2;
             this.indicator.visible = true;
         }
         else
@@ -102,16 +117,16 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
 export class WhiteChessCase extends ChessCase {
     constructor(position: ICaseBoardPosition)
     {
-        const tmpMat = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(1, 1, 1)//
-            , emissive: new THREE.Color(0, 0, 0), roughness: 0.25, metalness: 0.3, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+        const tmpMat = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0.678, 0.644, 0.539)//
+            , emissive: new THREE.Color(0, 0, 0), roughness: 0.5, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
         super(tmpMat, position);
     }
 }
 export class BlackChessCase extends ChessCase {
     constructor(position: ICaseBoardPosition)
     {
-        const material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0, 0, 0)//
-                    , emissive: new THREE.Color(0, 0, 0), roughness: 0.25, metalness: 0.3, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+        const material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0.172, 0.172, 0.172)//
+                    , emissive: new THREE.Color(0, 0, 0), roughness: 0.5, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
         super(material, position);
     }
 }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { IVisitedCase } from '../board/chessCase';
+import { ChessCase, IVisitedCase } from '../board/chessCase';
 import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessnavigation/chessnavigationmanager';
 import { ChessPiece, PieceColor, PieceType } from './chesspiece';
 
@@ -44,7 +44,7 @@ export class PawnPiece extends ChessPiece
                 this.hasMovedOnce = (this.currentCase != null);
                 this.quitCase();
                 this.currentCase = host;
-                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 60, 0)));
                 resolve();
                 return;
             });

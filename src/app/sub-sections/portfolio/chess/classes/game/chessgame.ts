@@ -36,8 +36,11 @@ export class ChessGame
         if (this.gameRequestsSupplier.playerHasSomethingToDo(color))
         {
             let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
+            const kingCaseOne = this.gameRequestsSupplier.getKingCase(color);
+            kingCaseOne.showIsInDanger(isInCheck);
             player.play().then(() =>
             {
+                kingCaseOne.showIsInDanger(false);
                 if (isInCheck)
                 {
                     isInCheck = isInCheck && this.gameRequestsSupplier.kingIsInCheck(color);
@@ -48,6 +51,7 @@ export class ChessGame
                 }
                 else
                 {
+                    this.gameRequestsSupplier.getKingCase(color).showIsInDanger(true);
                     alert(' end of game ');
                 }
             });

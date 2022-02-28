@@ -39,6 +39,7 @@ export interface IGameRequestSupplier
     getProvider(): Readonly<ChessNodeProvider>;
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>;
     playerHasSomethingToDo(color: PieceColor): boolean;
+    getKingCase(color: PieceColor): Readonly<ChessCase>;
 }
 
 export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier, IGameRequestSupplier
@@ -52,6 +53,16 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
         this.fullBoard = board;
         this.chessNodeProvider = new ChessNodeProvider();
         this.chessNodeProvider.initFromPieces(this.fullBoard.getPieces());
+    }
+    getKingCase(color: PieceColor): Readonly<ChessCase>
+    {
+        switch (color)
+        {
+            case PieceColor.BLACK:
+                return this.fullBoard.getBlackKing().getCurrentCase();
+            case PieceColor.WHITE:
+               return this.fullBoard.getWhiteKing().getCurrentCase();
+        }
     }
     playerHasSomethingToDo(color: PieceColor): boolean {
         return this.chessNodeProvider.playerHasAMoveToDo(color);

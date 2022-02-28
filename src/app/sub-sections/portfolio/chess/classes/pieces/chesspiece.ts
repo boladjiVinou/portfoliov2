@@ -52,7 +52,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                 this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
                 this.quitCase();
                 this.currentCase = host;
-                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 60, 0)));
                 resolve();
                 return;
             });
@@ -63,7 +63,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
         // this.captureHostVisitorIfNeeded(host);
         this.quitCase();
         this.currentCase = host;
-        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, 30, 0)));
+        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 60, 0)));
     }
     quitCase(): void
     {
@@ -84,18 +84,28 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
                 PieceModelLoader.getInstance().getModel(this.modelPath).then((model) =>
                 {
                     this.mesh = model;
+                    this.mesh.traverse((child) =>
+                    {
+                        if (child.isObject3D)
+                        {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    this.mesh.castShadow = true;
+                    this.mesh.receiveShadow = true;
                     this.mesh.scale.set(25, 25, 25);
                     let material: THREE.Material;
                     if (this.color === PieceColor.BLACK)
                     {
                         material = new THREE.MeshPhongMaterial({color: 0x393232 });
                         material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x393232)//
-                            , emissive: new THREE.Color(0x000000), roughness: 0.3, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: true});
+                            , emissive: new THREE.Color(0, 0, 0), roughness: 0.5, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: true});
                     }
                     else
                     {
                         material = new THREE.MeshStandardMaterial({transparent: false, opacity: 1, depthTest: true, depthWrite: true, alphaTest: 0, visible: true, side: THREE.FrontSide, color: new THREE.Color(0x888888)//
-                            , emissive: new THREE.Color(0x222222), roughness: 0.3, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
+                            , emissive: new THREE.Color(0, 0, 0), roughness: 0.5, metalness: 0, flatShading: false, wireframe: false, vertexColors: false, fog: false});
                     }
                     this.mesh.traverse(child => {
                         if (child instanceof THREE.Mesh)

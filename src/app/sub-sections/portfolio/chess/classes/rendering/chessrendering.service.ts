@@ -37,7 +37,6 @@ export class ChessRenderingService implements OnDestroy {
             this.scene.add(this.parentNode);
 
             this.initLight();
-
             this.initChessBoard().then(() =>
             {
                this.initAmbientSound().then(() => {
@@ -77,9 +76,14 @@ export class ChessRenderingService implements OnDestroy {
 
     private initLight()
     {
-        const directionalLight = new THREE.DirectionalLight(0x505050, 1);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
         directionalLight.position.set(0, 1, 1);
-        this.scene.add(directionalLight);
+        // this.scene.add(directionalLight);
+        const pointLight = new THREE.PointLight(0xffffff, 0.5, 10000, 0.1);
+        pointLight.castShadow = true;
+        const pointLightHelper = new THREE.PointLightHelper(pointLight);
+        pointLight.position.set(0, 2000, 2000);
+        this.scene.add(pointLight);
         const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
         this.scene.add(ambientLight);
     }
@@ -271,7 +275,6 @@ export class ChessRenderingService implements OnDestroy {
     }
 
     public animate() {
-        // this.controls.update();
         this.animateParentNode();
         this.renderer.render(this.scene, this.camera);
         if (this.chessInteractor != null)
