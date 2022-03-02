@@ -16,7 +16,7 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         geometry.clearGroups();
         geometry.addGroup(0, geometry.index.count, 0);
         this.indicator = new THREE.Mesh( geometry, [new THREE.MeshBasicMaterial({color: new THREE.Color(0xA8DDA8)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xFFAB76)}), //
-              new THREE.MeshBasicMaterial({color: new THREE.Color(0xFF0000)})]);
+              new THREE.MeshBasicMaterial({color: new THREE.Color(0xFF0000)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0x6660e0)})]);
         this.indicator.translateY(65);
         this.add(this.indicator);
         this.positionInBoard = position;
@@ -44,6 +44,18 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         else if (this.available)
         {
             this.indicator.geometry.groups[0].materialIndex = 0;
+            this.indicator.visible = true;
+        }
+        else
+        {
+            this.indicator.visible = false;
+        }
+    }
+    public showHighLight(highLight: boolean): void
+    {
+        if (highLight)
+        {
+            this.indicator.geometry.groups[0].materialIndex = 3;
             this.indicator.visible = true;
         }
         else

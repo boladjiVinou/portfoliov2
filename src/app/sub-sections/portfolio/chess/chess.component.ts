@@ -82,22 +82,19 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
         {
             this.displayWarning = true;
         }
-        else
-        {
-            this.chessRenderingService.init().then(() => {
-                const container = document.querySelector('#render-container');
-                container.removeChild(document.getElementById('progress-bar'));
-                this.chessRenderingService.setupHtmlContainer(container);
-                this.chessGame = new ChessGame();
-                this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX).then(() =>
-                {
-                    console.log('started animation');
-                    this.chessRenderingService.animate();
-                    this.showMenuButton = true;
-                });
+        this.chessRenderingService.init().then(() => {
+            const container = document.querySelector('#render-container');
+            container.removeChild(document.getElementById('progress-bar'));
+            this.chessRenderingService.setupHtmlContainer(container);
+            this.chessGame = new ChessGame();
+            this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX).then(() =>
+            {
+                console.log('started animation');
+                this.chessRenderingService.animate();
+                this.showMenuButton = true;
             });
-            this.pieceTypeObservable = this.pieceTypeSubject.asObservable();
-        }
+        });
+        this.pieceTypeObservable = this.pieceTypeSubject.asObservable();
     }
 
     ngOnDestroy(): void {
@@ -121,7 +118,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     {
         if (isEnglish)
         {
-            this.warningMsg = 'This application is not available on mobile, please use a computer.';
+            this.warningMsg = 'This application is not recommended on mobile, please use a computer.';
             this.aiTypeLabel = 'AI Type';
             this.difficultyLabel = 'Difficulty';
             this.viewLabel = 'View';
@@ -136,7 +133,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
         }
         else
         {
-            this.warningMsg = `Cette application est indisponible sur mobile, veuillez utiliser un ordinateur.`;
+            this.warningMsg = `Cette application n'est pas optimale sur mobile, veuillez utiliser un ordinateur.`;
             this.aiTypeLabel = `Type d' IA`;
             this.difficultyLabel = 'Difficulté';
             this.viewLabel = 'Vue';

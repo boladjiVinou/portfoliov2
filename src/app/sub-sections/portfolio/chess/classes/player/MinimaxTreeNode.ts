@@ -88,22 +88,3 @@ export class MinimaxTreeNode
         return this.electedChild.move;
     }
 }
-
-export class MinimaxNodeRequirement
-{
-    currentMove: [ICaseBoardPosition, ChessNodeMaster];
-    simulator: Simulator;
-    color: PieceColor;
-    step: number;
-    isMax: boolean;
-    parentCurrentScore: number;
-    constructor(currentMove: [ICaseBoardPosition, ChessNodeMaster], simulator: Simulator, color: PieceColor, step: number, isMax: boolean, parentCurrentScore: number)
-    {
-        this.currentMove = currentMove;
-        this.simulator = simulator;
-        this.color = color;
-        this.step = step;
-        this.isMax = isMax;
-        this.parentCurrentScore = parentCurrentScore;
-    }
-}

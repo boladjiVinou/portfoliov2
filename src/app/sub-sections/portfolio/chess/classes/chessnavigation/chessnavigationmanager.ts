@@ -69,7 +69,19 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     }
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>
     {
-        return this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor() as ChessPiece);
+        return new Promise<void>((resolve) =>
+        {
+            this.chessBoard[targetPosition.I][targetPosition.J].showHighLight(true);
+            this.chessBoard[currentPosition.I][currentPosition.J].showHighLight(true);
+            this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor() as ChessPiece).then(() =>
+            {
+                setTimeout(() => {
+                    this.chessBoard[targetPosition.I][targetPosition.J].showHighLight(false);
+                    this.chessBoard[currentPosition.I][currentPosition.J].showHighLight(false);
+                    resolve();
+                }, 500);
+            });
+        });
     }
     getProvider(): Readonly<ChessNodeProvider>
     {

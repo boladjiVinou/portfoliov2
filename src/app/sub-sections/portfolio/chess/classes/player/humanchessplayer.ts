@@ -36,8 +36,10 @@ export class HumanChessPlayer extends ChessPlayer
                         this.chessInteractor.removeMouseClickListener();
                         this.chessInteractor.setEnable(false);
                         choiceSubscription.unsubscribe();
-                        resolveMethod();
-                        return;
+                        setTimeout(() => {
+                            resolveMethod();
+                            return;
+                        }, 1000);
                     }
                 });
             });

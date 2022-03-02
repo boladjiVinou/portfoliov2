@@ -75,15 +75,17 @@ export class ChessRenderingService implements OnDestroy {
 
     private animateParentNode()
     {
-        console.log(`ha`);
         if (this.shouldAnimateParentNode)
         {
-            console.log('he');
             if (this.parentNode.position.y > this.parentNodeInitialPosition.y + 200 || this.parentNode.position.y < this.parentNodeInitialPosition.y)
             {
                 this.parentNodeAnimationDelta *= -1;
             }
             this.parentNode.position.y += this.parentNodeAnimationDelta;
+        }
+        else
+        {
+            this.parentNode.position.y = this.parentNodeInitialPosition.y;
         }
     }
     public setCameraControl(isEnabled: boolean)

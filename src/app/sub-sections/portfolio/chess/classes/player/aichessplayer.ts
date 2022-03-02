@@ -13,7 +13,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     private aiType: AIType;
     private gameProvider: Readonly<ChessNodeProvider>;
     private color: PieceColor;
-    private minimaxLevel = 3;
+    private minimaxLevel = 4;
     private readonly delayBetweenActions: 2000;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
     constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
