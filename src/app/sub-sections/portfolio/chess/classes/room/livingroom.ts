@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PointLight } from 'three';
 export class LivingRoom {
-    public static LampBulbColor = new THREE.Color(0Xeeee00);
+    public static LampBulbColor = new THREE.Color(0Xffcb69);
     private children: THREE.Object3D[] = [];
     init(): void
     {
@@ -41,8 +41,8 @@ export class LivingRoom {
         table.add(tablePiliar);
         this.children.push(table);
 
-        const lamp = new THREE.Mesh(new THREE.CylinderGeometry(200, 500, 700, 23, 1, true), new THREE.MeshLambertMaterial({color: 0xF3C892, transparent: true}));
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(150), new THREE.MeshBasicMaterial({color: LivingRoom.LampBulbColor}));
+        const lamp = new THREE.Mesh(new THREE.CylinderGeometry(200, 500, 700, 23, 1, true), new THREE.MeshLambertMaterial({color: 0xF3C892, emissive: LivingRoom.LampBulbColor, transparent: true}));
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(150), new THREE.MeshStandardMaterial({color: LivingRoom.LampBulbColor, emissive: LivingRoom.LampBulbColor}));
         const lampSupport = new THREE.Mesh(new THREE.CylinderGeometry(35, 35, 5200, 23, 1), new THREE.MeshLambertMaterial({color: 0x000000}));
         const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(200, 200, 35), lampSupport.material.clone());
         lampSupport.translateY(-2800);

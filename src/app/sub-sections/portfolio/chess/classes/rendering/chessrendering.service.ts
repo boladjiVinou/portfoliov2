@@ -26,7 +26,7 @@ export class ChessRenderingService implements OnDestroy {
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
             this.scene = new THREE.Scene();
-            this.scene.background = new THREE.Color(0x0c2b40);
+            // this.scene.background = new THREE.Color(0x082032);
 
             this.initRenderer();
             this.initCamera();
@@ -36,7 +36,9 @@ export class ChessRenderingService implements OnDestroy {
             this.parentNodeInitialPosition = this.parentNode.position.clone();
             this.scene.add(this.parentNode);
 
-            this.initLight();
+            // this.initLight();
+            this.initNightLight();
+            // this.initController();
             this.initChessBoard().then(() =>
             {
                this.initAmbientSound().then(() => {
@@ -76,16 +78,28 @@ export class ChessRenderingService implements OnDestroy {
 
     private initLight()
     {
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
-        directionalLight.position.set(0, 1, 1);
-        // this.scene.add(directionalLight);
-        const pointLight = new THREE.PointLight(0xffffff, 0.5, 10000, 0.1);
+        const pointLight = new THREE.PointLight(0xffffff, 0.5, 5000, 0.1);
         pointLight.castShadow = true;
         const pointLightHelper = new THREE.PointLightHelper(pointLight);
         pointLight.position.set(0, 2000, 2000);
         this.scene.add(pointLight);
         const ambientLight = new THREE.AmbientLight( 0xffffff, 1);
         this.scene.add(ambientLight);
+    }
+
+    private initNightLight()
+    {
+        const pointLight = new THREE.PointLight(0Xffcb69, 0.3, 3000, 0.1);
+        pointLight.castShadow = true;
+        const pointLightHelper = new THREE.PointLightHelper(pointLight);
+        pointLight.position.set(0, 500, -500);
+        this.scene.add(pointLight);
+        const ambientLight = new THREE.AmbientLight( 0xffffff, 0.3);
+        this.scene.add(ambientLight);
+
+        const light = new THREE.PointLight(LivingRoom.LampBulbColor, 1, 20000);
+        light.position.set(-3500 , 3900, -3500);
+        this.scene.add(light);
     }
 
     private initChessBoard(): Promise<void>
@@ -120,6 +134,10 @@ export class ChessRenderingService implements OnDestroy {
                 this.parentNodeAnimationDelta *= -1;
             }
             this.parentNode.position.y += this.parentNodeAnimationDelta;
+        }
+        else
+        {
+            this.parentNode.position.y = this.parentNodeInitialPosition.y;
         }
     }
     public getChessboard(): Readonly<ChessBoard>
@@ -276,6 +294,7 @@ export class ChessRenderingService implements OnDestroy {
 
     public animate() {
         this.animateParentNode();
+        // this.controls.update();
         this.renderer.render(this.scene, this.camera);
         if (this.chessInteractor != null)
         {

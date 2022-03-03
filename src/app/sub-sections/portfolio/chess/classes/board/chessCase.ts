@@ -15,7 +15,7 @@ export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISel
         const geometry = new THREE.CylinderGeometry( 65, 65, 2, 32 );
         geometry.clearGroups();
         geometry.addGroup(0, geometry.index.count, 0);
-        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshBasicMaterial({color: new THREE.Color(0xA8DDA8)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xFFAB76)}), //
+        this.indicator = new THREE.Mesh( geometry, [new THREE.MeshBasicMaterial({color: new THREE.Color(0x357C3C)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0xF76E11)}), //
               new THREE.MeshBasicMaterial({color: new THREE.Color(0xFF0000)}), new THREE.MeshBasicMaterial({color: new THREE.Color(0x6660e0)})]);
         this.indicator.translateY(65);
         this.add(this.indicator);
