@@ -167,7 +167,7 @@ export class ChessRenderingService implements OnDestroy {
         this.shouldAnimateParentNode = false;
         return new Promise<void>((resolve) => {
             const cameraPositionUpdater = setInterval(() => {
-                const increment = 6;
+                const increment = 18;
                 if (this.camera.position.x < this.camreaFrontIdealPosiion.x) {
                     this.camera.position.x += increment;
                 }

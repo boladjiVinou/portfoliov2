@@ -52,21 +52,31 @@ export class MinimaxTreeNode
             for (const value of simulator.movesGenerator(color))
             {
                 const child = new MinimaxTreeNode(value, simulator, nextColor, childStep , this);
-                if (this.isMax && this.score < child.score)
+                if (this.isMax)
                 {
-                    this.score = child.score;
-                    this.alpha = child.score;
-                    this.electedChild = child;
+                    this.score = Math.max(this.score, child.score);
+                    if (this.alpha < this.score)
+                    {
+                        this.electedChild = child;
+                        this.alpha = this.score;
+                    }
+                    if (this.alpha >= this.beta)
+                    {
+                        break;
+                    }
                 }
-                else if (!this.isMax && this.score > child.score)
+                else
                 {
-                    this.score = child.score;
-                    this.beta = child.score;
-                    this.electedChild = child;
-                }
-                if (this.alpha >= this.beta)
-                {
-                    break;
+                    this.score = Math.min(this.score, child.score);
+                    if (this.beta > this.score)
+                    {
+                        this.electedChild = child;
+                        this.beta = this.score;
+                    }
+                    if (this.beta <= this.alpha)
+                    {
+                        break;
+                    }
                 }
             }
         }

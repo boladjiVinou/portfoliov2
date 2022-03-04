@@ -62,9 +62,9 @@ export class ChessInteractor
     }
     private searchPointedObject()
     {
+        this.raycaster.setFromCamera(this.mousePosition, this.camera);
         if (!this.isSelectingSomething)
         {
-            this.raycaster.setFromCamera(this.mousePosition, this.camera);
             let intersectedObjects = this.raycaster.intersectObjects(this.outlinables.filter(outlinable => outlinable.visible), true);
             if (intersectedObjects.length > 0)
             {
