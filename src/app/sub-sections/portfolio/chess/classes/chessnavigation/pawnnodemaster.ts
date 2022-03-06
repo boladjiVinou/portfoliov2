@@ -1,6 +1,8 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
+import { PawnSimulationMove } from './PawnSimulationMove';
+import { SimulationMove } from './SimulationMove';
 
 export class PawnNodeMaster extends ChessNodeMaster
 {
@@ -79,6 +81,28 @@ export class PawnNodeMaster extends ChessNodeMaster
             possiblesMoves.push(possiblePosition);
         }
         return possiblesMoves.filter(position => this.positionIsSafeForTheKing(position));
+    }
+
+    public getSimulationMoves(): SimulationMove[]
+    {
+        const moves: PawnSimulationMove[] = [];
+        this.nodeProvider.getNodeOf(this).getOutnodePosition().forEach(position => {
+            moves.push(new PawnSimulationMove(position, this));
+            if (this.color === PieceColor.BLACK && this.originalPosition.I === 1 && position.I === 7)
+            {
+                moves[moves.length - 1].setPromotionType(PieceType.QUEEN);
+            }
+            else if (this.color === PieceColor.WHITE && this.originalPosition.I === 6 && position.I === 0)
+            {
+                moves[moves.length - 1].setPromotionType(PieceType.QUEEN);
+            }
+            if (moves[moves.length - 1].hasPromotionType())
+            {
+                moves.push(new PawnSimulationMove(position, this));
+                moves[moves.length - 1].setPromotionType(PieceType.KNIGHT);
+            }
+        });
+        return moves;
     }
 
     public getHasMovedTwoSquares(): boolean

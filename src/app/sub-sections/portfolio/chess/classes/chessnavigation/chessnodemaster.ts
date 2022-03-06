@@ -2,8 +2,8 @@ import { ICaseBoardPosition } from '../board/chessCase';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessNode } from './chessnode';
 import { ChessNodeProvider } from './chessnodeprovider';
-import { KingNodeMaster } from './kingnodemaster';
 import { PawnNodeMaster } from './pawnnodemaster';
+import { SimulationMove } from './SimulationMove';
 
 export abstract class ChessNodeMaster
 {
@@ -23,6 +23,14 @@ export abstract class ChessNodeMaster
     }
     public abstract getPositions(): ICaseBoardPosition[];
     public abstract clone(): ChessNodeMaster;
+    public getSimulationMoves(): SimulationMove[]
+    {
+        const moves: SimulationMove[] = [];
+        this.nodeProvider.getNodeOf(this).getOutnodePosition().forEach(position => {
+            moves.push(new SimulationMove(position, this));
+        });
+        return moves;
+    }
     public getId(): number
     {
         return this.id;
@@ -169,20 +177,20 @@ export abstract class ChessNodeMaster
         {
             ++distance;
             const node = this.nodeProvider.getNode({I: x , J: y});
-            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            if (!nodeIsFree(node))
             {
-                const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                if (nodeIsOccupiedByOpponent(node))
                 {
-                    return false;
+                    const nodeOwner = node.getOwner();
+                    if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                    {
+                        return false;
+                    }
+                    else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
+                    {
+                        return false;
+                    }
                 }
-                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
-                {
-                    return false;
-                }
-            }
-            else if (!nodeIsFree(node))
-            {
                 break;
             }
             x -= 1;
@@ -195,20 +203,20 @@ export abstract class ChessNodeMaster
         {
             ++distance;
             const node = this.nodeProvider.getNode({I: x , J: y});
-            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            if (!nodeIsFree(node))
             {
-                const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                if (nodeIsOccupiedByOpponent(node))
                 {
-                    return false;
+                    const nodeOwner = node.getOwner();
+                    if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                    {
+                        return false;
+                    }
+                    else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
+                    {
+                        return false;
+                    }
                 }
-                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === 1)
-                {
-                    return false;
-                }
-            }
-            else if (!nodeIsFree(node))
-            {
                 break;
             }
             x -= 1;
@@ -216,24 +224,25 @@ export abstract class ChessNodeMaster
         }
         x = kingPosition.I + 1;
         y = kingPosition.J + 1;
+        distance = 0;
         while (x >= 0 && x < 8 && y >= 0 && y < 8)
         {
             ++distance;
             const node = this.nodeProvider.getNode({I: x , J: y});
-            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            if (!nodeIsFree(node))
             {
-                const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                if (nodeIsOccupiedByOpponent(node))
                 {
-                    return false;
+                    const nodeOwner = node.getOwner();
+                    if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                    {
+                        return false;
+                    }
+                    else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
+                    {
+                        return false;
+                    }
                 }
-                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
-                {
-                    return false;
-                }
-            }
-            else if (!nodeIsFree(node))
-            {
                 break;
             }
             x += 1;
@@ -241,24 +250,25 @@ export abstract class ChessNodeMaster
         }
         x = kingPosition.I + 1;
         y = kingPosition.J - 1;
+        distance = 0;
         while (x >= 0 && x < 8 && y >= 0 && y < 8)
         {
             ++distance;
             const node = this.nodeProvider.getNode({I: x , J: y});
-            if (!nodeIsFree(node) && nodeIsOccupiedByOpponent(node))
+            if (!nodeIsFree(node))
             {
-                const nodeOwner = node.getOwner();
-                if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                if (nodeIsOccupiedByOpponent(node))
                 {
-                    return false;
+                    const nodeOwner = node.getOwner();
+                    if (nodeOwner.getType() === PieceType.BISHOP || nodeOwner.getType() === PieceType.QUEEN)
+                    {
+                        return false;
+                    }
+                    else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
+                    {
+                        return false;
+                    }
                 }
-                else if (distance === 1 && nodeOwner.getType() === PieceType.PAWN && (nodeOwner as PawnNodeMaster).getMvtDirection() === -1)
-                {
-                    return false;
-                }
-            }
-            else if (!nodeIsFree(node))
-            {
                 break;
             }
             x += 1;

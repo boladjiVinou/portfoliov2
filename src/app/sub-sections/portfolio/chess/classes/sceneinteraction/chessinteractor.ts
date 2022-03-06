@@ -96,34 +96,31 @@ export class ChessInteractor
             }
             else if (this.previousOutlinableFound != null)
             {
-                intersectedObjects = this.raycaster.intersectObjects(this.selectables.filter(selectable => selectable.isAvailable() && selectable.getModel().visible).map(selectable => selectable.getModel()), true);
+                intersectedObjects = this.raycaster.intersectObjects(this.selectables.filter(selectable =>  selectable.getModel().visible).map(selectable => selectable.getModel()), true);
+                let hasSelectedCase = false;
                 if (intersectedObjects.length > 0)
                 {
                     this.isSelectingSomething = true;
-                    let node: THREE.Object3D;
-                    for (const intersection of intersectedObjects)
+                    let node = intersectedObjects[0].object;
+                    while (!this.selectablesMap.has(node.uuid))
                     {
-                        node = intersection.object;
-                        while (!this.selectablesMap.has(node.uuid))
-                        {
-                            node = node.parent;
-                        }
-                        if (this.selectablesMap.has(node.uuid))
-                        {
-                            break;
-                        }
+                        node = node.parent;
                     }
-                    this.selectablesMap.get(node.uuid).onSelect(this.previousOutlinableFound).then(() =>
+                    if (this.selectablesMap.has(node.uuid) && this.selectablesMap.get(node.uuid).isAvailable())
                     {
-                        this.previousOutlinableFound.onDeselect();
-                        this.previousOutlinableFound = null;
-                        this.outlinePass.selectedObjects = [];
-                        this.isSelectingSomething = false;
-                        this.outlinePass.renderToScreen = false;
-                        this.choiceMadeSubject.next(true);
-                    });
+                        hasSelectedCase = true;
+                        this.selectablesMap.get(node.uuid).onSelect(this.previousOutlinableFound).then(() =>
+                        {
+                            this.previousOutlinableFound.onDeselect();
+                            this.previousOutlinableFound = null;
+                            this.outlinePass.selectedObjects = [];
+                            this.isSelectingSomething = false;
+                            this.outlinePass.renderToScreen = false;
+                            this.choiceMadeSubject.next(true);
+                        });
+                    }
                 }
-                else
+                if (!hasSelectedCase)
                 {
                     this.previousOutlinableFound.onDeselect();
                     this.previousOutlinableFound = null;
@@ -133,7 +130,6 @@ export class ChessInteractor
                 }
             }
         }
-
     }
 
     public trackMouseClickEvents()

@@ -1,12 +1,11 @@
-import { ICaseBoardPosition } from '../board/chessCase';
 import { ChessNodeState } from '../chessnavigation/chessnode';
-import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
+import { SimulationMove } from '../chessnavigation/SimulationMove';
 import { PieceColor } from '../pieces/chesspiece';
 
 export interface Simulator
 {
-    movesGenerator(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][];
-    moveSimulator(position: ICaseBoardPosition, master: ChessNodeMaster): void;
+    movesGenerator(color: PieceColor): SimulationMove[];
+    moveSimulator(move: SimulationMove): void;
     scoreGetter(): number;
     gameIsNotOver(): boolean;
     restoreGameState(nodeStates: ChessNodeState[]): void;
@@ -14,7 +13,7 @@ export interface Simulator
 }
 export class MinimaxTreeNode
 {
-    private move: [ICaseBoardPosition, ChessNodeMaster];
+    private move: SimulationMove;
     private score: number;
     private electedChild: MinimaxTreeNode;
     private alpha = Number.MIN_SAFE_INTEGER;
@@ -22,7 +21,7 @@ export class MinimaxTreeNode
     private isMax = true;
     // https://youtu.be/xBXHtz4Gbdo
     // https://www.mygreatlearning.com/blog/alpha-beta-pruning-in-ai/
-    constructor(currentMove: [ICaseBoardPosition, ChessNodeMaster], simulator: Simulator, color: PieceColor, step: number, parent: MinimaxTreeNode)
+    constructor(currentMove: SimulationMove, simulator: Simulator, color: PieceColor, step: number, parent: MinimaxTreeNode)
     {
         this.move = currentMove;
         let gameState: ChessNodeState[] = [];
@@ -43,7 +42,7 @@ export class MinimaxTreeNode
         if (this.move !== null)
         {
             gameState = simulator.saveGameState();
-            simulator.moveSimulator(this.move[0], this.move[1]);
+            simulator.moveSimulator(this.move);
         }
         if (simulator.gameIsNotOver() && step > 0 )
         {
@@ -93,7 +92,7 @@ export class MinimaxTreeNode
     {
         return (color === PieceColor.BLACK) ? PieceColor.WHITE : PieceColor.BLACK;
     }
-    public getElectedMove(): [ICaseBoardPosition, ChessNodeMaster]
+    public getElectedMove(): SimulationMove
     {
         return this.electedChild.move;
     }

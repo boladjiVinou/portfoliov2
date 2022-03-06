@@ -27,6 +27,7 @@
     "three-obj-mtl-loader": "^1.0.3",
     "tslib": "^1.10.0",
     "underscore": "^1.13.2",
+    "workerpool": "^6.2.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.12.47",
     "@types/three": "^0.135.0",
+    "@types/workerpool": "^6.1.0",
     "angular-cli-ghpages": "^0.6.2",
     "codelyzer": "^5.1.2",
     "jasmine-core": "~3.5.0",

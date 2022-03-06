@@ -1,6 +1,6 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { BishopPiece } from '../pieces/bishoppiece';
-import { ChessPiece, PieceColor } from '../pieces/chesspiece';
+import { ChessPiece, PieceColor, PieceType } from '../pieces/chesspiece';
 import { KingPiece } from '../pieces/kingpiece';
 import { KnightPiece } from '../pieces/knightpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
@@ -13,8 +13,10 @@ import { ChessNodeMaster } from './chessnodemaster';
 import { KingNodeMaster } from './kingnodemaster';
 import { KnightNodeMaster } from './knightNodeMaster';
 import { PawnNodeMaster } from './pawnnodemaster';
+import { PawnSimulationMove } from './PawnSimulationMove';
 import { QueenNodeMaster } from './queennodemaster';
 import { RookNodeMaster } from './rooknodemaster';
+import { SimulationMove } from './SimulationMove';
 
 export class ChessNodeProvider
 {
@@ -30,6 +32,11 @@ export class ChessNodeProvider
     constructor()
     {
         this.initNodes();
+    }
+
+    public logNodes()
+    {
+        console.log(this.nodes);
     }
 
     public initFromPieces(pieces: Readonly<ChessPiece[]>)
@@ -215,13 +222,37 @@ export class ChessNodeProvider
         });
     }
 
-    public simulateMove(position: ICaseBoardPosition, master: ChessNodeMaster)
+    public simulateMove(simulationMove: SimulationMove)
     {
-        if (master instanceof PawnNodeMaster && master.isDoingEnPassantCapture(this.getNodeOf(master).getPosition(), position))
+        // console.log('simulating', simulationMove);
+        let master = simulationMove.getMaster();
+        const position = simulationMove.getPosition();
+        if (master instanceof PawnNodeMaster)
         {
-            const targetPosition = {I: position.I, J: position.J};
-            targetPosition.I -= master.getMvtDirection();
-            this.setMasterAndUpdateBoard(targetPosition, null);
+            if (master.isDoingEnPassantCapture(this.getNodeOf(master).getPosition(), position))
+            {
+                const targetPosition = {I: position.I, J: position.J};
+                targetPosition.I -= master.getMvtDirection();
+                this.setMasterAndUpdateBoard(targetPosition, null);
+            }
+            else if ((simulationMove as PawnSimulationMove).hasPromotionType())
+            {
+                const oldMaster = master;
+                switch ((simulationMove as PawnSimulationMove).getPromotionType())
+                {
+                    case PieceType.KNIGHT:
+                        master = new KnightNodeMaster(master.getColor());
+                        break;
+                    case PieceType.QUEEN:
+                        master = new QueenNodeMaster(master.getColor());
+                        break;
+                }
+                master.setHasMoved(true);
+                master.setOriginalPosition(oldMaster.getOriginalPosition());
+                master.setNodeProvider(this);
+                this.insertNewMaster(master);
+                this.setMasterAndUpdateBoard(oldMaster.getOriginalPosition(), null);
+            }
         }
         else if ( master instanceof KingNodeMaster)
         {
@@ -348,6 +379,21 @@ export class ChessNodeProvider
         return this.shuffle(moves);
     }
 
+    public getPossibleSimulationMoves(color: PieceColor): SimulationMove[]
+    {
+        const moves: SimulationMove[] = [];
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
+            if (key.getColor() === color)
+            {
+                key.getSimulationMoves().forEach(simulationMove =>
+                    {
+                        moves.push(simulationMove);
+                    });
+            }
+        });
+        return this.shuffle(moves);
+    }
+
     private shuffle(array: any[]): any[]
     {
         let currentIndex = array.length;
@@ -396,39 +442,17 @@ export class ChessNodeProvider
         });
         return states;
     }
-}
 
-class SimulationMove
-{
-    private principalMaster: ChessNodeMaster = null;
-    private previousPrincipalMasterPosition: ICaseBoardPosition;
-    private newPosition: ICaseBoardPosition;
-    private replacedMaster: ChessNodeMaster = null;
-    constructor(principalMaster: ChessNodeMaster, previousPrincipalMasterPosition: ICaseBoardPosition, newPosition: ICaseBoardPosition, replacedMaster: ChessNodeMaster)
+    public flushUnusedMasters()
     {
-        this.principalMaster = principalMaster;
-        this.previousPrincipalMasterPosition = previousPrincipalMasterPosition;
-        this.newPosition = newPosition;
-        this.replacedMaster = replacedMaster;
-    }
-
-    public getPrincipalMaster(): ChessNodeMaster
-    {
-        return this.principalMaster;
-    }
-
-    public getPreviousPosition(): ICaseBoardPosition
-    {
-        return this.previousPrincipalMasterPosition;
-    }
-
-    public getPosition(): ICaseBoardPosition
-    {
-        return this.newPosition;
-    }
-
-    public getReplacedMaster(): ChessNodeMaster
-    {
-        return this.replacedMaster;
+        const idsToKeep: number[] = [];
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
+        {
+            idsToKeep.push(key.getId());
+        });
+        Array.from(this.masterById.keys()).filter((id) => !idsToKeep.includes(id)).forEach((idToRemove) => {
+            this.masterById.delete(idToRemove);
+        });
     }
 }
+

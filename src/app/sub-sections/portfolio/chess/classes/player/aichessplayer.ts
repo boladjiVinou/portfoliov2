@@ -1,7 +1,8 @@
 import { ICaseBoardPosition } from '../board/chessCase';
 import { ChessNodeState } from '../chessnavigation/chessnode';
-import { ChessNodeMaster } from '../chessnavigation/chessnodemaster';
 import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
+import { PawnSimulationMove } from '../chessnavigation/PawnSimulationMove';
+import { SimulationMove } from '../chessnavigation/SimulationMove';
 import { PieceColor, PieceType } from '../pieces/chesspiece';
 import { ChessPlayer } from './chessplayer';
 import { MinimaxTreeNode, Simulator } from './MinimaxTreeNode';
@@ -15,6 +16,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     private color: PieceColor;
     private minimaxLevel = 4;
     private readonly delayBetweenActions: 2000;
+    private pawnPromotionType: PieceType = PieceType.QUEEN;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
     constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
     {
@@ -33,11 +35,11 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     gameIsNotOver(): boolean {
         return this.gameProvider.hasKing(PieceColor.BLACK) && this.gameProvider.hasKing(PieceColor.WHITE);
     }
-    movesGenerator(color: PieceColor): [ICaseBoardPosition, ChessNodeMaster][] {
-        return this.gameProvider.getPossibleMoves(color);
+    movesGenerator(color: PieceColor): SimulationMove[] {
+        return this.gameProvider.getPossibleSimulationMoves(color);
     }
-    moveSimulator(position: ICaseBoardPosition, master: ChessNodeMaster): void {
-        this.gameProvider.simulateMove(position, master);
+    moveSimulator(move: SimulationMove): void {
+        this.gameProvider.simulateMove(move);
     }
     scoreGetter(): number {
         return this.gameProvider.getTotal();
@@ -50,12 +52,17 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
             const search = () => {
                 const start = performance.now();
                 const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);
+                this.gameProvider.flushUnusedMasters(); // during the simulations we can add new masters for pawn promotion
                 const end = performance.now();
                 const choosenMove = minimaxRoot.getElectedMove();
-                const oldPosition = this.gameProvider.getNodeOf(choosenMove[1]).getPosition();
+                if (choosenMove instanceof PawnSimulationMove && choosenMove.hasPromotionType())
+                {
+                    this.pawnPromotionType = choosenMove.getPromotionType();
+                }
+                const oldPosition = this.gameProvider.getNodeOf(choosenMove.getMaster()).getPosition();
                 const waitingTime = Math.max(this.delayBetweenActions - (end - start), 1);
                 setTimeout(() => {
-                    this.moveSubmiter(choosenMove[0], oldPosition).then(() =>
+                    this.moveSubmiter(choosenMove.getPosition(), oldPosition).then(() =>
                         {
                             resolve();
                             return;
@@ -78,7 +85,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
 
     public selectPawnPromotionType(pawn: ICaseBoardPosition): Promise<PieceType> {
         return new Promise<PieceType>((resolve) => {
-            resolve(PieceType.QUEEN);
+            resolve(this.pawnPromotionType);
         });
     }
 
