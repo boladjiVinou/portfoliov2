@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { BlackChessCase, ChessCase, WhiteChessCase } from './chessCase';
 import { BishopPiece } from '../pieces/bishoppiece';
-import { ChessPiece, PieceColor } from '../pieces/chesspiece';
+import { ChessPiece } from '../pieces/chesspiece';
+import { PieceColor } from '../pieces/PieceColor';
 import { KingPiece } from '../pieces/kingpiece';
 import { KnightPiece } from '../pieces/knightpiece';
 import { QueenPiece } from '../pieces/queenpiece';

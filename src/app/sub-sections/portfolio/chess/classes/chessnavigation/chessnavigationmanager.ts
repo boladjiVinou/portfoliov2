@@ -1,5 +1,8 @@
-import { ChessCase, ICaseBoardPosition } from '../board/chessCase';
-import { ChessPiece, PieceColor, PieceType } from '../pieces/chesspiece';
+import { ChessCase } from '../board/chessCase';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { ChessPiece } from '../pieces/chesspiece';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 import { KingPiece } from '../pieces/kingpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
 import { ChessBoard } from '../board/chessboard';
@@ -11,12 +14,15 @@ import { ChessNodeMaster } from './chessnodemaster';
 import { QueenNodeMaster } from './queennodemaster';
 import { RookNodeMaster } from './rooknodemaster';
 import { KnightNodeMaster } from './knightNodeMaster';
+import { ChessMovePositions } from './chessMovePositions';
+import { PieceAbstraction } from './pieceabstraction';
 
 export interface IPiecesRequestSupplier
 {
     positionOccupiedByOpponent(piece: NonNullable<ChessPiece>, position: NonNullable<ICaseBoardPosition>): boolean;
     caseIsEmpty(position: ICaseBoardPosition): boolean;
     setCaseAvailability(isAvailable: boolean , position: ICaseBoardPosition): void;
+    showIsInDanger(isInDanger: boolean, position: ICaseBoardPosition): void;
     getPossibleDestinations(position: ICaseBoardPosition): ICaseBoardPosition[];
     notifyMove(piece: ChessPiece, newPosition: ICaseBoardPosition): void;
     realizeCapture(piece: ChessPiece, position: ICaseBoardPosition): void;
@@ -40,6 +46,8 @@ export interface IGameRequestSupplier
     realizeMove(targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition): Promise<void>;
     playerHasSomethingToDo(color: PieceColor): boolean;
     getKingCase(color: PieceColor): Readonly<ChessCase>;
+    getPreviousMove(): ChessMovePositions;
+    getBoardSummary(): PieceAbstraction[];
 }
 
 export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpecialRequestSupplier, IPawnSpecialRequestSupplier, IGameRequestSupplier
@@ -47,12 +55,20 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     private chessBoard: Readonly<ChessCase[][]>;
     private fullBoard: Readonly<ChessBoard>;
     private chessNodeProvider: ChessNodeProvider;
+    private lastMoveDone: ChessMovePositions;
     constructor(board: Readonly<ChessBoard>)
     {
         this.chessBoard = board.getBoard();
         this.fullBoard = board;
         this.chessNodeProvider = new ChessNodeProvider();
-        this.chessNodeProvider.initFromPieces(this.fullBoard.getPieces());
+        this.chessNodeProvider.initWithoutPiece(); // initFromPieces(this.fullBoard.getPieces());
+    }
+    showIsInDanger(isInDanger: boolean, position: ICaseBoardPosition): void {
+        this.chessBoard[position.I][position.J].showIsInDanger(isInDanger);
+    }
+    getBoardSummary(): PieceAbstraction[]
+    {
+        return this.chessNodeProvider.getMastersSummary();
     }
     getKingCase(color: PieceColor): Readonly<ChessCase>
     {
@@ -73,19 +89,23 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
         {
             this.chessBoard[targetPosition.I][targetPosition.J].showHighLight(true);
             this.chessBoard[currentPosition.I][currentPosition.J].showHighLight(true);
-            this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor() as ChessPiece).then(() =>
+            this.chessBoard[targetPosition.I][targetPosition.J].animatedAccept(this.chessBoard[currentPosition.I][currentPosition.J].getVisitor()).then(() =>
             {
                 setTimeout(() => {
                     this.chessBoard[targetPosition.I][targetPosition.J].showHighLight(false);
                     this.chessBoard[currentPosition.I][currentPosition.J].showHighLight(false);
                     resolve();
-                }, 500);
+                }, 700);
             });
         });
     }
     getProvider(): Readonly<ChessNodeProvider>
     {
         return this.chessNodeProvider;
+    }
+    getPreviousMove(): ChessMovePositions
+    {
+        return this.lastMoveDone;
     }
     notifyPromotion(pawn: NonNullable<TransformablePawnPiece>, newType: PieceType): void
     {
@@ -116,9 +136,11 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     notifyMove(piece: ChessPiece, newPosition: ICaseBoardPosition): void
     {
        const quittingNode = this.chessNodeProvider.getNode(piece.getCurrentCase().getCasePosition());
+       const oldPos = piece.getCurrentCase().getCasePosition();
        const master = quittingNode.getOwner();
        const receivingNode = this.chessNodeProvider.getNode(newPosition);
        this.chessNodeProvider.setMasterAndUpdateBoard(receivingNode.getPosition(), master);
+       this.lastMoveDone = new ChessMovePositions( {I: oldPos.I, J: oldPos.J}, {I: newPosition.I, J: newPosition.J});
     }
     getPossibleDestinations(position: ICaseBoardPosition): ICaseBoardPosition[]
     {

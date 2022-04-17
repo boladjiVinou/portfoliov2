@@ -4,12 +4,13 @@ import { Subscription } from 'rxjs/internal/Subscription';
 import { LanguageService } from 'src/app/services/languageService';
 import { ChessRenderingService } from './classes/rendering/chessrendering.service';
 import { ChoiceContainer } from './classes/choicecontainer';
-import { ChessPiece, PieceType } from './classes/pieces/chesspiece';
+import { ChessPiece } from './classes/pieces/chesspiece';
+import { PieceType } from './classes/pieces/PieceType';
 import { ChessGame } from './classes/game/chessgame';
 import { AIType } from './classes/player/aichessplayer';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export interface IPawnPromoter
+export interface IViewRequest
 {
     askTypeToPromoteTo(): Promise<PieceType>;
 }
@@ -20,7 +21,7 @@ export interface IPawnPromoter
     styleUrls: ['./chess.component.scss'],
     providers: [ChessRenderingService]
 })
-export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPromoter {
+export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IViewRequest {
     private langageSubscription: Subscription;
     public displayWarning = false;
     public menuOpened = false;
@@ -34,7 +35,7 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public bishop: string;
     public rook: string;
     public knight: string;
-    public aiChoices = new ChoiceContainer(['Minimax'], ['Minimax']);
+    // public aiChoices = new ChoiceContainer(['AlphaBeta'], ['AlphaBeta']);
     public difficultyLabel: string;
     public difficultyChoices = new ChoiceContainer(['Easy', 'Medium', 'Hard'], ['Facile', 'Normal', 'Difficile']);
     public viewLabel: string;
@@ -43,10 +44,17 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
     public soundChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
     public soundEffectLabel: string;
     public soundEffectChoices = new ChoiceContainer(['Off', 'On'], ['Sans', 'Avec']);
+    public playerTypeLabel: string;
+    public playerTypesChoices = new ChoiceContainer(['Human', 'CPU'], ['Humain', 'CPU']);
+    public playerColorLabel: string;
+    public playerColorChoices = new ChoiceContainer(['White', 'Black'], ['Blanc', 'Noir']);
+    public showCredits = false;
     public playLabel: string;
     private chessGame: ChessGame;
     private pieceTypeSubject: BehaviorSubject<PieceType> = new BehaviorSubject(PieceType.PAWN);
     private pieceTypeObservable: Observable<PieceType>;
+    public isMobile = false;
+    public heavyProcessing = false;
     constructor(private chessRenderingService: ChessRenderingService, private languageService: LanguageService , private zone: NgZone){
     }
     askTypeToPromoteTo(): Promise<PieceType> {
@@ -72,27 +80,28 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
         console.log('submiting choice');
         this.pieceTypeSubject.next(this.pawnPromotionChoice);
     }
+    private checkIsMobile()
+    {
+        this.isMobile = /*window.navigator.userAgent.toLowerCase().includes('mobi') &&*/ window.innerWidth < 600;
+    }
+    private setHeavyProcessing(isProcessing: boolean): void
+    {
+        this.heavyProcessing = isProcessing;
+    }
     ngOnInit(): void {
         this.langageSubscription = this.languageService.getEnglishLangageState().subscribe((value) => {
             this.zone.run(() => {
               this.updateLangage(value);
             });
         });
-        if ( window.navigator.userAgent.toLowerCase().includes('mobi'))
-        {
-            this.displayWarning = true;
-        }
+        this.checkIsMobile();
         this.chessRenderingService.init().then(() => {
             const container = document.querySelector('#render-container');
             container.removeChild(document.getElementById('progress-bar'));
-            this.chessRenderingService.setupHtmlContainer(container);
+            this.chessRenderingService.setupHtmlContainer(container, this.checkIsMobile.bind(this));
             this.chessGame = new ChessGame();
-            this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX).then(() =>
-            {
-                console.log('started animation');
-                this.chessRenderingService.animate();
-                this.showMenuButton = true;
-            });
+            this.chessRenderingService.animate();
+            this.showMenuButton = true;
         });
         this.pieceTypeObservable = this.pieceTypeSubject.asObservable();
     }
@@ -130,6 +139,8 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.bishop = 'Bishop';
             this.rook = 'Rook';
             this.knight = 'Knight';
+            this.playerColorLabel = 'Color Choice';
+            this.playerTypeLabel = 'Player Type';
         }
         else
         {
@@ -145,11 +156,16 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
             this.bishop = 'Fou';
             this.rook = 'Tour';
             this.knight = 'Cavalier';
+            this.playerColorLabel = 'Choix de couleur';
+            this.playerTypeLabel = 'Type de joueur';
         }
-        this.aiChoices.setLangage(isEnglish);
+        // this.aiChoices.setLangage(isEnglish);
         this.difficultyChoices.setLangage(isEnglish);
         this.viewChoices.setLangage(isEnglish);
         this.soundChoices.setLangage(isEnglish);
+        this.soundEffectChoices.setLangage(isEnglish);
+        this.playerColorChoices.setLangage(isEnglish);
+        this.playerTypesChoices.setLangage(isEnglish);
     }
     private updateSound(stopSound)
     {
@@ -182,11 +198,31 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IPawnPr
         this.soundEffectChoices.nextChoice();
         ChessPiece.AUDIO_MVT_PLAYER.setEnable(this.soundEffectChoices.getChoiceIndex() === 1);
     }
+    public onPlayerTypeNextChoice()
+    {
+        this.playerTypesChoices.nextChoice();
+    }
+    public onPlayerTypePrevChoice()
+    {
+        this.playerTypesChoices.previousChoice();
+    }
+    public onPlayerColorNextChoice()
+    {
+        this.playerColorChoices.nextChoice();
+    }
+    public onPlayerColorPrevChoice()
+    {
+        this.playerColorChoices.previousChoice();
+    }
     public startGame()
     {
         this.menuOpened = false;
-        this.chessRenderingService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1).then(() => {
-            this.chessGame.start();
+        this.chessGame.init(this.chessRenderingService, this, AIType.MININMAX, //
+                this.playerTypesChoices.getChoiceIndex() === 1, this.playerColorChoices.getChoiceIndex()).then(() =>
+        {
+            this.chessRenderingService.moveCameraToIdealPosition(this.viewChoices.getChoiceIndex() === 1, this.playerColorChoices.getChoiceIndex() ).then(() => {
+                this.chessGame.start();
+            });
         });
     }
     public onMenuClick()

@@ -1,4 +1,4 @@
-import { ICaseBoardPosition } from '../board/chessCase';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { ChessNodeMaster } from './chessnodemaster';
 
 

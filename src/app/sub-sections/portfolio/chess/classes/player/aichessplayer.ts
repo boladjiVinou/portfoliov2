@@ -1,14 +1,16 @@
-import { ICaseBoardPosition } from '../board/chessCase';
+import { IViewRequest } from '../../chess.component';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { ChessNodeState } from '../chessnavigation/chessnode';
 import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
 import { PawnSimulationMove } from '../chessnavigation/PawnSimulationMove';
 import { SimulationMove } from '../chessnavigation/SimulationMove';
-import { PieceColor, PieceType } from '../pieces/chesspiece';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 import { ChessPlayer } from './chessplayer';
-import { MinimaxTreeNode, Simulator } from './MinimaxTreeNode';
+import { MinimaxTreeNode, ISimulator } from './MinimaxTreeNode';
 // https://github.com/josdejong/workerpool
 
-export class AIChessPlayer extends ChessPlayer implements Simulator
+export class AIChessPlayer extends ChessPlayer implements ISimulator
 {
     // good to test with https://github.com/AnshGaikwad/Chess-World/tree/master/engines
     private aiType: AIType;
@@ -18,6 +20,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     private readonly delayBetweenActions: 2000;
     private pawnPromotionType: PieceType = PieceType.QUEEN;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
+    // private heavyProcessNotifyer: (isProcessing: boolean) => void;
     constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
     {
         super();
@@ -25,6 +28,16 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
         this.gameProvider = provider;
         this.color = color;
         this.moveSubmiter = moveSubmiter;
+        // this.heavyProcessNotifyer = heavyProcesingNotifyer;
+    }
+    kingIsInDanger(color: PieceColor): boolean {
+        return this.gameProvider.kingIsInDanger(color);
+    }
+    hasKing(color: PieceColor): boolean {
+        return this.gameProvider.hasKing(color);
+    }
+    public getColor(): PieceColor {
+        return this.color;
     }
     restoreGameState(nodeStates: ChessNodeState[]): void {
         this.gameProvider.restoreGameState(nodeStates);
@@ -41,8 +54,8 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
     moveSimulator(move: SimulationMove): void {
         this.gameProvider.simulateMove(move);
     }
-    scoreGetter(): number {
-        return this.gameProvider.getTotal();
+    scoreGetter(color: PieceColor): number {
+        return this.gameProvider.getScore(color);
     }
     public play(): Promise<void>
     {
@@ -74,7 +87,7 @@ export class AIChessPlayer extends ChessPlayer implements Simulator
                 (window as any).requestIdleCallback(() =>
                 {
                     search();
-                }, { timeout: 250 });
+                }, { timeout: 4000 });
             }
             else
             {

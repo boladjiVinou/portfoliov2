@@ -1,5 +1,7 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { ChessPiece, PieceType } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { ChessPiece } from '../pieces/chesspiece';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 
 export abstract class ChessPlayer
 {
@@ -11,6 +13,7 @@ export abstract class ChessPlayer
         piece.quitCase();
         piece.getModel().visible = false;
     }
+    public abstract getColor(): PieceColor;
     public abstract selectPawnPromotionType(pawn: ICaseBoardPosition): Promise<PieceType>;
 }
 

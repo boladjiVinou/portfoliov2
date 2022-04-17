@@ -1,12 +1,14 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { BishopPiece } from '../pieces/bishoppiece';
-import { ChessPiece, PieceColor, PieceType } from '../pieces/chesspiece';
-import { KingPiece } from '../pieces/kingpiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+/*import { BishopPiece } from '../pieces/bishoppiece';
+import { ChessPiece } from '../pieces/chesspiece';*/
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
+/*import { KingPiece } from '../pieces/kingpiece';
 import { KnightPiece } from '../pieces/knightpiece';
 import { PawnPiece } from '../pieces/pawnpiece';
 import { QueenPiece } from '../pieces/queenpiece';
 import { RookPiece } from '../pieces/rookpiece';
-import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';
+import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';*/
 import { BishopNodeMaster } from './bishopnodemaster';
 import { ChessNode, ChessNodeState } from './chessnode';
 import { ChessNodeMaster } from './chessnodemaster';
@@ -14,6 +16,7 @@ import { KingNodeMaster } from './kingnodemaster';
 import { KnightNodeMaster } from './knightNodeMaster';
 import { PawnNodeMaster } from './pawnnodemaster';
 import { PawnSimulationMove } from './PawnSimulationMove';
+import { PieceAbstraction } from './pieceabstraction';
 import { QueenNodeMaster } from './queennodemaster';
 import { RookNodeMaster } from './rooknodemaster';
 import { SimulationMove } from './SimulationMove';
@@ -29,6 +32,7 @@ export class ChessNodeProvider
     private leftWhiteRook: ChessNodeMaster = null;
     private positionByPiece: Map<ChessNodeMaster, ICaseBoardPosition> = new Map<ChessNodeMaster, ICaseBoardPosition>();
     private masterById: Map<number, ChessNodeMaster> = new Map<number, ChessNodeMaster>();
+    private absoluteMax = 0;
     constructor()
     {
         this.initNodes();
@@ -39,9 +43,177 @@ export class ChessNodeProvider
         console.log(this.nodes);
     }
 
-    public initFromPieces(pieces: Readonly<ChessPiece[]>)
+   /* public initFromPieces(pieces: Readonly<ChessPiece[]>)
     {
         this.createAnndInitMasters(pieces);
+        this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
+        {
+            this.nodes[position.I][position.J].setOwner(key);
+            this.masterById.set(key.getId(), key);
+        });
+    }*/
+    public initFromAbstractPiece(pieces: PieceAbstraction[])
+    {
+        const rooks: RookNodeMaster[] = [];
+        pieces.forEach( piece =>
+        {
+            let master: ChessNodeMaster = null;
+            if (piece.type === PieceType.PAWN)
+            {
+                master = new PawnNodeMaster(piece.color);
+            }
+            else if ( piece.type  === PieceType.KING)
+            {
+                master = new KingNodeMaster(piece.color);
+                this.kings.push(master);
+            }
+            else if (piece.type  === PieceType.QUEEN)
+            {
+                master = new QueenNodeMaster(piece.color);
+            }
+            else if (piece.type  === PieceType.KNIGHT)
+            {
+                master = new KnightNodeMaster(piece.color);
+                this.knights.push(master);
+            }
+            else if (piece.type  === PieceType.ROOK)
+            {
+                master = new RookNodeMaster(piece.color);
+                rooks.push(master);
+            }
+            else if (piece.type  === PieceType.BISHOP)
+            {
+                master = new BishopNodeMaster(piece.color);
+            }
+            if (master != null)
+            {
+                const position = piece.position;
+                const ogPosition: ICaseBoardPosition = {I: piece.originalPosition.I, J: piece.originalPosition.J};
+                master.setOriginalPosition(ogPosition);
+                master.setNodeProvider(this);
+                this.positionByPiece.set(master , {I: position.I, J: position.J});
+                master.setHasMoved(piece.hasMoved);
+            }
+        });
+        this.initRooks(rooks);
+        this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
+        {
+            this.nodes[position.I][position.J].setOwner(key);
+            this.masterById.set(key.getId(), key);
+            if (key.getColor() === PieceColor.BLACK)
+            {
+                this.absoluteMax = key.getValue();
+            }
+        });
+    }
+    public initWithoutPiece()
+    {
+        // pawn init
+        for (let i = 0; i < 8; ++i)
+        {
+            const blackPawn = new PawnNodeMaster(PieceColor.BLACK);
+            const ogPosition: ICaseBoardPosition = {I: 1, J: i};
+            blackPawn.setOriginalPosition(ogPosition);
+            blackPawn.setNodeProvider(this);
+            this.positionByPiece.set(blackPawn , {I: 1, J: i});
+            blackPawn.setHasMoved(false);
+
+            const whitePawn = new PawnNodeMaster(PieceColor.WHITE);
+            const ogPosition2: ICaseBoardPosition = {I: 6, J: i};
+            whitePawn.setOriginalPosition(ogPosition2);
+            whitePawn.setNodeProvider(this);
+            this.positionByPiece.set(whitePawn , {I: 6, J: i});
+            whitePawn.setHasMoved(false);
+        }
+        const rooks: RookNodeMaster[] = [];
+        // rook init
+        for (let i = 0; i < 8; i += 7)
+        {
+            const blackRook = new RookNodeMaster(PieceColor.BLACK);
+            const ogPosition: ICaseBoardPosition = {I: 0, J: i};
+            blackRook.setOriginalPosition(ogPosition);
+            blackRook.setNodeProvider(this);
+            this.positionByPiece.set(blackRook , {I: 0, J: i});
+            blackRook.setHasMoved(false);
+
+
+            const whiteRook = new RookNodeMaster(PieceColor.WHITE);
+            const ogPosition2: ICaseBoardPosition = {I: 7, J: i};
+            whiteRook.setOriginalPosition(ogPosition2);
+            whiteRook.setNodeProvider(this);
+            this.positionByPiece.set(whiteRook , {I: 7, J: i});
+            whiteRook.setHasMoved(false);
+            rooks.push(blackRook);
+            rooks.push(whiteRook);
+        }
+        this.initRooks(rooks);
+        // knight init
+        for (let i = 1; i < 8; i += 5)
+        {
+            const blackKnight = new KnightNodeMaster(PieceColor.BLACK);
+            const ogPosition: ICaseBoardPosition = {I: 0, J: i};
+            blackKnight.setOriginalPosition(ogPosition);
+            blackKnight.setNodeProvider(this);
+            this.positionByPiece.set(blackKnight , {I: 0, J: i});
+            blackKnight.setHasMoved(false);
+
+            const whiteKnight = new KnightNodeMaster(PieceColor.WHITE);
+            const ogPosition2: ICaseBoardPosition = {I: 7, J: i};
+            whiteKnight.setOriginalPosition(ogPosition2);
+            whiteKnight.setNodeProvider(this);
+            this.positionByPiece.set(whiteKnight , {I: 7, J: i});
+            whiteKnight.setHasMoved(false);
+            this.knights.push(blackKnight);
+            this.knights.push(whiteKnight);
+        }
+        // bishop init
+        for (let i = 2; i < 6; i += 3)
+        {
+            const blackBishop = new BishopNodeMaster(PieceColor.BLACK);
+            const ogPosition: ICaseBoardPosition = {I: 0, J: i};
+            blackBishop.setOriginalPosition(ogPosition);
+            blackBishop.setNodeProvider(this);
+            this.positionByPiece.set(blackBishop , {I: 0, J: i});
+            blackBishop.setHasMoved(false);
+
+            const whiteBishop = new BishopNodeMaster(PieceColor.WHITE);
+            const ogPosition2: ICaseBoardPosition = {I: 7, J: i};
+            whiteBishop.setOriginalPosition(ogPosition2);
+            whiteBishop.setNodeProvider(this);
+            this.positionByPiece.set(whiteBishop , {I: 7, J: i});
+            whiteBishop.setHasMoved(false);
+        }
+        // king init
+        const blackKing = new KingNodeMaster(PieceColor.BLACK);
+        const tmpOgPosition: ICaseBoardPosition = {I: 0, J: 4};
+        blackKing.setOriginalPosition(tmpOgPosition);
+        blackKing.setNodeProvider(this);
+        this.positionByPiece.set(blackKing , {I: 0, J: 4});
+        blackKing.setHasMoved(false);
+        this.kings.push(blackKing);
+
+        const whiteKing = new KingNodeMaster(PieceColor.WHITE);
+        const tmpOgPosition2: ICaseBoardPosition = {I: 7, J: 4};
+        whiteKing.setOriginalPosition(tmpOgPosition2);
+        whiteKing.setNodeProvider(this);
+        this.positionByPiece.set(whiteKing , {I: 7, J: 4});
+        whiteKing.setHasMoved(false);
+        this.kings.push(whiteKing);
+        // queen init
+        const blackQueen = new QueenNodeMaster(PieceColor.BLACK);
+        const queenOgPosition: ICaseBoardPosition = {I: 0, J: 3};
+        blackQueen.setOriginalPosition(queenOgPosition);
+        blackQueen.setNodeProvider(this);
+        this.positionByPiece.set(blackQueen , {I: 0, J: 3});
+        blackQueen.setHasMoved(false);
+
+        const whiteQueen = new QueenNodeMaster(PieceColor.WHITE);
+        const queenOgPosition2: ICaseBoardPosition = {I: 7, J: 3};
+        whiteQueen.setOriginalPosition(queenOgPosition2);
+        whiteQueen.setNodeProvider(this);
+        this.positionByPiece.set(whiteQueen , {I: 7, J: 3});
+        whiteQueen.setHasMoved(false);
+
         this.positionByPiece.forEach((position: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
             this.nodes[position.I][position.J].setOwner(key);
@@ -102,7 +274,7 @@ export class ChessNodeProvider
         }
     }
 
-    private createAnndInitMasters(pieces: Readonly<ChessPiece[]>)
+   /* private createAnndInitMasters(pieces: Readonly<ChessPiece[]>)
     {
         const rooks: RookNodeMaster[] = [];
         pieces.forEach( piece =>
@@ -149,7 +321,7 @@ export class ChessNodeProvider
             }
         });
         this.initRooks(rooks);
-    }
+    }*/
     private initRooks(rooks: RookNodeMaster[] )
     {
         rooks.forEach(rook =>
@@ -196,12 +368,17 @@ export class ChessNodeProvider
     {
         return this.knights.filter(knight => this.positionByPiece.has(knight) && knight.getColor() === color).map(knight => knight as KnightNodeMaster);
     }
-    public setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
+    private setMaster(position: ICaseBoardPosition, master: ChessNodeMaster)
     {
         if (master !== null && this.positionByPiece.has(master))
         {
             const previousPosition = this.positionByPiece.get(master);
-            this.setMasterAndUpdateBoard(previousPosition, null);
+            this.setMaster(previousPosition, null);
+            if (master instanceof PawnNodeMaster)
+            {
+                const hasMovedTwoSquares = Math.abs(previousPosition.I - position.I) === 2;
+                (master as PawnNodeMaster).setHasMovedTwoSquares(hasMovedTwoSquares);
+            }
         }
         const oldMaster = this.nodes[position.I][position.J].getOwner();
         if (oldMaster != null && master !== oldMaster)
@@ -213,6 +390,16 @@ export class ChessNodeProvider
             this.positionByPiece.set(master, position);
         }
         this.nodes[position.I][position.J].setOwner(master);
+        if (master != null && !master.hasMoved())
+        {
+            master.updateHasMoved();
+        }
+    }
+    public setMasterAndUpdateBoard(position: ICaseBoardPosition, master: ChessNodeMaster)
+    {
+        // console.log('setting master start', performance.now());
+        this.setMaster(position, master);
+        // console.log('setting master loop start', performance.now());
         this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
             if (value.I !== position.I || value.J !== position.J)
@@ -220,11 +407,11 @@ export class ChessNodeProvider
                 this.nodes[value.I][value.J].initNeighborhoodUnsafely();
             }
         });
+        // console.log('setting master end', performance.now());
     }
 
     public simulateMove(simulationMove: SimulationMove)
     {
-        // console.log('simulating', simulationMove);
         let master = simulationMove.getMaster();
         const position = simulationMove.getPosition();
         if (master instanceof PawnNodeMaster)
@@ -394,6 +581,15 @@ export class ChessNodeProvider
         return this.shuffle(moves);
     }
 
+    public getMastersSummary(): PieceAbstraction[]
+    {
+        const pieces: PieceAbstraction[] = [];
+        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
+            pieces.push(key.summarize());
+        });
+        return pieces;
+    }
+
     private shuffle(array: any[]): any[]
     {
         let currentIndex = array.length;
@@ -413,9 +609,33 @@ export class ChessNodeProvider
     public getTotal(): number
     {
         let score = 0;
-        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
-            score += key.getValue();
+        this.positionByPiece.forEach((hostPos: ICaseBoardPosition, master: ChessNodeMaster) => {
+            score += master.getValue();
         });
+        return score;
+    }
+    public getScore(color: PieceColor): number
+    {
+        let score = 0;
+        let opponentVal = 0;
+        this.positionByPiece.forEach((hostPos: ICaseBoardPosition, master: ChessNodeMaster) => {
+            if (master.getColor() === color)
+            {
+                score += master.getValue() + this.nodes[hostPos.I][hostPos.J].getValue();
+            }
+            else
+            {
+                opponentVal += master.getValue();
+            }
+        });
+        if (color === PieceColor.BLACK)
+        {
+            score += this.absoluteMax - (Math.abs(opponentVal));
+        }
+        else
+        {
+            score -= this.absoluteMax - (Math.abs(opponentVal));
+        }
         return score;
     }
 

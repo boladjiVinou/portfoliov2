@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import { ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
-import { ChessCase } from '../chessCase';
+import { ChessCase, IVisitedCase } from '../board/chessCase';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { IKingSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessnavigation/chessnavigationmanager';
-import { ChessPiece, PieceColor, PieceType } from './chesspiece';
+import { ChessPiece } from './chesspiece';
+import { PieceColor } from './PieceColor';
+import { PieceType } from './PieceType';
 
 export class KingPiece extends ChessPiece
 {
@@ -39,7 +41,7 @@ export class KingPiece extends ChessPiece
                 this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
                 this.quitCase();
                 this.currentCase = host;
-                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height + 12, 0))); // temporary
+                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 48, 0))); // temporary
                 if (isDoingLeftCastling)
                 {
                     this.specialRequestsSupplier.realizeAnimatedRookLeftCastling(this.color).then(() =>
@@ -69,7 +71,7 @@ export class KingPiece extends ChessPiece
         // this.captureHostVisitorIfNeeded(host);
         this.quitCase();
         this.currentCase = host;
-        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height + 12, 0)));
+        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 48, 0)));
         /*if (this.isDoingALeftCastling(host))
         {
             this.specialRequestsSupplier.realizeRookLeftCastling(this.color);

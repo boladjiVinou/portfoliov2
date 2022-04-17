@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { AudioPlayer } from '../audio/audioplayer';
-import { ChessCase, ICaseBoardPosition, ICaseVisitor, IVisitedCase } from '../board/chessCase';
+import { ChessCase, ICaseVisitor, IVisitedCase } from '../board/chessCase';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { IPiecesRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPlayer } from '../player/chessplayer';
 import { IOutlinable } from '../sceneinteraction/chessinteractor';
+import { PieceColor } from './PieceColor';
+import { PieceType } from './PieceType';
 import { PieceModelLoader } from './piecemodelloader';
 export abstract class ChessPiece implements ICaseVisitor, IOutlinable
 {
@@ -15,7 +18,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     protected hasMovedOnce = false;
     protected color: PieceColor;
     protected currentCase: IVisitedCase = null;
-    private possibleDestinations: ICaseBoardPosition[];
+    protected possibleDestinations: ICaseBoardPosition[];
     private owner: ChessPlayer;
     constructor(modelPath: string, color: PieceColor)
     {
@@ -176,13 +179,4 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     }
     public abstract getType(): Readonly<PieceType>;
 }
-export enum PieceColor
-{
-    WHITE, BLACK
-}
-export enum PieceType
-{
-    KING, QUEEN, PAWN, ROOK, BISHOP, KNIGHT
-}
-
 

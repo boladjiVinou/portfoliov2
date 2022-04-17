@@ -1,5 +1,6 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor, PieceType } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 import { PawnSimulationMove } from './PawnSimulationMove';
 import { SimulationMove } from './SimulationMove';
@@ -44,7 +45,7 @@ export class PawnNodeMaster extends ChessNodeMaster
         }
 
         possiblePosition = {I: currentPosition.I, J: currentPosition.J};
-        possiblePosition.I += (1 * this.mvtDirection);
+        possiblePosition.I += (this.mvtDirection);
         if (this.isAValidPosition(possiblePosition) && (this.nodeProvider.getNode(possiblePosition).isFree()))
         {
             possiblesMoves.push(possiblePosition);
@@ -52,7 +53,7 @@ export class PawnNodeMaster extends ChessNodeMaster
 
         // diagonal moves
         possiblePosition = {I: currentPosition.I, J: currentPosition.J};
-        possiblePosition.I += (1 * this.mvtDirection);
+        possiblePosition.I += (this.mvtDirection);
         possiblePosition.J += 1;
         if (this.isAValidPosition(possiblePosition) && this.nodeProvider.getNode(possiblePosition).isOccupiedByOpponent(this.color))
         {
@@ -67,7 +68,7 @@ export class PawnNodeMaster extends ChessNodeMaster
         }
 
         possiblePosition = {I: currentPosition.I, J: currentPosition.J};
-        possiblePosition.I += (1 * this.mvtDirection);
+        possiblePosition.I += (this.mvtDirection);
         possiblePosition.J -= 1;
         if (this.isAValidPosition(possiblePosition) && this.nodeProvider.getNode(possiblePosition).isOccupiedByOpponent(this.color))
         {
@@ -122,7 +123,7 @@ export class PawnNodeMaster extends ChessNodeMaster
         {
             const positionOwner = this.nodeProvider.getNode(targetPosition).getOwner();
             return positionOwner.getColor() !== this.getColor() && (positionOwner instanceof PawnNodeMaster)
-                    && (positionOwner as PawnNodeMaster).getHasMovedTwoSquares() && Math.abs(currentPosition.J - targetPosition.J) === 1;
+                    && (positionOwner as PawnNodeMaster).getHasMovedTwoSquares() && (Math.abs(currentPosition.J - targetPosition.J) === 1);
         }
         else
         {

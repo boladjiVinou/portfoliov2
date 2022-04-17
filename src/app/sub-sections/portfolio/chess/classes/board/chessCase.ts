@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { IOutlinable, ISelectable } from '../sceneinteraction/chessinteractor';
+import { ICaseBoardPosition } from './ICaseBoardPosition';
 export abstract class ChessCase extends THREE.Mesh implements IVisitedCase, ISelectable
 {
     public static width = 150;
@@ -143,11 +144,6 @@ export class BlackChessCase extends ChessCase {
     }
 }
 
-export interface ICaseBoardPosition
-{
-    I: number;
-    J: number;
-}
 export interface ICaseVisitor
 {
     firstVisit(host: IVisitedCase): void;

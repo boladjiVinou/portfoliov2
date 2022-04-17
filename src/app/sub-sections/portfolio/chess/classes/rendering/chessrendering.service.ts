@@ -4,6 +4,7 @@ import { Scene, SpotLight, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import { AudioPlayer } from '../audio/audioplayer';
 import { ChessBoard } from '../board/chessboard';
+import { PieceColor } from '../pieces/PieceColor';
 import { LivingRoom } from '../room/livingroom';
 import { ChessInteractor } from '../sceneinteraction/chessinteractor';
 @Injectable()
@@ -13,7 +14,7 @@ export class ChessRenderingService implements OnDestroy {
     private camera: THREE.PerspectiveCamera;
     private controls: OrbitControls;
     private container: Element;
-    private camreaFrontIdealPosiion = new THREE.Vector3(850, -400, 0);
+    private camreaFrontIdealPosiion;
     private cameraTopIdealPosition = new THREE.Vector3(0, 100, 0);
     private parentNode: THREE.Object3D = new THREE.Object3D();
     private parentNodeInitialPosition: THREE.Vector3;
@@ -22,6 +23,7 @@ export class ChessRenderingService implements OnDestroy {
     private chessInteractor: Readonly<ChessInteractor>;
     private ambientSoundPlayer: AudioPlayer;
     private chessboard: ChessBoard;
+    private isMobileFct: () => void = null;
 
     public init(): Promise<void> {
         return new Promise<void>((resolve) => {
@@ -38,7 +40,7 @@ export class ChessRenderingService implements OnDestroy {
 
             // this.initLight();
             this.initNightLight();
-            // this.initController();
+            this.initController();
             this.initChessBoard().then(() =>
             {
                this.initAmbientSound().then(() => {
@@ -162,8 +164,16 @@ export class ChessRenderingService implements OnDestroy {
         this.ambientSoundPlayer.playSound(playWithLoop);
     }
 
-    public moveCameraToIdealPosition(viewFromTop: boolean): Promise<void>
+    public moveCameraToIdealPosition(viewFromTop: boolean, playerColor: PieceColor): Promise<void>
     {
+        if (playerColor === PieceColor.BLACK)
+        {
+            this.camreaFrontIdealPosiion = new THREE.Vector3(-1050, -400, 0);
+        }
+        else
+        {
+            this.camreaFrontIdealPosiion = new THREE.Vector3(850, -400, 0);
+        }
         this.shouldAnimateParentNode = false;
         return new Promise<void>((resolve) => {
             const cameraPositionUpdater = setInterval(() => {
@@ -201,7 +211,14 @@ export class ChessRenderingService implements OnDestroy {
                     else
                     {
                         this.camera.position.set(this.camreaFrontIdealPosiion.x, this.camreaFrontIdealPosiion.y, this.camreaFrontIdealPosiion.z);
-                        this.camera.lookAt(-1500, -3000, 0);
+                        if (playerColor === PieceColor.BLACK)
+                        {
+                            this.camera.lookAt(1500, -3000, 0);
+                        }
+                        else
+                        {
+                            this.camera.lookAt(-1500, -3000, 0);
+                        }
                     }
                     this.camera.updateProjectionMatrix();
                     clearInterval(cameraPositionUpdater);
@@ -253,12 +270,13 @@ export class ChessRenderingService implements OnDestroy {
         this.controls.enablePan = true;
     }
 
-    public setupHtmlContainer(container: Element)
+    public setupHtmlContainer(container: Element, isMobileFct: () => void)
     {
         this.renderer.domElement.id = 'renderBody';
         this.renderer.domElement.style.width = '100%';
         this.renderer.domElement.style.height = '100%';
         this.container = container;
+        this.isMobileFct = isMobileFct;
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(container.clientWidth, container.clientHeight);
         window.addEventListener('resize', this.resizeListener.bind(this));
@@ -269,6 +287,10 @@ export class ChessRenderingService implements OnDestroy {
     }
 
     private resizeListener(event){
+        if (this.isMobileFct != null)
+        {
+            this.isMobileFct();
+        }
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.camera.updateProjectionMatrix();
         if (this.chessInteractor != null)
@@ -294,7 +316,7 @@ export class ChessRenderingService implements OnDestroy {
 
     public animate() {
         this.animateParentNode();
-        // this.controls.update();
+        this.controls.update();
         this.renderer.render(this.scene, this.camera);
         if (this.chessInteractor != null)
         {

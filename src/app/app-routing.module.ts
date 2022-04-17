@@ -39,7 +39,7 @@ const routes: Routes = [{
 }
 ,
 {
-  path: 'portfolio/Project 1',
+  path: 'portfolio/1st Project',
   component: ProjectOneComponent
 }
 ,

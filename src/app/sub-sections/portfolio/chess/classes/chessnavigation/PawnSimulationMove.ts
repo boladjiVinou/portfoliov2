@@ -1,5 +1,5 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceType } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { PieceType } from '../pieces/PieceType';
 import { ChessNodeMaster } from './chessnodemaster';
 import { SimulationMove } from './SimulationMove';
 

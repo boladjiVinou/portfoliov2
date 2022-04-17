@@ -1,11 +1,13 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { PieceColor } from '../pieces/PieceColor';
 import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 import { ChessNodeProvider } from './chessnodeprovider';
+import { ChessNodeWeightGiver } from './chessNodeWeightsGiver';
 import { PawnNodeMaster } from './pawnnodemaster';
 
 export class ChessNode
 {
+    private static weightMap: ChessNodeWeightGiver = new ChessNodeWeightGiver();
     private outNodes: Set<ChessNode> = new Set<ChessNode>();
     private inNodes: Set<ChessNode> = new Set<ChessNode>();
     private nodeProvider: ChessNodeProvider;
@@ -28,12 +30,6 @@ export class ChessNode
     {
         // console.log('setting master', this, master);
         const previousMaster = this.master;
-        if (master !== null && master instanceof PawnNodeMaster && !master.hasMoved())
-        {
-            const oldPosition = this.nodeProvider.getNodeOf(master).getPosition();
-            const hasMovedTwoSquares = Math.abs(oldPosition.I - this.getPosition().I) === 2;
-            (master as PawnNodeMaster).setHasMovedTwoSquares(hasMovedTwoSquares);
-        }
         this.master = master;
         this.setNeighborhood();
         if ((previousMaster !== null && this.master === null) || (previousMaster === null && this.master !== null))
@@ -161,6 +157,10 @@ export class ChessNode
         {
             this.master = null;
         }
+    }
+    public getValue(): number
+    {
+        return ChessNode.weightMap.getChessNodeValue(this.master, this.getPosition());
     }
 }
 

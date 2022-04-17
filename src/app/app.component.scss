@@ -5,7 +5,10 @@ html {
       width: 0px;
       background: transparent; /* make scrollbar transparent */
   }
-
+.bg-dark
+{
+    background-color: #1e1e1e !important;
+}
 main{
     flex-grow: 0.975;
     position: relative;

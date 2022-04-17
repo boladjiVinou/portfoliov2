@@ -1,5 +1,6 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor, PieceType } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
 
 export class KingNodeMaster extends ChessNodeMaster

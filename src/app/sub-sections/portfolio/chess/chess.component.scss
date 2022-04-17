@@ -1,3 +1,10 @@
+html {
+    overflow:   scroll;
+}
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* make scrollbar transparent */
+}
 .chess-container
 {
     position: absolute;
@@ -5,7 +12,7 @@
     bottom:0px;
     left:0px;
     right: 0px;
-    #render-container
+    .normal-container
     {
         position: absolute;
         top: 0px;
@@ -16,7 +23,24 @@
         display: flex;
         justify-content: center;
     }
-
+    .mobile-container
+    {
+        position: absolute;
+        color: #37474F;
+        margin: 0 auto;
+        top: 25%;
+        bottom:25%;
+        left:0px;
+        right: 0px;
+    }
+    svg
+    {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        margin: 0px;
+        margin-left: 10px;
+    }
     .chess-menu-button
     {
         position: absolute;
@@ -29,19 +53,22 @@
 
     .chess-menu
     {
-        width: 25%;
         position: absolute;
+        // width: 25%;
         top: 4%;
         bottom:0px;
         right:0px;
         display: flex;
         flex-direction: column;
+        justify-content: flex-start;
         font-family:'Courier New', monospace; 
+        overflow: scroll;
         .menu-section
         {
             border-bottom: white;
             display:inline-block;
-            margin-bottom: 4%;
+            margin-bottom: 6px;
+            min-width: 400px;
             .choice-title
             {
                 text-align: center;
@@ -58,6 +85,7 @@
                     width: 50px;
                     height: 50px;
                     border-radius: 50%;
+                    padding: 0%;
                 }
                 p
                 {

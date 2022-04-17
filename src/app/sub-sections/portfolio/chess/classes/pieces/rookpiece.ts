@@ -1,4 +1,6 @@
-import { ChessPiece, PieceColor, PieceType } from './chesspiece';
+import { ChessPiece } from './chesspiece';
+import { PieceColor } from './PieceColor';
+import { PieceType } from './PieceType';
 
 export class RookPiece extends ChessPiece
 {

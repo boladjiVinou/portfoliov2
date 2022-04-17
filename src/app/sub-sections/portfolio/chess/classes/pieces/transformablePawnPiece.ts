@@ -1,9 +1,12 @@
-import { ChessCase, ICaseBoardPosition, IVisitedCase } from '../board/chessCase';
+import { ChessCase, IVisitedCase } from '../board/chessCase';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { IPawnSpecialRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPlayer} from '../player/chessplayer';
 import { HumanChessPlayer } from '../player/humanchessplayer';
 import { BishopPiece } from './bishoppiece';
-import { ChessPiece, PieceColor, PieceType } from './chesspiece';
+import { ChessPiece } from './chesspiece';
+import { PieceColor } from './PieceColor';
+import { PieceType } from './PieceType';
 import { KnightPiece } from './knightpiece';
 import { PawnPiece } from './pawnpiece';
 import { QueenPiece } from './queenpiece';

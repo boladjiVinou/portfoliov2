@@ -1,8 +1,10 @@
-import { ICaseBoardPosition } from '../board/chessCase';
-import { PieceColor, PieceType } from '../pieces/chesspiece';
+import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
+import { PieceColor } from '../pieces/PieceColor';
+import { PieceType } from '../pieces/PieceType';
 import { ChessNode } from './chessnode';
 import { ChessNodeProvider } from './chessnodeprovider';
 import { PawnNodeMaster } from './pawnnodemaster';
+import { PieceAbstraction } from './pieceabstraction';
 import { SimulationMove } from './SimulationMove';
 
 export abstract class ChessNodeMaster
@@ -59,18 +61,14 @@ export abstract class ChessNodeMaster
     {
         return this.chessType;
     }
+    public updateHasMoved(): void
+    {
+        const currentPosition = this.nodeProvider.getNodeOf(this).getPosition();
+        this.hasMovedOnce = ( currentPosition.I !== this.originalPosition.I || currentPosition.J !== this.originalPosition.J);
+    }
     public hasMoved(): boolean
     {
-        if (this.hasMovedOnce)
-        {
-            return true;
-        }
-        else
-        {
-            const currentPosition = this.nodeProvider.getNodeOf(this).getPosition();
-            this.hasMovedOnce = ( currentPosition.I !== this.originalPosition.I || currentPosition.J !== this.originalPosition.J);
-            return this.hasMovedOnce;
-        }
+        return this.hasMovedOnce;
     }
 
     protected isAValidPosition(position: ICaseBoardPosition)
@@ -368,6 +366,10 @@ export abstract class ChessNodeMaster
     public restoreState(state: ChessNodeMasterState): void
     {
         this.hasMovedOnce = state.getHasMoved();
+    }
+    public summarize(): PieceAbstraction
+    {
+        return new PieceAbstraction(this.color, this.chessType, this.nodeProvider.getNodeOf(this).getPosition() , this.getOriginalPosition(), this.hasMoved());
     }
 }
 

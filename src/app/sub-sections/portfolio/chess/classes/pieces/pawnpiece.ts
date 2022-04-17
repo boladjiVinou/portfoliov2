@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { ChessCase, IVisitedCase } from '../board/chessCase';
 import { IPawnSpecialRequestSupplier, IPiecesRequestSupplier} from '../chessnavigation/chessnavigationmanager';
-import { ChessPiece, PieceColor, PieceType } from './chesspiece';
+import { ChessPiece } from './chesspiece';
+import { PieceColor } from './PieceColor';
+import { PieceType } from './PieceType';
 
 export class PawnPiece extends ChessPiece
 {
@@ -22,6 +24,34 @@ export class PawnPiece extends ChessPiece
             }
         }
         super.firstVisit(host);
+    }
+    onDeselect(): void
+    {
+        const currentPosition = this.getCurrentCase().getCasePosition();
+        this.possibleDestinations.forEach( destination =>
+        {
+            if (currentPosition.J !== destination.J && this.positionAvailabilityChecker.caseIsEmpty(destination))
+            {
+                const target = {I: destination.I - this.mvtDirection, J: destination.J};
+                this.positionAvailabilityChecker.showIsInDanger(false, target);
+            }
+            this.positionAvailabilityChecker.setCaseAvailability(false, destination);
+        });
+        this.possibleDestinations = [];
+    }
+    onOutline(): void
+    {
+        this.possibleDestinations = this.getPossibleDestinations();
+        const currentPosition = this.getCurrentCase().getCasePosition();
+        this.possibleDestinations.forEach( destination =>
+        {
+            if (currentPosition.J !== destination.J && this.positionAvailabilityChecker.caseIsEmpty(destination))
+            {
+                const target = {I: destination.I - this.mvtDirection, J: destination.J};
+                this.positionAvailabilityChecker.showIsInDanger(true, target);
+            }
+            this.positionAvailabilityChecker.setCaseAvailability(true, destination);
+        });
     }
     public getHasMovedTwoSquares(): boolean
     {

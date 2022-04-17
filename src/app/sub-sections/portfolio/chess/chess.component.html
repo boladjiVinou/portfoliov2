@@ -1,13 +1,27 @@
 <div class="chess-container">
-    <div id ="render-container">
+    <div id ="render-container" [ngClass]="{'normal-container':!isMobile, 'mobile-container':isMobile }">
         <progress id ="progress-bar"></progress>
     </div>
     <div class="alert alert-danger" role="alert" *ngIf = "displayWarning === true">
         {{warningMsg}}
     </div>
     <button class="chess-menu-button" (click) ="onMenuClick()" *ngIf ="showMenuButton"  style="background: url('../../../../../assets/chess/play-button.png'); background-size:cover"></button>
+    
+    <svg  *ngIf = "heavyProcessing === true" version="1.1" id="L9" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    viewBox="0 0 100 100" enable-background="new 0 0 0 0" xml:space="preserve">
+        <path fill="#fff" d="M73,50c0-12.7-10.3-23-23-23S27,37.3,27,50 M30.9,50c0-10.5,8.5-19.1,19.1-19.1S69.1,39.5,69.1,50">
+            <animateTransform 
+            attributeName="transform" 
+            attributeType="XML" 
+            type="rotate"
+            dur="1s" 
+            from="0 50 50"
+            to="360 50 50" 
+            repeatCount="indefinite" />
+        </path>
+    </svg>
     <div class="chess-menu"  *ngIf ="menuOpened">
-        <div class="menu-section">
+        <!--<div class="menu-section">
             <p class ="choice-title">{{aiTypeLabel}}</p>
             <div class="choice-container">
                 <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click) ="aiChoices.previousChoice()"></button>
@@ -15,7 +29,6 @@
                 <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click) ="aiChoices.nextChoice()"></button>
             </div>
         </div>
-        <!--
         <div class="menu-section">
             <p class ="choice-title">{{difficultyLabel}}</p>
             <div class="choice-container">
@@ -25,6 +38,22 @@
             </div>
         </div>
         -->
+        <div class="menu-section">
+            <p class ="choice-title">{{playerTypeLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click)="onPlayerTypePrevChoice()"></button>
+                <p>{{playerTypesChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click)="onPlayerTypeNextChoice()"></button>
+            </div>
+        </div>
+        <div class="menu-section">
+            <p class ="choice-title">{{playerColorLabel}}</p>
+            <div class="choice-container">
+                <button class="section-button" style="background: url('../../../../../assets/chess/previous-button.png'); background-size:cover" (click)="onPlayerColorPrevChoice()"></button>
+                <p>{{playerColorChoices.getCurrenthoice()}}</p>
+                <button class="section-button" style="background: url('../../../../../assets/chess/next-button.png'); background-size:cover" (click)="onPlayerColorNextChoice()"></button>
+            </div>
+        </div>
         <div class="menu-section">
             <p class ="choice-title">{{viewLabel}}</p>
             <div class="choice-container">
@@ -50,6 +79,10 @@
             </div>
         </div>
         <button id="play-button" type="button" class="btn btn-danger" (click)="startGame()">{{playLabel}}</button>
+    </div>
+    <div class="credits-container" *ngIf="showCredits">
+        <p>Music: Juan-Sanchez-Now-The-Silence</p>
+        <p>Chess Model: https://sketchfab.com/robie1/collections/low-poly-chess-set</p>
     </div>
     <div class="pawn-promotion-container" *ngIf="showPawnPromotionDialog">
         <strong>{{pawnPromotionQuestion}}</strong>

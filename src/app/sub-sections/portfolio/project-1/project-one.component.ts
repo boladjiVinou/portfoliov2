@@ -9,7 +9,7 @@ import { ProjectOneRendererService } from './project-one-renderer.service';
   styleUrls: ['./project-one.component.scss'],
   providers: [ProjectOneRendererService]
 })
-export class ProjectOneComponent implements OnInit, OnDestroy,AfterViewInit {
+export class ProjectOneComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public projectTitle = 'Projet I';
   // tslint:disable-next-line:max-line-length
