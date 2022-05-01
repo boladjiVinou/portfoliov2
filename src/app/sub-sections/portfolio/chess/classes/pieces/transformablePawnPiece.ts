@@ -20,6 +20,7 @@ export class TransformablePawnPiece extends ChessPiece
     private rook: RookPiece;
     private knight: KnightPiece;
     private startingPosition: ICaseBoardPosition;
+    private freshlyPromoted = false;
     constructor(color: PieceColor)
     {
         super('', color);
@@ -29,47 +30,58 @@ export class TransformablePawnPiece extends ChessPiece
         this.innerPiece = new PawnPiece(color);
         this.knight = new KnightPiece(color);
     }
-    private promoteAs(type: PieceType)
+    private promoteAs(type: PieceType): Promise<void>
     {
-        const previousModel = this.innerPiece.getModel();
-        previousModel.visible = false;
-        if (this.getOwner() instanceof HumanChessPlayer)
+        return new Promise(resolve =>
         {
-            this.innerPiece.onDeselect();
-        }
-        const currentCase = this.innerPiece.getCurrentCase();
-        const owner = this.innerPiece.getOwner();
-        switch (type)
-        {
-            case PieceType.BISHOP:
-                this.innerPiece = this.bishop;
-                break;
-            case PieceType.QUEEN:
-                this.innerPiece = this.queen;
-                break;
-            case PieceType.ROOK:
-                this.innerPiece = this.rook;
-                break;
-            case PieceType.KNIGHT:
-                this.innerPiece = this.knight;
-                break;
-        }
-        currentCase.acceptVisitor(this.innerPiece);
-        this.innerPiece.setOwner(owner);
-        this.innerPiece.getModel().visible = true;
-        (this.positionAvailabilityChecker as IPawnSpecialRequestSupplier).notifyPromotion(this, type);
-        if (this.getOwner() instanceof HumanChessPlayer)
-        {
-            this.innerPiece.onOutline();
-        }
+            const previousModel = this.innerPiece.getModel();
+            previousModel.visible = false;
+            if (this.getOwner() instanceof HumanChessPlayer)
+            {
+                this.innerPiece.onDeselect();
+            }
+            const currentCase = this.innerPiece.getCurrentCase();
+            const owner = this.innerPiece.getOwner();
+            switch (type)
+            {
+                case PieceType.BISHOP:
+                    this.innerPiece = this.bishop;
+                    break;
+                case PieceType.QUEEN:
+                    this.innerPiece = this.queen;
+                    break;
+                case PieceType.ROOK:
+                    this.innerPiece = this.rook;
+                    break;
+                case PieceType.KNIGHT:
+                    this.innerPiece = this.knight;
+                    break;
+            }
+            this.freshlyPromoted = true;
+            currentCase.acceptVisitor(this.innerPiece);
+            this.innerPiece.setOwner(owner);
+            this.innerPiece.getModel().visible = true;
+            (this.positionAvailabilityChecker as IPawnSpecialRequestSupplier).notifyPromotion(this, type).then(() =>
+            {
+                resolve();
+                return;
+            });
+        });
     }
     public onDeselect(): void
     {
-        this.innerPiece.onDeselect();
+        if (!this.freshlyPromoted)
+        {
+            this.innerPiece.onDeselect();
+        }
+        else
+        {
+            this.freshlyPromoted = false;
+        }
     }
-    public onOutline(): void
+    public onOutline(): Promise<void>
     {
-        this.innerPiece.onOutline();
+        return this.innerPiece.onOutline();
     }
     public isFriendWith(piece: ChessPiece): boolean
     {
@@ -110,7 +122,7 @@ export class TransformablePawnPiece extends ChessPiece
     {
         this.innerPiece.quitCase();
     }
-    public getPossibleDestinations(): ICaseBoardPosition[]
+    public getPossibleDestinations(): Promise<ICaseBoardPosition[]>
     {
         return this.innerPiece.getPossibleDestinations();
     }

@@ -31,14 +31,41 @@ export class KingPiece extends ChessPiece
             {
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
-                this.captureHostVisitorIfNeeded(host);
-                const isDoingLeftCastling = this.isDoingALeftCastling(host);
-                let isDoingRightCastling = false;
-                if (!isDoingLeftCastling)
+                this.captureHostVisitorIfNeeded(host).then(() =>
                 {
-                    isDoingRightCastling = this.isDoingARightCastling(host);
-                }
-                this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
+                    this.isDoingALeftCastling(host).then(isDoingLeftCastling =>
+                        {
+                            let isDoingRightCastling = false;
+                            if (!isDoingLeftCastling)
+                            {
+                                this.isDoingARightCastling(host).then(isDoingRight =>
+                                {
+                                    isDoingRightCastling = isDoingRight;
+                                    this.visitImpl(host, isDoingLeftCastling, isDoingRightCastling).then(() =>
+                                    {
+                                        resolve();
+                                        return;
+                                    });
+                                });
+                            }
+                            else
+                            {
+                                this.visitImpl(host, isDoingLeftCastling, isDoingRightCastling).then(() =>
+                                {
+                                    resolve();
+                                    return;
+                                });
+                            }
+                        });
+                });
+            });
+    }
+    private visitImpl(host: IVisitedCase, isDoingLeftCastling: boolean, isDoingRightCastling: boolean): Promise<void>
+    {
+        return new Promise(resolve =>
+        {
+            this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition()).then(() =>
+            {
                 this.quitCase();
                 this.currentCase = host;
                 this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 48, 0))); // temporary
@@ -64,6 +91,7 @@ export class KingPiece extends ChessPiece
                     return;
                 }
             });
+        });
     }
     firstVisit( host: IVisitedCase): void
     {
@@ -81,15 +109,27 @@ export class KingPiece extends ChessPiece
             this.specialRequestsSupplier.realizeRookRightCastling(this.color);
         }*/
     }
-    private isDoingALeftCastling(host: IVisitedCase): boolean
+    private isDoingALeftCastling(host: IVisitedCase): Promise<boolean>
     {
-        const hostPosition = host.getCasePosition();
-        return this.specialRequestsSupplier.canMakeALeftCastling(this) && (hostPosition.I === this.leftCastlingPosition.I) && (hostPosition.J === this.leftCastlingPosition.J);
+        return new Promise(resolve =>
+        {
+            this.specialRequestsSupplier.canMakeALeftCastling(this).then((canMakeLeftCastling) =>
+            {
+                const hostPosition = host.getCasePosition();
+                resolve(canMakeLeftCastling && (hostPosition.I === this.leftCastlingPosition.I) && (hostPosition.J === this.leftCastlingPosition.J));
+            });
+        });
     }
-    private isDoingARightCastling(host: IVisitedCase): boolean
+    private isDoingARightCastling(host: IVisitedCase): Promise<boolean>
     {
-        const hostPosition = host.getCasePosition();
-        return this.specialRequestsSupplier.canMakeARightCastling(this) && (hostPosition.I === this.rightCastlingPosition.I) && (hostPosition.J === this.rightCastlingPosition.J);
+        return new Promise(resolve =>
+        {
+            this.specialRequestsSupplier.canMakeARightCastling(this).then((canMakeRightCastling) =>
+            {
+                const hostPosition = host.getCasePosition();
+                resolve(canMakeRightCastling && (hostPosition.I === this.rightCastlingPosition.I) && (hostPosition.J === this.rightCastlingPosition.J));
+            });
+        });
     }
     public setNavigationChecker( mvtValidator: IPiecesRequestSupplier): void
     {

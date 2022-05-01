@@ -1,17 +1,11 @@
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
-/*import { BishopPiece } from '../pieces/bishoppiece';
-import { ChessPiece } from '../pieces/chesspiece';*/
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
-/*import { KingPiece } from '../pieces/kingpiece';
-import { KnightPiece } from '../pieces/knightpiece';
-import { PawnPiece } from '../pieces/pawnpiece';
-import { QueenPiece } from '../pieces/queenpiece';
-import { RookPiece } from '../pieces/rookpiece';
-import { TransformablePawnPiece } from '../pieces/transformablePawnPiece';*/
+import { MinimaxTreeNode } from '../player/MinimaxTreeNode';
 import { BishopNodeMaster } from './bishopnodemaster';
 import { ChessNode, ChessNodeState } from './chessnode';
 import { ChessNodeMaster } from './chessnodemaster';
+import { ISimulator } from './ISimulator';
 import { KingNodeMaster } from './kingnodemaster';
 import { KnightNodeMaster } from './knightNodeMaster';
 import { PawnNodeMaster } from './pawnnodemaster';
@@ -21,7 +15,7 @@ import { QueenNodeMaster } from './queennodemaster';
 import { RookNodeMaster } from './rooknodemaster';
 import { SimulationMove } from './SimulationMove';
 
-export class ChessNodeProvider
+export class ChessCore implements ISimulator
 {
     private nodes: ChessNode[][] = [];
     private knights: ChessNodeMaster[] = [];
@@ -36,6 +30,18 @@ export class ChessNodeProvider
     constructor()
     {
         this.initNodes();
+    }
+    movesGenerator(color: PieceColor): SimulationMove[] {
+        return this.getPossibleSimulationMoves(color);
+    }
+    moveSimulator(move: SimulationMove): void {
+        return this.simulateMove(move);
+    }
+    scoreGetter(color: PieceColor): number {
+        return this.getScore(color);
+    }
+    gameIsNotOver(): boolean {
+        return  this.hasKing(PieceColor.BLACK) && this.hasKing(PieceColor.WHITE);
     }
 
     public logNodes()
@@ -235,9 +241,9 @@ export class ChessNodeProvider
         }
         return null;
     }
-    public clone(): ChessNodeProvider
+    public clone(): ChessCore
     {
-        const provider = new ChessNodeProvider();
+        const provider = new ChessCore();
         const rooks: RookNodeMaster[] = [];
         this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) =>
         {
@@ -500,6 +506,10 @@ export class ChessNodeProvider
         const king = this.kings.filter(piece => piece.getColor() === color)[0];
         return this.getNodeOf(king).ownerIsInDanger();
     }
+    public canMakeRightCastling(color: PieceColor): boolean
+    {
+       return this.canMakeARightCastling(this.kings.filter(val => val.getColor() === color)[0] as KingNodeMaster);
+    }
     public canMakeARightCastling(king: NonNullable<KingNodeMaster>): boolean
     {
         let rook: ChessNodeMaster;
@@ -521,6 +531,10 @@ export class ChessNodeProvider
             && this.rightWhiteRook.positionIsSafeForTheKing({I: 7, J: 5});
         }
 
+    }
+    public canMakeLeftCastling(color: PieceColor): boolean
+    {
+       return this.canMakeALeftCastling(this.kings.filter(val => val.getColor() === color)[0] as KingNodeMaster);
     }
     public canMakeALeftCastling(king: NonNullable<KingNodeMaster>): boolean
     {
@@ -568,17 +582,26 @@ export class ChessNodeProvider
 
     public getPossibleSimulationMoves(color: PieceColor): SimulationMove[]
     {
-        const moves: SimulationMove[] = [];
+        const bestMove: SimulationMove[] = [];
+        const otherMoves: SimulationMove[] = [];
         this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
             if (key.getColor() === color)
             {
                 key.getSimulationMoves().forEach(simulationMove =>
                     {
-                        moves.push(simulationMove);
+                        // moves.push(simulationMove);
+                        if (!this.getNode(simulationMove.getPosition()).isFree())
+                        {
+                            bestMove.push(simulationMove);
+                        }
+                        else
+                        {
+                            otherMoves.push(simulationMove);
+                        }
                     });
             }
         });
-        return this.shuffle(moves);
+        return [...bestMove, ...this.shuffle(otherMoves)];
     }
 
     public getMastersSummary(): PieceAbstraction[]
@@ -673,6 +696,47 @@ export class ChessNodeProvider
         Array.from(this.masterById.keys()).filter((id) => !idsToKeep.includes(id)).forEach((idToRemove) => {
             this.masterById.delete(idToRemove);
         });
+    }
+
+    public notifyPromotion(pawnPosition: ICaseBoardPosition, newType: PieceType, pawnColor: PieceColor): void
+    {
+        const oldMaster = this.getNode(pawnPosition).getOwner();
+        let master: ChessNodeMaster;
+        switch (newType)
+        {
+            case PieceType.BISHOP:
+                master = new BishopNodeMaster(pawnColor);
+                break;
+            case PieceType.QUEEN:
+                master = new QueenNodeMaster(pawnColor);
+                break;
+            case PieceType.ROOK:
+                master = new RookNodeMaster(pawnColor);
+                break;
+            case PieceType.KNIGHT:
+                master = new KnightNodeMaster(pawnColor);
+                break;
+        }
+        master.setHasMoved(true);
+        master.setOriginalPosition(oldMaster.getOriginalPosition());
+        master.setNodeProvider(this);
+        this.insertNewMaster(master);
+        this.setMasterAndUpdateBoard(pawnPosition, master);
+    }
+    notifyMove(oldPosition: ICaseBoardPosition, newPosition: ICaseBoardPosition): void
+    {
+        const quittingNode = this.getNode(oldPosition);
+        const master = quittingNode.getOwner();
+        const receivingNode = this.getNode(newPosition);
+        this.setMasterAndUpdateBoard(receivingNode.getPosition(), master);
+    }
+
+    public getBestMovePossible(color: PieceColor): SimulationMove
+    {
+        const minimaxRoot = new MinimaxTreeNode(null, this, color, 4 , null);
+        const choosenMove = minimaxRoot.getElectedMove();
+        this.flushUnusedMasters();
+        return choosenMove;
     }
 }
 

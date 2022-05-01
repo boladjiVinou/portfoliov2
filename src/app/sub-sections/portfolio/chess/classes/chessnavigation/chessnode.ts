@@ -1,7 +1,7 @@
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { ChessNodeMaster, ChessNodeMasterState } from './chessnodemaster';
-import { ChessNodeProvider } from './chessnodeprovider';
+import { ChessCore } from './chessCore';
 import { ChessNodeWeightGiver } from './chessNodeWeightsGiver';
 import { PawnNodeMaster } from './pawnnodemaster';
 
@@ -10,10 +10,10 @@ export class ChessNode
     private static weightMap: ChessNodeWeightGiver = new ChessNodeWeightGiver();
     private outNodes: Set<ChessNode> = new Set<ChessNode>();
     private inNodes: Set<ChessNode> = new Set<ChessNode>();
-    private nodeProvider: ChessNodeProvider;
+    private nodeProvider: ChessCore;
     private nodePosition: ICaseBoardPosition;
     private master: ChessNodeMaster = null;
-    constructor(nodeProvider: ChessNodeProvider, nodePosition: ICaseBoardPosition, master: ChessNodeMaster)
+    constructor(nodeProvider: ChessCore, nodePosition: ICaseBoardPosition, master: ChessNodeMaster)
     {
         this.nodeProvider = nodeProvider;
         this.nodePosition = nodePosition;
@@ -126,7 +126,7 @@ export class ChessNode
         this.inNodes.forEach(node => positions.push({I: node.nodePosition.I, J: node.nodePosition.J}));
         return positions;
     }
-    public getProvider(): ChessNodeProvider
+    public getProvider(): ChessCore
     {
         return this.nodeProvider;
     }

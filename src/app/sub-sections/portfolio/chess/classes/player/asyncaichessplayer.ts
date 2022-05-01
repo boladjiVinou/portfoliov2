@@ -4,8 +4,8 @@ import { PieceAbstraction } from '../chessnavigation/pieceabstraction';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
 import { ChessPlayer } from './chessplayer';
-import { ChessWorkerData, WorkerMoveGenerationData, WorkerMoveGenerationResult } from './chessworkerdata';
-import { WorkerMessageType } from './workermessagetype';
+import { ChessWorkerData, WorkerMoveGenerationData, WorkerMoveGenerationResult } from '../multithreading/chessworkerdata';
+import { WorkerMessageType } from '../multithreading/workermessagetype';
 // import * as WorkerPool from 'workerpool';
 // https://github.com/josdejong/workerpool
 

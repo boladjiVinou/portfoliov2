@@ -1,10 +1,8 @@
 import { IViewRequest } from '../../chess.component';
-import { ChessMovePositions } from '../chessnavigation/chessMovePositions';
 import { IGameRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { ChessPiece } from '../pieces/chesspiece';
 import { PieceColor } from '../pieces/PieceColor';
 import { AIChessPlayer, AIType } from '../player/aichessplayer';
-import { AsyncAIChessPlayer } from '../player/asyncaichessplayer';
 import { ChessPlayer } from '../player/chessplayer';
 import { HumanChessPlayer } from '../player/humanchessplayer';
 import { ChessRenderingService } from '../rendering/chessrendering.service';
@@ -14,15 +12,25 @@ export class ChessGame
     private humanPlayer: ChessPlayer;
     private botPlayer: ChessPlayer;
     private gameRequestsSupplier: Readonly<IGameRequestSupplier>;
+    public preInit(renderingService: ChessRenderingService, heavyProcesingNotifyer: (isProcessing: boolean) => void): Promise<void>
+    {
+        return new Promise((resolve) =>
+        {
+            this.gameRequestsSupplier = renderingService.getChessboard().getGameRequestsSupplier();
+            this.gameRequestsSupplier.initCore(heavyProcesingNotifyer).then(() =>
+            {
+                resolve();
+                return;
+            });
+        });
+    }
     public init(renderingService: ChessRenderingService, viewRequest: IViewRequest, aiType: AIType, playerIsCpu: boolean, playerColor: PieceColor): Promise<void>
     {
         return new Promise<void>(resolve =>
             {
-                this.gameRequestsSupplier = renderingService.getChessboard().getGameRequestsSupplier();
                 if (playerIsCpu)
                 {
-                    this.humanPlayer = new AIChessPlayer(aiType, this.gameRequestsSupplier.getProvider(),
-                    this.gameRequestsSupplier.realizeMove.bind(this.gameRequestsSupplier)  , playerColor);
+                    this.humanPlayer = new AIChessPlayer(aiType, this.gameRequestsSupplier, playerColor);
                 }
                 else
                 {
@@ -30,8 +38,7 @@ export class ChessGame
                     this.humanPlayer = new HumanChessPlayer(viewRequest, renderingService, playerColor);
                 }
                 const opponentColor = (playerColor === PieceColor.BLACK) ? PieceColor.WHITE : PieceColor.BLACK;
-                this.botPlayer = new AIChessPlayer(aiType, this.gameRequestsSupplier.getProvider(),
-                this.gameRequestsSupplier.realizeMove.bind(this.gameRequestsSupplier)  , opponentColor);
+                this.botPlayer = new AIChessPlayer(aiType, this.gameRequestsSupplier,  opponentColor);
                 renderingService.getChessboard().setPieceOwner(playerColor, this.humanPlayer);
                 renderingService.getChessboard().setPieceOwner(opponentColor, this.botPlayer);
                 ChessPiece.AUDIO_MVT_PLAYER.initSound(renderingService.getCamera(), renderingService.getScene(), ChessPiece.MOVEMENT_SOUND_PATH).then(() =>
@@ -54,32 +61,43 @@ export class ChessGame
     }
     private playerRoutine(player: ChessPlayer, nextPlayer: ChessPlayer, color: PieceColor): void
     {
-        if (this.gameRequestsSupplier.playerHasSomethingToDo(color))
+        this.gameRequestsSupplier.playerHasSomethingToDo(color).then(hasSomethingToDo =>
         {
-            let isInCheck = this.gameRequestsSupplier.kingIsInCheck(color);
-            const kingCaseOne = this.gameRequestsSupplier.getKingCase(color);
-            kingCaseOne.showIsInDanger(isInCheck);
-            player.play().then(() =>
+            if (hasSomethingToDo)
             {
-                kingCaseOne.showIsInDanger(false);
-                if (isInCheck)
-                {
-                    isInCheck = isInCheck && this.gameRequestsSupplier.kingIsInCheck(color);
-                }
-                if (!isInCheck)
-                {
-                    this.playerRoutine(nextPlayer, player, (color === PieceColor.BLACK ) ? PieceColor.WHITE : PieceColor.BLACK);
-                }
-                else
-                {
-                    this.gameRequestsSupplier.getKingCase(color).showIsInDanger(true);
-                    alert('Game Over');
-                }
-            });
-        }
-        else
-        {
-            alert('Game Over');
-        }
+                this.gameRequestsSupplier.kingIsInCheck(color).then(isInCheck =>
+                    {
+                        const kingCaseOne = this.gameRequestsSupplier.getKingCase(color);
+                        kingCaseOne.showIsInDanger(isInCheck);
+                        player.play().then(() =>
+                        {
+                            kingCaseOne.showIsInDanger(false);
+                            if (isInCheck)
+                            {
+                               this.gameRequestsSupplier.kingIsInCheck(color).then(againInCheck =>
+                               {
+                                    if (againInCheck)
+                                    {
+                                        this.gameRequestsSupplier.getKingCase(color).showIsInDanger(true);
+                                        alert('Game Over');
+                                    }
+                                    else
+                                    {
+                                        this.playerRoutine(nextPlayer, player, (color === PieceColor.BLACK ) ? PieceColor.WHITE : PieceColor.BLACK);
+                                    }
+                               });
+                            }
+                            else
+                            {
+                                this.playerRoutine(nextPlayer, player, (color === PieceColor.BLACK ) ? PieceColor.WHITE : PieceColor.BLACK);
+                            }
+                        });
+                    });
+            }
+            else
+            {
+                alert('Game Over');
+            }
+        });
     }
 }

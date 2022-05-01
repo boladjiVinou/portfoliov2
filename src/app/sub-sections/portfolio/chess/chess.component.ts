@@ -96,12 +96,15 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IViewRe
         });
         this.checkIsMobile();
         this.chessRenderingService.init().then(() => {
-            const container = document.querySelector('#render-container');
-            container.removeChild(document.getElementById('progress-bar'));
-            this.chessRenderingService.setupHtmlContainer(container, this.checkIsMobile.bind(this));
             this.chessGame = new ChessGame();
-            this.chessRenderingService.animate();
-            this.showMenuButton = true;
+            this.chessGame.preInit(this.chessRenderingService, this.setHeavyProcessing.bind(this)).then(() =>
+            {
+                const container = document.querySelector('#render-container');
+                container.removeChild(document.getElementById('progress-bar'));
+                this.chessRenderingService.setupHtmlContainer(container, this.checkIsMobile.bind(this));
+                this.chessRenderingService.animate();
+                this.showMenuButton = true;
+            });
         });
         this.pieceTypeObservable = this.pieceTypeSubject.asObservable();
     }

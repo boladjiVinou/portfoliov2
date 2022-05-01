@@ -2,7 +2,7 @@ import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
 import { ChessNode } from './chessnode';
-import { ChessNodeProvider } from './chessnodeprovider';
+import { ChessCore } from './chessCore';
 import { PawnNodeMaster } from './pawnnodemaster';
 import { PieceAbstraction } from './pieceabstraction';
 import { SimulationMove } from './SimulationMove';
@@ -11,7 +11,7 @@ export abstract class ChessNodeMaster
 {
     private static idCounter = 0;
     protected color: PieceColor;
-    protected nodeProvider: ChessNodeProvider;
+    protected nodeProvider: ChessCore;
     protected originalPosition: ICaseBoardPosition;
     protected hasMovedOnce = false;
     protected chessType: Readonly<PieceType>;
@@ -45,7 +45,7 @@ export abstract class ChessNodeMaster
     {
         this.hasMovedOnce = hasMoved;
     }
-    public setNodeProvider(provider: ChessNodeProvider)
+    public setNodeProvider(provider: ChessCore)
     {
         this.nodeProvider = provider;
     }

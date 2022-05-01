@@ -2,7 +2,6 @@ import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
 import { ChessNodeMaster } from './chessnodemaster';
-// this was an experimentation, but I dont use it, games are boring with it
 export class ChessNodeWeightGiver
 {
     private knightWeights: number[][] = [   [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],

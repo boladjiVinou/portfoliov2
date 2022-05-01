@@ -40,7 +40,7 @@ export class ChessRenderingService implements OnDestroy {
 
             // this.initLight();
             this.initNightLight();
-            this.initController();
+            // this.initController();
             this.initChessBoard().then(() =>
             {
                this.initAmbientSound().then(() => {
@@ -316,7 +316,7 @@ export class ChessRenderingService implements OnDestroy {
 
     public animate() {
         this.animateParentNode();
-        this.controls.update();
+        // this.controls.update();
         this.renderer.render(this.scene, this.camera);
         if (this.chessInteractor != null)
         {

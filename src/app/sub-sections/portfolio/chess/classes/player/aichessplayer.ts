@@ -1,99 +1,47 @@
-import { IViewRequest } from '../../chess.component';
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
-import { ChessNodeState } from '../chessnavigation/chessnode';
-import { ChessNodeProvider } from '../chessnavigation/chessnodeprovider';
-import { PawnSimulationMove } from '../chessnavigation/PawnSimulationMove';
-import { SimulationMove } from '../chessnavigation/SimulationMove';
+import { IPlayerRequestSupplier } from '../chessnavigation/chessnavigationmanager';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
 import { ChessPlayer } from './chessplayer';
-import { MinimaxTreeNode, ISimulator } from './MinimaxTreeNode';
 // https://github.com/josdejong/workerpool
 
-export class AIChessPlayer extends ChessPlayer implements ISimulator
+export class AIChessPlayer extends ChessPlayer
 {
     // good to test with https://github.com/AnshGaikwad/Chess-World/tree/master/engines
     private aiType: AIType;
-    private gameProvider: Readonly<ChessNodeProvider>;
     private color: PieceColor;
-    private minimaxLevel = 4;
     private readonly delayBetweenActions: 2000;
     private pawnPromotionType: PieceType = PieceType.QUEEN;
+    private playerRequestSupplier: IPlayerRequestSupplier;
     moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>;
-    // private heavyProcessNotifyer: (isProcessing: boolean) => void;
-    constructor(aiType: AIType, provider: Readonly<ChessNodeProvider> , moveSubmiter: (targetPosition: ICaseBoardPosition, currentPosition: ICaseBoardPosition) => Promise<void>, color: PieceColor)
+    constructor(aiType: AIType, playerRequestSupplier: IPlayerRequestSupplier, color: PieceColor)
     {
         super();
         this.aiType = aiType;
-        this.gameProvider = provider;
         this.color = color;
-        this.moveSubmiter = moveSubmiter;
-        // this.heavyProcessNotifyer = heavyProcesingNotifyer;
-    }
-    kingIsInDanger(color: PieceColor): boolean {
-        return this.gameProvider.kingIsInDanger(color);
-    }
-    hasKing(color: PieceColor): boolean {
-        return this.gameProvider.hasKing(color);
+        this.playerRequestSupplier = playerRequestSupplier;
     }
     public getColor(): PieceColor {
         return this.color;
     }
-    restoreGameState(nodeStates: ChessNodeState[]): void {
-        this.gameProvider.restoreGameState(nodeStates);
-    }
-    saveGameState(): ChessNodeState[] {
-        return this.gameProvider.saveGameState();
-    }
-    gameIsNotOver(): boolean {
-        return this.gameProvider.hasKing(PieceColor.BLACK) && this.gameProvider.hasKing(PieceColor.WHITE);
-    }
-    movesGenerator(color: PieceColor): SimulationMove[] {
-        return this.gameProvider.getPossibleSimulationMoves(color);
-    }
-    moveSimulator(move: SimulationMove): void {
-        this.gameProvider.simulateMove(move);
-    }
-    scoreGetter(color: PieceColor): number {
-        return this.gameProvider.getScore(color);
-    }
     public play(): Promise<void>
     {
-        return new Promise<void>((resolve) =>
+       return new Promise<void>((resolve) =>
         {
-            const level = this.minimaxLevel;
-            const search = () => {
-                const start = performance.now();
-                const minimaxRoot = new MinimaxTreeNode(null, this, this.color, level, null);
-                this.gameProvider.flushUnusedMasters(); // during the simulations we can add new masters for pawn promotion
-                const end = performance.now();
-                const choosenMove = minimaxRoot.getElectedMove();
-                if (choosenMove instanceof PawnSimulationMove && choosenMove.hasPromotionType())
+            this.playerRequestSupplier.getBestMovePossible(this.color).then(result =>
+            {
+                if (result.pawnPromotionType !== null && result.pawnPromotionType !== undefined)
                 {
-                    this.pawnPromotionType = choosenMove.getPromotionType();
+                    this.pawnPromotionType = result.pawnPromotionType;
                 }
-                const oldPosition = this.gameProvider.getNodeOf(choosenMove.getMaster()).getPosition();
-                const waitingTime = Math.max(this.delayBetweenActions - (end - start), 1);
-                setTimeout(() => {
-                    this.moveSubmiter(choosenMove.getPosition(), oldPosition).then(() =>
-                        {
-                            resolve();
-                            return;
-                        });
-                }, waitingTime);
-            };
-            if ('requestIdleCallback' in window)
-            {
-                (window as any).requestIdleCallback(() =>
+                this.playerRequestSupplier.realizeMove(result.move.destination, result.move.source).then(() =>
                 {
-                    search();
-                }, { timeout: 4000 });
-            }
-            else
-            {
-                search();
-            }
+                    resolve();
+                    return;
+                });
+            });
         });
+
     }
 
     public selectPawnPromotionType(pawn: ICaseBoardPosition): Promise<PieceType> {

@@ -17,6 +17,7 @@ export class ChessInteractor
     private camera: THREE.Camera;
     private outlinePass: OutlinePass;
     private isSelectingSomething = false;
+    private isOutliningSomething = false;
     private isEnabled = false;
     private choiceMadeSubject: BehaviorSubject<boolean>;
     private choiceMadeObservable: Observable<boolean>;
@@ -54,17 +55,20 @@ export class ChessInteractor
     }
     private onMouseClick(event: MouseEvent)
     {
-        const renderingZone = this.renderer.domElement.getBoundingClientRect();
-        this.mousePosition.x = ( ( event.clientX - renderingZone.left ) / renderingZone.width ) * 2 - 1;
-        this.mousePosition.y = - ( ( event.clientY - renderingZone.top ) / renderingZone.height ) * 2 + 1;
-        this.mousePosition.z = 1;
-        this.searchPointedObject();
+        if (!this.isOutliningSomething)
+        {
+            const renderingZone = this.renderer.domElement.getBoundingClientRect();
+            this.mousePosition.x = ( ( event.clientX - renderingZone.left ) / renderingZone.width ) * 2 - 1;
+            this.mousePosition.y = - ( ( event.clientY - renderingZone.top ) / renderingZone.height ) * 2 + 1;
+            this.mousePosition.z = 1;
+            this.searchPointedObject();
+        }
     }
     private searchPointedObject()
     {
-        this.raycaster.setFromCamera(this.mousePosition, this.camera);
         if (!this.isSelectingSomething)
         {
+            this.raycaster.setFromCamera(this.mousePosition, this.camera);
             let intersectedObjects = this.raycaster.intersectObjects(this.outlinables.filter(outlinable => outlinable.visible), true);
             if (intersectedObjects.length > 0)
             {
@@ -73,26 +77,7 @@ export class ChessInteractor
                     this.previousOutlinableFound.onDeselect();
                     this.previousOutlinableFound = null;
                 }
-                let node: THREE.Object3D;
-                for (const intersection of intersectedObjects)
-                {
-                    node = intersection.object;
-                    while (!this.outlinablesMap.has(node.uuid))
-                    {
-                        node = node.parent;
-                    }
-                    if (this.outlinablesMap.has(node.uuid))
-                    {
-                        break;
-                    }
-                }
-                if (this.outlinablesMap.has(node.uuid))
-                {
-                    this.outlinablesMap.get(node.uuid).onOutline();
-                    this.previousOutlinableFound = this.outlinablesMap.get(node.uuid);
-                    this.outlinePass.selectedObjects = [node];
-                    this.outlinePass.renderToScreen = true;
-                }
+                this.outliningProcedure(intersectedObjects);
             }
             else if (this.previousOutlinableFound != null)
             {
@@ -132,6 +117,33 @@ export class ChessInteractor
         }
     }
 
+    private outliningProcedure(intersectedObjects: THREE.Intersection<THREE.Object3D<THREE.Event>>[])
+    {
+        let node: THREE.Object3D;
+        for (const intersection of intersectedObjects)
+        {
+            node = intersection.object;
+            while (!this.outlinablesMap.has(node.uuid))
+            {
+                node = node.parent;
+            }
+            if (this.outlinablesMap.has(node.uuid))
+            {
+                break;
+            }
+        }
+        if (this.outlinablesMap.has(node.uuid))
+        {
+            this.isOutliningSomething = true;
+            this.outlinablesMap.get(node.uuid).onOutline().then(() =>
+            {
+                this.previousOutlinableFound = this.outlinablesMap.get(node.uuid);
+                this.outlinePass.selectedObjects = [node];
+                this.outlinePass.renderToScreen = true;
+                this.isOutliningSomething = false;
+            });
+        }
+    }
     public trackMouseClickEvents()
     {
         this.choiceMadeSubject.next(false);
@@ -168,6 +180,6 @@ export interface IOutlinable
 {
     onDeselect(): void;
     getModel(): THREE.Object3D;
-    onOutline(): void;
+    onOutline(): Promise<void>;
 }
 

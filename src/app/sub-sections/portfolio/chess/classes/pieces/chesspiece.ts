@@ -28,17 +28,25 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     onDeselect(): void
     {
         this.possibleDestinations.forEach( destination =>
-        {
-            this.positionAvailabilityChecker.setCaseAvailability(false, destination);
-        });
+            {
+                this.positionAvailabilityChecker.setCaseAvailability(false, destination);
+            });
         this.possibleDestinations = [];
     }
-    onOutline(): void
+    onOutline(): Promise<void>
     {
-        this.possibleDestinations = this.getPossibleDestinations();
-        this.possibleDestinations.forEach( destination =>
+        return new Promise((resolve) =>
         {
-            this.positionAvailabilityChecker.setCaseAvailability(true, destination);
+            this.getPossibleDestinations().then(positions =>
+            {
+                this.possibleDestinations = positions;
+                this.possibleDestinations.forEach( destination =>
+                {
+                    this.positionAvailabilityChecker.setCaseAvailability(true, destination);
+                });
+                resolve();
+                return;
+            });
         });
     }
     isFriendWith(piece: ChessPiece): boolean
@@ -51,13 +59,17 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
             {
                 ChessPiece.AUDIO_MVT_PLAYER.playSound(false);
                 this.hasMovedOnce = (this.currentCase != null);
-                this.captureHostVisitorIfNeeded(host);
-                this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition());
-                this.quitCase();
-                this.currentCase = host;
-                this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 60, 0)));
-                resolve();
-                return;
+                this.captureHostVisitorIfNeeded(host).then(() =>
+                {
+                    this.positionAvailabilityChecker.notifyMove(this, host.getCasePosition()).then(() =>
+                    {
+                        this.quitCase();
+                        this.currentCase = host;
+                        this.set3DPosition(this.currentCase.getCase3dPosition().add(new THREE.Vector3(0, ChessCase.height - 60, 0)));
+                        resolve();
+                        return;
+                    });
+                });
             });
     }
     firstVisit( host: IVisitedCase): void
@@ -76,9 +88,16 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
             this.currentCase = null;
         }
     }
-    protected captureHostVisitorIfNeeded(host: IVisitedCase)
+    protected captureHostVisitorIfNeeded(host: IVisitedCase): Promise<void>
     {
-        this.positionAvailabilityChecker.realizeCapture(this, host.getCasePosition());
+        return new Promise(resolve =>
+        {
+            this.positionAvailabilityChecker.realizeCapture(this, host.getCasePosition()).then(() =>
+            {
+                resolve();
+                return;
+            });
+        });
     }
     public init(): Promise<void>
     {
@@ -125,7 +144,7 @@ export abstract class ChessPiece implements ICaseVisitor, IOutlinable
     {
         this.positionAvailabilityChecker = mvtValidator;
     }
-    getPossibleDestinations(): ICaseBoardPosition[]
+    getPossibleDestinations(): Promise<ICaseBoardPosition[]>
     {
         return this.positionAvailabilityChecker.getPossibleDestinations(this.currentCase.getCasePosition());
     }
