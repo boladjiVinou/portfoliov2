@@ -13,8 +13,8 @@ interface KeyValuePair {
 export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   private shakingSystem: any;
   public projects: KeyValuePair[] = [];
-  public projectShaker: boolean[] =  [false, false, false, false];
-  private projectsUrl = ['portfolio/firstProject', 'portfolio/sudoku', 'portfolio/curling', 'portfolio/chess'];
+  public projectShaker: boolean[] =  [false, false, false, false, false];
+  private projectsUrl = ['portfolio/firstProject', 'portfolio/sudoku', 'portfolio/curling', 'portfolio/chess', 'portfolio/sokoban'];
   public projectsImgs: KeyValuePair[] = [];
   private projectToShake = 0;
   constructor(private principalService: LanguageService, private zone: NgZone, private router: Router) { }
@@ -24,10 +24,12 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     this.projects.push({ key: 'Sudoku', value: `Sudoku` });
     this.projects.push({ key: 'Curling', value: `Curling` });
     this.projects.push({ key: 'Échecs(beta)', value: `Échecs(beta)` });
+    this.projects.push({ key: 'Sokoban', value: `Sokoban` });
     this.projectsImgs.push({key: 'Projet I', value: '../../../assets/circuit.png'});
     this.projectsImgs.push({key: 'Sudoku', value: '../../../assets/sudoku.png'});
     this.projectsImgs.push({key: 'Curling', value: '../../../assets/curling.png'});
     this.projectsImgs.push({key: 'Chess(beta)', value: '../../../assets/chess.png'});
+    this.projectsImgs.push({key: 'Sokoban', value: '../../../assets/sokoban_rounded.png'});
     this.principalService.getEnglishLangageState().subscribe((isEnglish: boolean) => {
       this.zone.run(() => this.translateProjects(isEnglish));
     });
@@ -66,11 +68,13 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
       this.projects.push({ key: 'Curling', value: `Curling` });
       this.projects.push({ key: 'Chess(beta)', value: `Chess(beta)` });
+      this.projects.push({ key: 'Sokoban', value: `Sokoban` });
     } else {
       this.projects.push({ key: 'Projet I', value: `Projet 1`});
       this.projects.push({ key: 'Sudoku', value: `Sudoku` });
       this.projects.push({ key: 'Curling', value: `Curling` });
       this.projects.push({ key: 'Échecs(beta)', value: `Échecs(beta)` });
+      this.projects.push({ key: 'Sokoban', value: `Sokoban` });
     }
   }
 

@@ -9,6 +9,7 @@ import {SudokuComponent} from './sub-sections/portfolio/sudoku/sudoku.component'
 import {CurlingComponent} from './sub-sections/portfolio/curling/curling.component';
 import { ChessComponent } from './sub-sections/portfolio/chess/chess.component';
 import { BrowserModule } from '@angular/platform-browser';
+import { SokobanComponent } from './sub-sections/portfolio/sokoban/sokoban.component';
 
 const routes: Routes = [{
   path: '',
@@ -58,6 +59,10 @@ const routes: Routes = [{
 {
   path: 'portfolio/Échecs(beta)',
   component: ChessComponent
+},
+{
+  path: 'portfolio/Sokoban',
+  component: SokobanComponent
 }
 ];
 

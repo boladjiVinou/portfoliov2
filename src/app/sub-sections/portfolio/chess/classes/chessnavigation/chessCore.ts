@@ -584,24 +584,21 @@ export class ChessCore implements ISimulator
     {
         const bestMove: SimulationMove[] = [];
         const otherMoves: SimulationMove[] = [];
-        this.positionByPiece.forEach((value: ICaseBoardPosition, key: ChessNodeMaster) => {
-            if (key.getColor() === color)
-            {
-                key.getSimulationMoves().forEach(simulationMove =>
+        const masters = this.shuffle(Array.from( this.positionByPiece.keys()).filter(master => master.getColor() === color));
+        masters.forEach((master) => {
+            master.getSimulationMoves().forEach(simulationMove =>
+                {
+                    if (!this.getNode(simulationMove.getPosition()).isFree())
                     {
-                        // moves.push(simulationMove);
-                        if (!this.getNode(simulationMove.getPosition()).isFree())
-                        {
-                            bestMove.push(simulationMove);
-                        }
-                        else
-                        {
-                            otherMoves.push(simulationMove);
-                        }
-                    });
-            }
+                        bestMove.push(simulationMove);
+                    }
+                    else
+                    {
+                        otherMoves.push(simulationMove);
+                    }
+                });
         });
-        return [...bestMove, ...this.shuffle(otherMoves)];
+        return [...bestMove, ...otherMoves];
     }
 
     public getMastersSummary(): PieceAbstraction[]

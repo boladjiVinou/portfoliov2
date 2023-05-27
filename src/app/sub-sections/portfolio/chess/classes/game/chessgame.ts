@@ -100,4 +100,11 @@ export class ChessGame
             }
         });
     }
+    public stop()
+    {
+        if (this.gameRequestsSupplier !== undefined && this.gameRequestsSupplier !== null)
+        {
+            this.gameRequestsSupplier.killCore();
+        }
+    }
 }

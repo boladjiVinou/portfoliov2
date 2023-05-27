@@ -111,6 +111,10 @@ export class ChessComponent implements OnInit, OnDestroy, AfterViewInit, IViewRe
 
     ngOnDestroy(): void {
         this.chessRenderingService.stopAmbientSound();
+        if (this.chessGame !== null && this.chessGame !== undefined)
+        {
+            this.chessGame.stop();
+        }
         this.langageSubscription.unsubscribe();
         const childrenContainer = document.querySelector('.children-container') as HTMLElement;
         childrenContainer.style.opacity = '0.8';

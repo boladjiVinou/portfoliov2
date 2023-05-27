@@ -19,6 +19,7 @@ import {ProjectOneRendererService} from './sub-sections/portfolio/project-1/proj
 import {SudokuService} from './sub-sections/portfolio/sudoku/sudoku.service';
 import {CurlingService} from './sub-sections/portfolio/curling/curling.service';
 import { ChessRenderingService } from './sub-sections/portfolio/chess/classes/rendering/chessrendering.service';
+import { SokobanComponent } from './sub-sections/portfolio/sokoban/sokoban.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { ChessRenderingService } from './sub-sections/portfolio/chess/classes/re
     ProjectOneComponent,
     SudokuComponent,
     CurlingComponent,
-    ChessComponent
+    ChessComponent,
+    SokobanComponent
   ],
   imports: [
     BrowserModule,

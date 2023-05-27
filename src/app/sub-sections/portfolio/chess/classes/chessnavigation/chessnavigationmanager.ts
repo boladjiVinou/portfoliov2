@@ -43,6 +43,7 @@ export interface IGameRequestSupplier extends IPlayerRequestSupplier
     playerHasSomethingToDo(color: PieceColor): Promise<boolean>;
     getKingCase(color: PieceColor): Readonly<ChessCase>;
     initCore(heavyProcesingNotifyer: (isProcessing: boolean) => void): Promise<void>;
+    killCore(): Promise<void>;
 }
 
 
@@ -55,6 +56,9 @@ export class ChessNavigationManager implements IPiecesRequestSupplier, IKingSpec
     {
         this.chessBoard = board.getBoard();
         this.fullBoard = board;
+    }
+    killCore(): Promise<void> {
+        return this.chessCoreAdapter.killCore();
     }
     initCore(heavyProcesingNotifyer: (isProcessing: boolean) => void): Promise<void> {
         if (typeof(Worker) !== 'undefined')

@@ -31,7 +31,7 @@ export class ExperienceComponent implements OnInit, OnDestroy {
   translateExperience(isEnglish: boolean) {
     this.experiences = [];
     if (isEnglish) {
-      this.experiences.push({ title: 'Full-time Employment in Software Development (January 2021 - Today)', place: 'Dental-Wings', tasks: ['Implementation / improvement of functionalities in the front-end application of an intra-oral scanner', 'Implementation of 2D and 3D algorithms']});
+      this.experiences.push({ title: 'Full-time Employment in Software Development (January 2021 - Today)', place: 'Dental-Wings', tasks: ['Implementation / improvement of functionalities in the front-end application of an intra-oral scanner', 'Planning and Analysis of new functionalities to be developed in an agile way.']});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Full-time Employment in ETL Development (July 2019 - December 2020)', place: 'MEDFAR Clinical Solutions', tasks: [`Integration of Medical data by developping C# and SQL scripts`, `Improvement of custom data transfer softwares.`]});
       // tslint:disable-next-line:max-line-length
@@ -41,7 +41,7 @@ export class ExperienceComponent implements OnInit, OnDestroy {
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Full time internship in Software development (May 2017 - August 2017)', place: 'Hydro-Quebec TransEnergie', tasks: ['Development with the C# of an application making it possible to direct the technician in the process of maintenance of a smart relay.', 'Unit test design.'] });
     } else {
-      this.experiences.push({title: 'Développeur Logiciel (Janvier 2021 - Aujourdhui)', place: 'Dental-Wings', tasks: [`Implémentation/amelioration de fonctionnalités dans l' application front-end d' un scanner intra-oral`, `Implémentation d' algorithmes 2D et 3D`]});
+      this.experiences.push({title: 'Développeur Logiciel (Janvier 2021 - Aujourdhui)', place: 'Dental-Wings', tasks: [`Implémentation/amelioration de fonctionnalités dans l' application front-end d' un scanner intra-oral`, `Planification et Analyse des nouvelles fonctionnalités à développer de façon agile.`]});
       // tslint:disable-next-line:max-line-length
       this.experiences.push({ title: 'Developpeur ETL Junior (Juillet 2019 - Décembre 2020)', place: 'MEDFAR Solutions Cliniques', tasks: [`Developpement avec les languages C# et SQL de scripts pour l' integration de donnnees medicales`, `Amelioration des logiciels custom de transferts de donnees`]});
       // tslint:disable-next-line:max-line-length
