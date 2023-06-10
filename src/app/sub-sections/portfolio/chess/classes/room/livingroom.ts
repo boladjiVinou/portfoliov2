@@ -27,7 +27,7 @@ export class LivingRoom {
         sideWallBase.rotateX(Math.PI / 2);
         this.children.push(sideWallBase);
 
-        const jocondeImg =  new THREE.TextureLoader().load( '../../../../../../assets/chess/joconde3.png' );
+        const jocondeImg =  new THREE.TextureLoader().load( '../../../../../../assets/chess/cry2.png' );
         const jocondeContainer = new THREE.Mesh(new THREE.PlaneGeometry(2000, 3000), new THREE.MeshBasicMaterial({map: jocondeImg, transparent: true}));
         jocondeContainer.translateY(5000);
         jocondeContainer.translateZ(-4650);
