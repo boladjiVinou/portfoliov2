@@ -501,8 +501,9 @@ export class ChessCore implements ISimulator
         const position =  this.positionByPiece.get(master);
         return this.nodes[position.I][position.J].ownerIsInDanger();
     }
-    kingIsInDanger(color: PieceColor): boolean
+    kingIsInDanger(isBlack: boolean): boolean
     {
+        const color = isBlack ? PieceColor.BLACK : PieceColor.WHITE;
         const king = this.kings.filter(piece => piece.getColor() === color)[0];
         return this.getNodeOf(king).ownerIsInDanger();
     }
@@ -552,7 +553,7 @@ export class ChessCore implements ISimulator
             return (rook !== null) && this.positionByPiece.has(rook) && !king.hasMoved() && !rook.hasMoved() && this.nodes[7][1].isFree() && this.nodes[7][2].isFree() && this.nodes[7][3].isFree()
             && !this.nodes[7][4].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][3].nextMasterWillBeInDanger(PieceColor.WHITE) &&
             !this.nodes[7][2].nextMasterWillBeInDanger(PieceColor.WHITE) && !this.nodes[7][1].nextMasterWillBeInDanger(PieceColor.WHITE)
-            && this.leftWhiteRook.positionIsSafeForTheKing({I: 7, J: 0});
+            && this.leftWhiteRook.positionIsSafeForTheKing({I: 7, J: 3});
         }
     }
 

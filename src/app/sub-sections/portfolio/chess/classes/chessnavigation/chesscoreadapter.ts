@@ -49,7 +49,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.kingIsInDanger(color));
+            resolve(this.chessCore.kingIsInDanger(color === PieceColor.BLACK));
             return;
         });
     }

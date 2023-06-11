@@ -10,7 +10,7 @@ export interface ISimulator
     gameIsNotOver(): boolean;
     restoreGameState(nodeStates: ChessNodeState[]): void;
     saveGameState(): ChessNodeState[];
-    kingIsInDanger(color: PieceColor): boolean;
+    kingIsInDanger(isBlack: boolean): boolean;
     hasKing(color: PieceColor): boolean;
 }
 export class MinimaxTreeNode
@@ -87,7 +87,7 @@ export class MinimaxTreeNode
         else if (moves.length === 0)
         {
             this.score = simulator.scoreGetter(color);
-            if (simulator.hasKing(color) && simulator.kingIsInDanger(color))
+            if (simulator.hasKing(color) && simulator.kingIsInDanger(color === PieceColor.BLACK))
             {
                 if (color === PieceColor.BLACK)
                 {

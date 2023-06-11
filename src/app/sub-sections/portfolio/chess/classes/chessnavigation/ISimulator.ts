@@ -10,6 +10,6 @@ export interface ISimulator {
     gameIsNotOver(): boolean;
     restoreGameState(nodeStates: ChessNodeState[]): void;
     saveGameState(): ChessNodeState[];
-    kingIsInDanger(color: PieceColor): boolean;
+    kingIsInDanger(isBlack: boolean): boolean;
     hasKing(color: PieceColor): boolean;
 }
