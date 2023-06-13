@@ -20,7 +20,7 @@ export abstract class ChessNodeMaster
     constructor(color: PieceColor)
     {
         this.color = color;
-        this.value = (this.color === PieceColor.WHITE) ? -1 : 1;
+        this.value = 1; // (this.color === PieceColor.WHITE) ? -1 : 1;
         this.id = ++ChessNodeMaster.idCounter;
     }
     public abstract getPositions(): ICaseBoardPosition[];

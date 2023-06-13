@@ -1,4 +1,4 @@
-enum BinaryPieceType
+export enum BinaryPieceType
 {
     Black = 0,
     White,

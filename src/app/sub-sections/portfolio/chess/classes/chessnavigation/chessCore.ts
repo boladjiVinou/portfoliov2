@@ -471,7 +471,7 @@ export class ChessCore implements ISimulator
                 }
                 else if (master.getColor() === PieceColor.WHITE)// white left castling
                 {
-                    this.setMasterAndUpdateBoard({I: 7, J: 5}, this.leftWhiteRook);
+                    this.setMasterAndUpdateBoard({I: 7, J: 3}, this.leftWhiteRook);
                 }
             }
         }
@@ -646,16 +646,16 @@ export class ChessCore implements ISimulator
             }
             else
             {
-                opponentVal += master.getValue();
+                opponentVal += master.getValue() + this.nodes[hostPos.I][hostPos.J].getValue();
             }
         });
         if (color === PieceColor.BLACK)
         {
-            score += this.absoluteMax - (Math.abs(opponentVal));
+            score -= opponentVal; // += this.absoluteMax - (Math.abs(opponentVal));
         }
         else
         {
-            score -= this.absoluteMax - (Math.abs(opponentVal));
+            score = -score + opponentVal; // this.absoluteMax - (Math.abs(opponentVal));
         }
         return score;
     }

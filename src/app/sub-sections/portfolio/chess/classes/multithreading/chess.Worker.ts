@@ -79,7 +79,7 @@ onmessage = (ev: MessageEvent) => {
             if (lifeWarranty != null)
             {
                 const color = msg.data as PieceColor;
-                const result = chessCore.kingIsInDanger(color);
+                const result = chessCore.kingIsInDanger(color === PieceColor.BLACK);
                 self.postMessage(result);
             }
             else

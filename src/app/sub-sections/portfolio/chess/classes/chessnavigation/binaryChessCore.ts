@@ -1,14 +1,13 @@
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
-import { MinimaxTreeNode } from '../player/MinimaxTreeNode';
-import { ChessNodeState } from './chessnode';
+import { BinaryChessCoreState } from './binarChessCoreState';
 import { MoveData } from './IChessCoreAdapter';
-import { ISimulator } from './ISimulator';
-import { PawnSimulationMove } from './PawnSimulationMove';
-import { SimulationMove } from './SimulationMove';
+import { IBinarySimulator } from './ISimulator';
+import {BinaryPieceType} from './binarypieceType';
+import { BinaryKingSimulationMove, BinaryPawnSimulationMove, BinarySimulationMove } from './SimulationMove';
 
-class BinaryChessCore implements ISimulator
+class BinaryChessCore implements IBinarySimulator
 {
     // https://www.chessprogramming.org/Bitboards
     pieces: number[] =  [0, 0, 0, 0, 0, 0, 0, 0];
@@ -111,15 +110,29 @@ white at 7 on init
     }
     playerHasAMoveToDo(color: PieceColor): boolean
     {
-        throw new Error('Method not implemented.');
+        let pieces = 0;
         switch (color)
         {
             case PieceColor.BLACK:
-            break;
+                pieces = this.pieces[BinaryPieceType.Black];
+                break;
             case PieceColor.WHITE:
-            break;
+                pieces = this.pieces[BinaryPieceType.White];
+                break;
         }
+        let flag = 0b1000000000000000000000000000000000000000000000000000000000000000;
+        for (let i = 0; i < 64; i++)
+        {
+            const tmp = flag & pieces;
+            if (tmp !== 0 &&  this.getPossibleDestinationsAsNumber(tmp, false).length > 0)
+            {
+                return true;
+            }
+            flag >>>= 1;
+        }
+        return false;
     }
+
     notifyPromotion(pawnPosition: ICaseBoardPosition, newType: PieceType): void
     {
         let nextType = BinaryPieceType.Pawn;
@@ -138,13 +151,20 @@ white at 7 on init
                 nextType = BinaryPieceType.Rook;
                 break;
         }
-        const pos = this.getPosFlag(pawnPosition);
+        return this.notifyPromotionImpl(this.getPosFlag(pawnPosition), nextType);
+    }
+    private notifyPromotionImpl(pos: number, newType: BinaryPieceType): void
+    {
         this.pieces[BinaryPieceType.Pawn] =  this.pieces[BinaryPieceType.Pawn] & ~pos;
-        this.pieces[nextType] = this.pieces[nextType] | pos;
+        this.pieces[newType] = this.pieces[newType] | pos;
     }
     getPossibleDestinations(position: ICaseBoardPosition): ICaseBoardPosition[]
     {
         const pos = this.getPosFlag(position);
+        return this.getPossibleDestinationsAsNumber(pos, false).map(x => this.getPosFromFlag(x));
+    }
+    getPossibleDestinationsAsNumber(pos: number, skipKing: boolean): number[]
+    {
         const isBlack = (this.pieces[BinaryPieceType.Black] & pos) !== 0;
         if ((this.pieces[BinaryPieceType.Pawn] & pos) !== 0)
         {
@@ -166,13 +186,13 @@ white at 7 on init
         {
             return this.generateQueenMoves(pos, isBlack);
         }
-        else if ((this.pieces[BinaryPieceType.King] & pos) !== 0)
+        else if (!skipKing && (this.pieces[BinaryPieceType.King] & pos) !== 0)
         {
             return this.generateKingMoves(pos, isBlack);
         }
         return [];
     }
-    generatePawnMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generatePawnMoves(pos: number , isBlack: boolean): number[]
     {
         const moves: number[]  = [];
         // front moves
@@ -287,7 +307,7 @@ white at 7 on init
         return moves.filter(x => x !== 0 &&
             this.safeForPiece(x, pos, isBlack,
                 this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-                .map(x => this.getPosFromFlag(x));
+                ;
     }
     safeForPiece(newMove: number, previousPos: number, isBlack: boolean, posToCheckSafety: number): boolean
     {
@@ -481,7 +501,7 @@ white at 7 on init
        }
         return true;
     }
-    generateBishopMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generateBishopMoves(pos: number , isBlack: boolean): number[]
     {
         let tmp = pos;
         const moves: number[] = [];
@@ -546,9 +566,9 @@ white at 7 on init
         return moves.filter(x => x !== 0 &&
             this.safeForPiece(x, pos, isBlack,
                 this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-                .map(x => this.getPosFromFlag(x));
+                ;
     }
-    generateKnightMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generateKnightMoves(pos: number , isBlack: boolean): number[]
     {
         const moves: number[] = [];
         const current = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
@@ -597,9 +617,9 @@ white at 7 on init
         return moves.filter(x => x !== 0 &&
         this.safeForPiece(x, pos, isBlack,
             this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-            .map(x => this.getPosFromFlag(x));
+            ;
     }
-    generateRookMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generateRookMoves(pos: number , isBlack: boolean): number[]
     {
         const moves: number[]  = [];
         const opponent = isBlack ? BinaryPieceType.White : BinaryPieceType.Black;
@@ -668,19 +688,82 @@ white at 7 on init
                 }
             } while (tmp !== 0 && (tmp & this.rightBorder) === 0);
         }
+        if (this.canMakeLeftCastling(isBlack) )
+        {
+            moves.push(isBlack ? this.flag06 : this.flag72);
+        }
+        if (this.canMakeRightCastling(isBlack))
+        {
+            moves.push(isBlack ? this.flag02 : this.flag76);
+        }
         // missing castling
         return moves.filter(x => x !== 0 &&
             this.safeForPiece(x, pos, isBlack,
                 this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-                .map(x => this.getPosFromFlag(x));
+                ;
     }
-   /*
-    * generator1(): IterableIterator<number> {
-        yield 55;
-        yield 54;
-    }*/
+    private generateKingSimulationMoves(pos: number , isBlack: boolean): BinaryKingSimulationMove[]
+    {
+        const moves: BinaryKingSimulationMove[]  = [];
+        const curr = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
+        const validCells =  ~this.pieces[curr];
+        let tmp = pos >>> 8;
+        if ((tmp & this.pieces[curr]) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos << 8;
+        if ((tmp & this.pieces[curr]) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos << 1;
+        if ((pos & this.leftBorder) === 0 && (tmp & validCells) !== 0 )
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos >>> 1;
+        if ((pos & this.rightBorder) === 0 && (tmp & validCells) !== 0 )
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos << 9;
+        if ((pos & this.leftBorder) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos >>> 7;
+        if ((pos & this.leftBorder) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos >>> 9;
+        if ((pos & this.rightBorder) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        tmp = pos << 7;
+        if ((pos & this.rightBorder) === 0 && (tmp & validCells) !== 0)
+        {
+            moves.push(new BinaryKingSimulationMove(pos, tmp, false, false));
+        }
+        if (this.canMakeLeftCastling(isBlack) )
+        {
+            const leftCastling = new BinaryKingSimulationMove(pos, isBlack ? this.flag06 : this.flag72, true, true);
+            moves.push(leftCastling);
+        }
+        if (this.canMakeRightCastling(isBlack))
+        {
+            const rightCastling = new BinaryKingSimulationMove(pos, isBlack ? this.flag02 : this.flag76, true, true);
+            moves.push(rightCastling);
+        }
+        return moves.filter(x => x.dest !== 0 &&
+            this.safeForPiece(x.dest, pos, isBlack,
+                this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
+                ;
+    }
 
-    generateKingMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generateKingMoves(pos: number , isBlack: boolean): number[]
     {
         const moves: number[]  = [];
         const curr = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
@@ -736,9 +819,9 @@ white at 7 on init
         return moves.filter(x => x !== 0 &&
             this.safeForPiece(x, pos, isBlack,
                 this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-                .map(x => this.getPosFromFlag(x));
+                ;
     }
-    generateQueenMoves(pos: number , isBlack: boolean): ICaseBoardPosition[]
+    generateQueenMoves(pos: number , isBlack: boolean): number[]
     {
         const moves: number[]  = [];
         const opponent = isBlack ? BinaryPieceType.White : BinaryPieceType.Black;
@@ -869,11 +952,14 @@ white at 7 on init
         return moves.filter(x => x !== 0 &&
             this.safeForPiece(x, pos, isBlack,
                 this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]))
-                .map(x => this.getPosFromFlag(x));
+            ;
     }
     capture(position: ICaseBoardPosition): void
     {
-        const pos = this.getPosFlag(position);
+        this.captureImpl(this.getPosFlag(position));
+    }
+    private captureImpl(pos: number): void
+    {
         const pColor = (this.pieces[BinaryPieceType.Black] & pos ) === 0 ? BinaryPieceType.White : BinaryPieceType.Black;
         this.pieces[pColor] = this.pieces[pColor] & ~pos;
     }
@@ -890,7 +976,10 @@ white at 7 on init
     }
     notifyMove(source: ICaseBoardPosition, dest: ICaseBoardPosition): void
     {
-        const pos =  this.getPosFlag(source);
+        this.notifyMoveImpl(this.getPosFlag(source), this.getPosFlag(dest));
+    }
+    private notifyMoveImpl(pos: number, nextPos: number): void
+    {
         const pColor = (this.pieces[BinaryPieceType.Black] & pos ) === 0 ? BinaryPieceType.White : BinaryPieceType.Black;
         let pType = BinaryPieceType.Pawn;
         if ((this.pieces[pColor] & this.pieces[BinaryPieceType.Rook] & pos ) !== 0)
@@ -920,7 +1009,6 @@ white at 7 on init
         this.pieces[pType] = this.pieces[pType] & ~pos;
         this.pieces[pColor] = this.pieces[pColor] & ~pos;
 
-        const nextPos = this.getPosFlag(dest);
         this.pieces[pColor] = this.pieces[pColor] | nextPos;
         this.pieces[pType] = this.pieces[pType] | nextPos;
 
@@ -1002,28 +1090,117 @@ white at 7 on init
         return false;
     }
 
-    movesGenerator(color: PieceColor): SimulationMove[]
+    movesGenerator(isBlack: boolean): BinarySimulationMove[]
     {
-        throw new Error('Method not implemented.');
+        let pos = 0b1000000000000000000000000000000000000000000000000000000000000000;
+        const currPieces = this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White];
+        const moves: BinarySimulationMove[] = [];
+        for (let i = 0; i < 64 ; i++)
+        {
+            if (pos & currPieces)
+            {
+                const isPawn = (this.pieces[BinaryPieceType.Pawn] & pos ) !== 0;
+                this.getPossibleDestinationsAsNumber(pos, true).forEach(val =>
+                    {
+                        if (isPawn)
+                        {
+                            const shouldPromote = (val & 0b1111111100000000000000000000000000000000000000000000000011111111) !== 0;
+                            if (shouldPromote)
+                            {
+                                moves.push(new BinaryPawnSimulationMove(pos, val, BinaryPieceType.Queen));
+                                moves.push(new BinaryPawnSimulationMove(pos, val, BinaryPieceType.Knight));
+                            }
+                            else
+                            {
+                                moves.push(new BinaryPawnSimulationMove(pos, val, null));
+                            }
+                        }
+                        else
+                        {
+                            moves.push(new BinarySimulationMove(pos, val));
+                        }
+                    });
+                if (this.pieces[BinaryPieceType.King] & pos)
+                {
+                    this.generateKingSimulationMoves(pos, isBlack).forEach(val => {
+                        moves.push(val);
+                    });
+                }
+            }
+            pos >>>= 1;
+        }
+        return moves;
     }
-    moveSimulator(move: SimulationMove): void {
-        throw new Error('Method not implemented.');
+    moveSimulator(move: BinarySimulationMove): void {
+        const color = (this.pieces[BinaryPieceType.Black] & move.from) !== 0 ? BinaryPieceType.Black : BinaryPieceType.White;
+        const opponent = color === BinaryPieceType.Black ? BinaryPieceType.White : BinaryPieceType.Black;
+        const moveFct = (() => {
+            if ((this.pieces[opponent] & move.dest) !== 0)
+            {
+                this.captureImpl(move.dest);
+            }
+            this.notifyMoveImpl(move.from, move.dest);
+        }).bind(this);
+        if (move instanceof BinaryPawnSimulationMove)
+        {
+            if (move.getPromotionType() !== null)
+            {
+                moveFct();
+                this.notifyPromotionImpl(move.dest, move.getPromotionType());
+                return;
+            }
+        }
+        else if (move instanceof BinaryKingSimulationMove)
+        {
+            if (move.getIsCastling())
+            {
+                if (move.getLeftCastling())
+                {
+                    switch (color)
+                    {
+                        case BinaryPieceType.Black:
+                            this.notifyMoveImpl(this.initLeftBlackRookFlag, this.flag05);
+                            break;
+                        case BinaryPieceType.White:
+                            this.notifyMoveImpl(this.initLeftWhiteRookFlag, this.flag73);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (color)
+                    {
+                        case BinaryPieceType.Black:
+                            this.notifyMoveImpl(this.initRightBlackRookFlag, this.flag03);
+                            break;
+                        case BinaryPieceType.White:
+                            this.notifyMoveImpl(this.initLeftWhiteRookFlag, this.flag75);
+                            break;
+                    }
+                }
+                moveFct();
+                return;
+            }
+        }
+        moveFct();
     }
-    scoreGetter(color: PieceColor): number {
+    scoreGetter(isBlack: boolean): number {
         throw new Error('Method not implemented.');
     }
     gameIsNotOver(): boolean {
-        throw new Error('Method not implemented.');
+        return this.hasKing(false) && this.hasKing(true);
     }
-    restoreGameState(nodeStates: ChessNodeState[]): void {
-        throw new Error('Method not implemented.');
+    restoreGameState(nodeStates: BinaryChessCoreState): void {
+        this.pieceMoved = nodeStates.pieceMoved;
+        for (let i = 0 ; i < this.pieces.length; i++)
+        {
+            this.pieces[i] = nodeStates.pieces[i];
+        }
+        this.pawnMovedTwoSquare = nodeStates.pawnMovedTwoSquare;
     }
-    saveGameState(): ChessNodeState[] {
-        throw new Error('Method not implemented.');
-    }
-    kingIsInDanger(isBlack: boolean): boolean
-    {
-        return !this.safeForPiece(null, null, isBlack, this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]);
+    saveGameState(): BinaryChessCoreState {
+        const pieces: number[] = [this.pieces[0], this.pieces[1], this.pieces[2], this.pieces[3], this.pieces[4], this.pieces[5], this.pieces[6], this.pieces[7]];
+        return new BinaryChessCoreState(pieces, this.pieceMoved, this.pawnMovedTwoSquare);
     }
     getBestMovePossible(color: PieceColor): MoveData
     {
@@ -1031,10 +1208,52 @@ white at 7 on init
     }
     canDoEnPassantCapture(source: ICaseBoardPosition, dest: ICaseBoardPosition): boolean
     {
-        throw new Error('Method not implemented.');
+        const pos = this.getPosFlag(source);
+        const target = this.getPosFlag(dest);
+        const isBlack = (this.pieces[BinaryPieceType.Black] & pos ) !== 0;
+        const color = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
+        const opponent = isBlack ? BinaryPieceType.White : BinaryPieceType.Black;
+        if ((this.pieces[color] & pos) === 0)
+        {
+            return false;
+        }
+        if ((this.pieces[opponent] & target) === 0)
+        {
+            return false;
+        }
+        if (this.leftBorder & pos)
+        {
+            if (target === (pos >>> 1))
+            {
+                return (this.pawnMovedTwoSquare & this.pieces[opponent] & this.pieces[BinaryPieceType.Pawn] & target) !== 0;
+            }
+        }
+        else if (this.rightBorder & pos)
+        {
+            if (target === (pos << 1))
+            {
+                return (this.pawnMovedTwoSquare & this.pieces[opponent] & this.pieces[BinaryPieceType.Pawn] & target) !== 0;
+            }
+        }
+        else
+        {
+            if (target === (pos >>> 1))
+            {
+                return (this.pawnMovedTwoSquare & this.pieces[opponent] & this.pieces[BinaryPieceType.Pawn] & target) !== 0;
+            }
+            if (target === (pos << 1))
+            {
+                return (this.pawnMovedTwoSquare & this.pieces[opponent] & this.pieces[BinaryPieceType.Pawn] & target) !== 0;
+            }
+        }
+        return false;
     }
-    hasKing(color: PieceColor): boolean {
-        const pColor = color === PieceColor.BLACK ? BinaryPieceType.Black : BinaryPieceType.White;
+    kingIsInDanger(isBlack: boolean): boolean
+    {
+        return !this.safeForPiece(null, null, isBlack, this.pieces[BinaryPieceType.King] & this.pieces[isBlack ? BinaryPieceType.Black : BinaryPieceType.White]);
+    }
+    hasKing(isBlack: boolean): boolean {
+        const pColor = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
         return (this.pieces[pColor] & this.pieces[BinaryPieceType.King]) !== 0;
     }
 
