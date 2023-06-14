@@ -6,8 +6,12 @@ import { MoveData } from './IChessCoreAdapter';
 import { IBinarySimulator } from './ISimulator';
 import {BinaryPieceType} from './binarypieceType';
 import { BinaryKingSimulationMove, BinaryPawnSimulationMove, BinarySimulationMove } from './SimulationMove';
+import { ChessNodeWeightGiver } from './chessNodeWeightsGiver';
+import { BinaryMinimaxNode } from '../player/BinaryMinimaxNode';
+import { PawnSimulationMove } from './PawnSimulationMove';
+import { ChessMovePositions } from './chessMovePositions';
 
-class BinaryChessCore implements IBinarySimulator
+export class BinaryChessCore implements IBinarySimulator
 {
     // https://www.chessprogramming.org/Bitboards
     pieces: number[] =  [0, 0, 0, 0, 0, 0, 0, 0];
@@ -44,6 +48,14 @@ class BinaryChessCore implements IBinarySimulator
     readonly initLeftBlackRookFlag: number;
     readonly initRightWhiteRookFlag: number;
     readonly initLeftWhiteRookFlag: number;
+    readonly valueGiver = new ChessNodeWeightGiver();
+   /* readonly m1  = 0x5555555555555555; // binary: 0101...
+    readonly m2  = 0x3333333333333333; // binary: 00110011..
+    readonly m4  = 0x0f0f0f0f0f0f0f0f; // binary:  4 zeros,  4 ones ...
+    readonly m8  = 0x00ff00ff00ff00ff; // binary:  8 zeros,  8 ones ...
+    readonly m16 = 0x0000ffff0000ffff; // binary: 16 zeros, 16 ones ...
+    readonly m32 = 0x00000000ffffffff; // binary: 32 zeros, 32 ones
+    readonly h01 = 0x0101010101010101; // the sum of 256 to the power of 0,1,2,3...*/
     /*
     enum PieceType
 {
@@ -1184,8 +1196,43 @@ white at 7 on init
         }
         moveFct();
     }
+   /* countBits(x: number): number
+    {
+        x -= (x >>> 1) & this.m1;             // put count of each 2 bits into those 2 bits
+        x = (x & this.m2) + ((x >>> 2) & this.m2); // put count of each 4 bits into those 4 bits
+        x = (x + (x >>> 4)) & this.m4;        // put count of each 8 bits into those 8 bits
+        return (x * this.h01) >>> 56;  // returns left 8 bits of x + (x<<8) + (x<<16) + (x<<24) + ...
+    }*/
     scoreGetter(isBlack: boolean): number {
-        throw new Error('Method not implemented.');
+       const pType = isBlack ? BinaryPieceType.Black : BinaryPieceType.White;
+       const pOpp = isBlack ? BinaryPieceType.White : BinaryPieceType.Black;
+       const pieces = this.pieces[pType];
+       const opponent = this.pieces[pOpp];
+       const all = pieces | opponent;
+       let pos = 0b1000000000000000000000000000000000000000000000000000000000000000;
+       let score = 0;
+       let oppScore = 0;
+       for (let i = 0; i < 64 ; i++)
+       {
+           if ((pos & opponent) !== 0)
+           {
+               oppScore += this.valueGiver.getChessPieceValue(pType, this.getPosFromFlag(pos) , !isBlack);
+           }
+           else  if ((pos & pieces) !== 0)
+           {
+               score += this.valueGiver.getChessPieceValue(pType, this.getPosFromFlag(pos) , isBlack);
+           }
+           pos >>>= 1;
+       }
+       if (isBlack)
+       {
+           score -= oppScore; // black is max node
+       }
+       else
+       {
+           score = -score + oppScore; // white is min node
+       }
+       return score;
     }
     gameIsNotOver(): boolean {
         return this.hasKing(false) && this.hasKing(true);
@@ -1204,7 +1251,23 @@ white at 7 on init
     }
     getBestMovePossible(color: PieceColor): MoveData
     {
-        throw new Error('Method not implemented.');
+        const minimaxRoot = new BinaryMinimaxNode(null, this, color === PieceColor.BLACK, 7 , null);
+        const choosenMove = minimaxRoot.getElectedMove();
+        const move = new ChessMovePositions(this.getPosFromFlag(choosenMove.from), this.getPosFromFlag(choosenMove.dest));
+        const res = new MoveData(move, null);
+        if (choosenMove instanceof BinaryPawnSimulationMove && choosenMove.getPromotionType() !== null)
+        {
+            switch(choosenMove.getPromotionType())
+            {
+                case BinaryPieceType.Queen:
+                    res.pawnPromotionType = PieceType.QUEEN;
+                    break;
+                case BinaryPieceType.Knight:
+                    res.pawnPromotionType = PieceType.KNIGHT;
+                    break;
+            }
+        }
+        return res;
     }
     canDoEnPassantCapture(source: ICaseBoardPosition, dest: ICaseBoardPosition): boolean
     {

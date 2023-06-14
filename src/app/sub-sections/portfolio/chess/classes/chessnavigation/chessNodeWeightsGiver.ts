@@ -1,6 +1,7 @@
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
+import { BinaryPieceType } from './binarypieceType';
 import { ChessNodeMaster } from './chessnodemaster';
 export class ChessNodeWeightGiver
 {
@@ -60,7 +61,7 @@ export class ChessNodeWeightGiver
             return 0;
         }
         const row = (master.getColor() === PieceColor.WHITE) ? position.I : 7 - position.I;
-        const factor = (master.getValue()) < 1 ? -1 : 1;
+        const factor = (master.getColor() === PieceColor.WHITE) ? -1 : 1;
         switch (master.getType())
         {
             case PieceType.BISHOP:
@@ -75,6 +76,26 @@ export class ChessNodeWeightGiver
                 return factor * this.queenWeights[row][position.J];
             case PieceType.ROOK:
                 return factor * this.rookWeights[row][position.J];
+        }
+    }
+    public getChessPieceValue(pType: BinaryPieceType, position: ICaseBoardPosition, isBlack: boolean): number
+    {
+        const row = (!isBlack) ? position.I : 7 - position.I;
+        const factor = (isBlack) ? 1 : -1;
+        switch (pType)
+        {
+            case BinaryPieceType.Bishop:
+                return 30 + factor * this.bishopWeights[row][position.J];
+            case BinaryPieceType.King:
+                return 900 + factor * this.kingWeights[row][position.J];
+            case BinaryPieceType.Knight:
+                return 30 + factor * this.knightWeights[row][position.J];
+            case BinaryPieceType.Pawn:
+                return 10 + factor * this.pawnWeights[row][position.J];
+            case BinaryPieceType.Queen:
+                return 90 + factor * this.queenWeights[row][position.J];
+            case BinaryPieceType.Rook:
+                return 50 + factor * this.rookWeights[row][position.J];
         }
     }
 }

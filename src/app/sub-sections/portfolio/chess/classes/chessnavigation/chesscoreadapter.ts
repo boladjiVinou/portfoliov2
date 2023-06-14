@@ -1,6 +1,7 @@
 import { ICaseBoardPosition } from '../board/ICaseBoardPosition';
 import { PieceColor } from '../pieces/PieceColor';
 import { PieceType } from '../pieces/PieceType';
+import { BinaryChessCore } from './binaryChessCore';
 import { ChessCore } from './chessCore';
 import { ChessMovePositions } from './chessMovePositions';
 import { IChessCoreAdapter, MoveData } from './IChessCoreAdapter';
@@ -9,12 +10,12 @@ import { PawnSimulationMove } from './PawnSimulationMove';
 
 export class ChessCoreAdapter implements IChessCoreAdapter
 {
-    private chessCore: ChessCore = null;
+    private chessCore: BinaryChessCore; // : ChessCore = null;
     initChessCore(): Promise<void> {
         return new Promise((resolve) =>
         {
-            this.chessCore = new ChessCore();
-            this.chessCore.initWithoutPiece();
+            this.chessCore =  new BinaryChessCore();
+            /// this.chessCore.initWithoutPiece();
             resolve();
             return;
         });
@@ -31,7 +32,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            this.chessCore.notifyPromotion(pawnPosition, newType, pawnColor);
+            this.chessCore.notifyPromotion(pawnPosition, newType);
             resolve();
             return;
         });
@@ -40,7 +41,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            const possiblePositions = this.chessCore.getNode(position).getOutnodePosition();
+            const possiblePositions = this.chessCore.getPossibleDestinations(position); // .getNode(position).getOutnodePosition();
             resolve(possiblePositions);
             return;
         });
@@ -57,7 +58,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            this.chessCore.setMasterAndUpdateBoard(position, null);
+            this.chessCore.capture(position); // .setMasterAndUpdateBoard(position, null);
             resolve();
         });
     }
@@ -65,7 +66,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.canDoEnpassantCapture(source, dest));
+            resolve(this.chessCore.canDoEnPassantCapture(source, dest)/*.canDoEnpassantCapture(source, dest)*/);
             return;
         });
     }
@@ -73,7 +74,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.getNode(position).isFree());
+            resolve(this.chessCore.caseIsEmpty(position)/*.getNode(position).isFree()*/);
             return;
         });
     }
@@ -81,7 +82,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.getNode(position).isOccupiedByOpponent(color));
+            resolve(this.chessCore.caseOccupiedByOpponent(position, color)/*.getNode(position).isOccupiedByOpponent(color)*/);
             return;
         });
     }
@@ -89,7 +90,7 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     {
         return new Promise((resolve) =>
         {
-            const choosenMove = this.chessCore.getBestMovePossible(color);
+           /* const choosenMove = this.chessCore.getBestMovePossible(color);
             let pawnPromotionType: PieceType = null;
             if (choosenMove instanceof PawnSimulationMove && choosenMove.hasPromotionType())
             {
@@ -97,7 +98,8 @@ export class ChessCoreAdapter implements IChessCoreAdapter
             }
             const oldPosition = this.chessCore.getNodeOf(choosenMove.getMaster()).getPosition();
             const newPosition = choosenMove.getPosition();
-            resolve(new MoveData(new ChessMovePositions(oldPosition, newPosition), pawnPromotionType));
+            resolve(new MoveData(new ChessMovePositions(oldPosition, newPosition), pawnPromotionType));*/
+            resolve(this.chessCore.getBestMovePossible(color));
             return;
         });
     }
@@ -113,14 +115,14 @@ export class ChessCoreAdapter implements IChessCoreAdapter
     canMakeRightCastling(color: PieceColor): Promise<boolean> {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.canMakeRightCastling(color));
+            resolve(this.chessCore.canMakeRightCastling(color === PieceColor.BLACK));
             return;
         });
     }
     canMakeLeftCastling(color: PieceColor): Promise<boolean> {
         return new Promise((resolve) =>
         {
-            resolve(this.chessCore.canMakeLeftCastling(color));
+            resolve(this.chessCore.canMakeLeftCastling(color === PieceColor.BLACK));
             return;
         });
     }
